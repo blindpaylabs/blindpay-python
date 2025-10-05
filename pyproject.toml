@@ -77,11 +77,6 @@ known-first-party = ["blindpay"]
 "examples/*.py" = ["T201"]
 "test_*.py" = ["T201"]
 
-[tool.pyright]
-typeCheckingMode = "strict"
-pythonVersion = "3.12"
-exclude = [".venv", ".git", "examples"]
-
 [tool.mypy]
 pretty = true
 show_error_codes = true

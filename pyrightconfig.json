@@ -1,0 +1,21 @@
+{
+  "include": ["src"],
+  "exclude": [".venv", ".git", "examples", "**/__pycache__"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.12",
+  "executionEnvironments": [
+    {
+      "root": "src/blindpay/resources",
+      "reportArgumentType": "none",
+      "reportTypedDictNotRequiredAccess": "none",
+      "reportGeneralTypeIssues": "none",
+      "reportMissingTypeArgument": "none"
+    },
+    {
+      "root": "src/blindpay",
+      "include": ["client.py", "internal/**"],
+      "typeCheckingMode": "strict"
+    }
+  ]
+}
+
