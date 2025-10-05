@@ -128,7 +128,7 @@ class ApiClientImplSync:
             error_message = str(e) if str(e) else "Unknown error"
             return {"data": None, "error": {"message": error_message}}
 
-    def close(self):
+    def close(self) -> None:
         self.client.close()
 
 
@@ -519,11 +519,11 @@ class BlindPaySync:
             svix_signature, expected_signature
         )
 
-    def close(self):
+    def close(self) -> None:
         if hasattr(self, "_api"):
             self._api.close()
 
-    def __enter__(self):
+    def __enter__(self) -> "BlindPaySync":
         return self
 
     def __exit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> None:
