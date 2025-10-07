@@ -1,4 +1,4 @@
-from typing import Generic, Literal, Optional, TypeVar, Union
+from typing import Generic, Literal, TypeVar, Union
 
 from typing_extensions import TypedDict
 
@@ -312,10 +312,10 @@ PaginationOffset = Literal["0", "10", "50", "100", "200", "1000"]
 
 
 class PaginationParams(TypedDict, total=False):
-    limit: Optional[PaginationLimit]
-    offset: Optional[PaginationOffset]
-    starting_after: Optional[str]
-    ending_before: Optional[str]
+    limit: PaginationLimit
+    offset: PaginationOffset
+    starting_after: str
+    ending_before: str
 
 
 class PaginationMetadata(TypedDict):

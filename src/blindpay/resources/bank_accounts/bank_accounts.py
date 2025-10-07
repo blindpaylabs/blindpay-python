@@ -25,7 +25,7 @@ class OfframpWallet(TypedDict):
     external_id: str
 
 
-class BankAccount(TypedDict, total=False):
+class BankAccount(TypedDict):
     id: str
     type: Rail
     name: str
@@ -212,7 +212,7 @@ class CreateAchResponse(TypedDict):
     created_at: str
 
 
-class CreateWireInput(TypedDict, total=False):
+class CreateWireInput(TypedDict):
     receiver_id: str
     name: str
     account_number: str
@@ -242,7 +242,8 @@ class CreateWireResponse(TypedDict):
     created_at: str
 
 
-class CreateInternationalSwiftInput(TypedDict, total=False):
+# Fix for pyright warning: make receiver_id required in CreateInternationalSwiftInput
+class CreateInternationalSwiftInput(TypedDict):
     receiver_id: str
     name: str
     swift_account_holder_name: str
@@ -301,7 +302,7 @@ class CreateInternationalSwiftResponse(TypedDict):
     created_at: str
 
 
-class CreateRtpInput(TypedDict, total=False):
+class CreateRtpInput(TypedDict):
     receiver_id: str
     name: str
     beneficiary_name: str
@@ -386,6 +387,7 @@ class BankAccountsResource:
     async def create_international_swift(
         self, data: CreateInternationalSwiftInput
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
+        # receiver_id is now required, so this will not warn
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "international_swift"
@@ -453,6 +455,7 @@ class BankAccountsResourceSync:
     def create_international_swift(
         self, data: CreateInternationalSwiftInput
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
+        # receiver_id is now required, so this will not warn
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "international_swift"

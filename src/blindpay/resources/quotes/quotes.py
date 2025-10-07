@@ -27,7 +27,7 @@ class Contract(TypedDict):
     network: ContractNetwork
 
 
-class CreateQuoteInput(TypedDict, total=False):
+class CreateQuoteInput(TypedDict):
     bank_account_id: str
     currency_type: CurrencyType
     network: Optional[Network]

@@ -196,7 +196,7 @@ class BusinessWithStandardKYB(TypedDict):
     limit: TransactionLimit
 
 
-class CreateIndividualWithStandardKYCInput(TypedDict, total=False):
+class CreateIndividualWithStandardKYCInput(TypedDict):
     external_id: Optional[str]
     address_line_1: str
     address_line_2: Optional[str]
@@ -223,7 +223,7 @@ class CreateIndividualWithStandardKYCResponse(TypedDict):
     id: str
 
 
-class CreateIndividualWithEnhancedKYCInput(TypedDict, total=False):
+class CreateIndividualWithEnhancedKYCInput(TypedDict):
     external_id: Optional[str]
     address_line_1: str
     address_line_2: Optional[str]
@@ -255,7 +255,7 @@ class CreateIndividualWithEnhancedKYCResponse(TypedDict):
     id: str
 
 
-class CreateBusinessWithStandardKYBInput(TypedDict, total=False):
+class CreateBusinessWithStandardKYBInput(TypedDict):
     external_id: Optional[str]
     address_line_1: str
     address_line_2: Optional[str]
@@ -286,7 +286,7 @@ ListReceiversResponse = List[Union[IndividualWithStandardKYC, IndividualWithEnha
 GetReceiverResponse = Union[IndividualWithStandardKYC, IndividualWithEnhancedKYC, BusinessWithStandardKYB]
 
 
-class OwnerUpdate(TypedDict, total=False):
+class OwnerUpdate(TypedDict):
     id: str
     first_name: str
     last_name: str
@@ -305,7 +305,7 @@ class OwnerUpdate(TypedDict, total=False):
     id_doc_back_file: Optional[str]
 
 
-class UpdateReceiverInput(TypedDict, total=False):
+class UpdateReceiverInput(TypedDict):
     receiver_id: str
     email: Optional[str]
     tax_id: Optional[str]

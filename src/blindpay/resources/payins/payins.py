@@ -55,7 +55,7 @@ class BlindpayBankDetails(TypedDict):
     receiving_bank: BlindpayReceivingBankDetails
 
 
-class Payin(TypedDict, total=False):
+class Payin(TypedDict):
     receiver_id: str
     id: str
     pix_code: Optional[str]
@@ -101,7 +101,7 @@ class ListPayinsResponse(TypedDict):
     pagination: PaginationMetadata
 
 
-class CreatePayinInput(TypedDict, total=False):
+class CreatePayinInput(TypedDict):
     quote_id: str
     sender_address: str
     receiver_address: str
