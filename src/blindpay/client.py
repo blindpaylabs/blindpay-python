@@ -54,7 +54,10 @@ class ApiClientImpl:
         return await self._request("DELETE", path, body)
 
     async def _request(
-        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Mapping[str, Any]] = None
+        self,
+        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        path: str,
+        body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
         url = f"{self.base_url}{path}"
 
@@ -104,7 +107,10 @@ class ApiClientImplSync:
         return self._request("DELETE", path, body)
 
     def _request(
-        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Mapping[str, Any]] = None
+        self,
+        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        path: str,
+        body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
         try:
             if body is not None:
