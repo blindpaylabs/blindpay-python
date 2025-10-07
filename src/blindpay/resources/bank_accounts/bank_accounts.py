@@ -242,7 +242,6 @@ class CreateWireResponse(TypedDict):
     created_at: str
 
 
-# Fix for pyright warning: make receiver_id required in CreateInternationalSwiftInput
 class CreateInternationalSwiftInput(TypedDict):
     receiver_id: str
     name: str
@@ -387,7 +386,6 @@ class BankAccountsResource:
     async def create_international_swift(
         self, data: CreateInternationalSwiftInput
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
-        # receiver_id is now required, so this will not warn
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "international_swift"
@@ -455,7 +453,6 @@ class BankAccountsResourceSync:
     def create_international_swift(
         self, data: CreateInternationalSwiftInput
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
-        # receiver_id is now required, so this will not warn
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "international_swift"
