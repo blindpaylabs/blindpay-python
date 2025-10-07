@@ -1,5 +1,5 @@
+from typing import Dict, List, Optional, TypedDict, Union
 from urllib.parse import urlencode
-from typing import List, Optional, Dict, TypedDict, Union
 
 from ...internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -15,27 +15,33 @@ from ...types import (
     TransactionStatus,
 )
 
+
 class BlindpayAchDetails(TypedDict):
     routing_number: str
     account_number: str
+
 
 class BlindpayWireDetails(TypedDict):
     routing_number: str
     account_number: str
 
+
 class BlindpayRtpDetails(TypedDict):
     routing_number: str
     account_number: str
+
 
 class BlindpayBeneficiaryDetails(TypedDict):
     name: str
     address_line_1: str
     address_line_2: Optional[str]
 
+
 class BlindpayReceivingBankDetails(TypedDict):
     name: str
     address_line_1: str
     address_line_2: Optional[str]
+
 
 class BlindpayBankDetails(TypedDict):
     routing_number: str
@@ -47,6 +53,7 @@ class BlindpayBankDetails(TypedDict):
     rtp: BlindpayRtpDetails
     beneficiary: BlindpayBeneficiaryDetails
     receiving_bank: BlindpayReceivingBankDetails
+
 
 class Payin(TypedDict, total=False):
     receiver_id: str
@@ -83,13 +90,16 @@ class Payin(TypedDict, total=False):
     network: Network
     blindpay_bank_details: BlindpayBankDetails
 
+
 class ListPayinsInput(PaginationParams):
     status: Optional[TransactionStatus]
     receiver_id: Optional[str]
 
+
 class ListPayinsResponse(TypedDict):
     data: List[Payin]
     pagination: PaginationMetadata
+
 
 class CreatePayinInput(TypedDict, total=False):
     quote_id: str
@@ -99,6 +109,7 @@ class CreatePayinInput(TypedDict, total=False):
     token: StablecoinToken
     network: Network
     description: Optional[str]
+
 
 class GetPayinTrackingTransaction(TypedDict):
     step: str
@@ -112,6 +123,7 @@ class GetPayinTrackingTransaction(TypedDict):
     trace_number: str
     transaction_reference: str
     description: str
+
 
 class GetPayinTrackResponse(TypedDict):
     receiver_id: str
@@ -148,12 +160,15 @@ class GetPayinTrackResponse(TypedDict):
     network: Network
     blindpay_bank_details: BlindpayBankDetails
 
+
 class ExportPayinsInput(TypedDict):
     limit: Optional[str]
     offset: Optional[str]
     status: TransactionStatus
 
+
 ExportPayinsResponse = List[Payin]
+
 
 class CreateEvmPayinResponse(TypedDict):
     id: str
@@ -168,6 +183,7 @@ class CreateEvmPayinResponse(TypedDict):
     blindpay_bank_details: BlindpayBankDetails
     receiver_id: str
     receiver_amount: float
+
 
 class PayinsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
@@ -192,6 +208,7 @@ class PayinsResource:
 
     async def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
+
 
 class PayinsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -220,8 +237,10 @@ class PayinsResourceSync:
     def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
 
+
 def create_payins_resource(instance_id: str, client: InternalApiClient) -> PayinsResource:
     return PayinsResource(instance_id, client)
+
 
 def create_payins_resource_sync(instance_id: str, client: InternalApiClientSync) -> PayinsResourceSync:
     return PayinsResourceSync(instance_id, client)

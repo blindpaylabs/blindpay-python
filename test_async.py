@@ -2,6 +2,7 @@ import asyncio
 
 from blindpay import BlindPay
 
+
 async def main() -> None:
     # Initialize the async client
     client = BlindPay(
@@ -15,7 +16,7 @@ async def main() -> None:
 
     # Check for errors
     if response["data"]:
-        print(f"✅ Success! Found {len(response["data"])} available rails:\n")
+        print(f"✅ Success! Found {len(response['data'])} available rails:\n")
         for rail in response["data"]:
             print(f"  • {rail['label']:25} {rail['value']:15} ({rail['country']})")
 
