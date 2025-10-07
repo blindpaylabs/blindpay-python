@@ -234,7 +234,7 @@ class CreateWireResponse(TypedDict):
     routing_number: str
     account_number: str
     address_line_1: str
-    address_line_2: str
+    address_line_2: Optional[str]
     city: str
     state_province_region: str
     country: Country

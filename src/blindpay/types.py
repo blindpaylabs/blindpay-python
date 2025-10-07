@@ -1,4 +1,3 @@
-# types.py
 from typing import Generic, Literal, Optional, TypeVar, Union
 
 from typing_extensions import TypedDict

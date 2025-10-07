@@ -174,7 +174,6 @@ class PayoutsResource:
     async def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
         query_string = ""
         if params:
-            # Filter out None values
             filtered_params = {k: v for k, v in params.items() if v is not None}
             if filtered_params:
                 query_string = f"?{urlencode(filtered_params)}"

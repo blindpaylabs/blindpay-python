@@ -1,4 +1,3 @@
-# resources/receivers/receivers.py
 from typing import List, Optional, Union
 
 from typing_extensions import Literal, TypedDict

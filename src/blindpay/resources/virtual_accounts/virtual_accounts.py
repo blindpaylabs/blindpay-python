@@ -1,17 +1,34 @@
-from typing_extensions import TypedDict
+from typing_extensions import Optional, TypedDict
 
 from ...internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse, StablecoinToken
 
 
+class BankAccountInfo(TypedDict):
+    routing_number: str
+    account_number: str
+
+
+class BeneficiaryInfo(TypedDict):
+    name: str
+    address_line_1: str
+    address_line_2: Optional[str]
+
+
+class ReceivingBankInfo(TypedDict):
+    name: str
+    address_line_1: str
+    address_line_2: Optional[str]
+
+
 class USBankDetails(TypedDict):
-    ach: dict  # {"routing_number": str, "account_number": str}
-    wire: dict  # {"routing_number": str, "account_number": str}
-    rtp: dict  # {"routing_number": str, "account_number": str}
+    ach: BankAccountInfo
+    wire: BankAccountInfo
+    rtp: BankAccountInfo
     swift_bic_code: str
     account_type: str
-    beneficiary: dict  # {"name": str, "address_line_1": str, "address_line_2": str}
-    receiving_bank: dict  # {"name": str, "address_line_1": str, "address_line_2": str}
+    beneficiary: BeneficiaryInfo
+    receiving_bank: ReceivingBankInfo
 
 
 class VirtualAccount(TypedDict):
