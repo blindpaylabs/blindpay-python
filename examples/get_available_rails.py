@@ -10,7 +10,7 @@ import asyncio
 from blindpay import BlindPay, BlindPaySync
 
 
-async def async_example():
+async def async_example() -> None:
     print("=== Async Example ===\n")
 
     client = BlindPay(
@@ -55,7 +55,7 @@ async def async_example():
         print(f"  • {detail['label']} ({detail['key']}) - {required}")
 
 
-def sync_example():
+def sync_example() -> None:
     print("\n\n=== Sync Example ===\n")
 
     client = BlindPaySync(
