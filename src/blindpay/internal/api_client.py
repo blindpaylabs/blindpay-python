@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Protocol
+from typing import Any, Mapping, Optional, Protocol
 
 from ..types import BlindpayApiResponse
 
@@ -13,19 +13,19 @@ class InternalApiClient(Protocol):
         """Make a GET request"""
         ...
 
-    async def post(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    async def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a POST request"""
         ...
 
-    async def put(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    async def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a PUT request"""
         ...
 
-    async def patch(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    async def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a PATCH request"""
         ...
 
-    async def delete(self, path: str, body: Optional[Dict[str, Any]] = None) -> BlindpayApiResponse[Any]:
+    async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[Any]:
         """Make a DELETE request"""
         ...
 
@@ -37,18 +37,18 @@ class InternalApiClientSync(Protocol):
         """Make a GET request"""
         ...
 
-    def post(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a POST request"""
         ...
 
-    def put(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a PUT request"""
         ...
 
-    def patch(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[Any]:
+    def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
         """Make a PATCH request"""
         ...
 
-    def delete(self, path: str, body: Optional[Dict[str, Any]] = None) -> BlindpayApiResponse[Any]:
+    def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[Any]:
         """Make a DELETE request"""
         ...

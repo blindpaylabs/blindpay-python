@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 
 import httpx
 
@@ -41,20 +41,20 @@ class ApiClientImpl:
     async def get(self, path: str) -> BlindpayApiResponse[T]:
         return await self._request("GET", path)
 
-    async def post(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    async def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return await self._request("POST", path, body)
 
-    async def put(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    async def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return await self._request("PUT", path, body)
 
-    async def patch(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    async def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return await self._request("PATCH", path, body)
 
-    async def delete(self, path: str, body: Optional[Dict[str, Any]] = None) -> BlindpayApiResponse[T]:
+    async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return await self._request("DELETE", path, body)
 
     async def _request(
-        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Dict[str, Any]] = None
+        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Mapping[str, Any]] = None
     ) -> BlindpayApiResponse[T]:
         url = f"{self.base_url}{path}"
 
@@ -91,20 +91,20 @@ class ApiClientImplSync:
     def get(self, path: str) -> BlindpayApiResponse[T]:
         return self._request("GET", path)
 
-    def post(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return self._request("POST", path, body)
 
-    def put(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return self._request("PUT", path, body)
 
-    def patch(self, path: str, body: Dict[str, Any]) -> BlindpayApiResponse[T]:
+    def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
         return self._request("PATCH", path, body)
 
-    def delete(self, path: str, body: Optional[Dict[str, Any]] = None) -> BlindpayApiResponse[T]:
+    def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return self._request("DELETE", path, body)
 
     def _request(
-        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Dict[str, Any]] = None
+        self, method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"], path: str, body: Optional[Mapping[str, Any]] = None
     ) -> BlindpayApiResponse[T]:
         try:
             if body is not None:

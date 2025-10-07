@@ -94,8 +94,8 @@ class Payout(TypedDict, total=False):
     has_virtual_account: bool
 
 
-class ListPayoutsInput(PaginationParams):
-    receiver_id: Optional[str] = None
+class ListPayoutsInput(PaginationParams, total=False):
+    receiver_id: Optional[str]
 
 
 class ListPayoutsResponse(TypedDict):

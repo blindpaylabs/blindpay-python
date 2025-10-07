@@ -6,15 +6,12 @@
   "executionEnvironments": [
     {
       "root": "src/blindpay/resources",
-      "reportArgumentType": "none",
-      "reportTypedDictNotRequiredAccess": "none",
-      "reportGeneralTypeIssues": "none",
-      "reportMissingTypeArgument": "none"
+      "reportArgumentType": "error",
+      "reportTypedDictNotRequiredAccess": "warning",
+      "reportMissingTypeArgument": "error",
     },
     {
       "root": "src/blindpay",
-      "include": ["client.py", "internal/**"],
-      "typeCheckingMode": "strict"
     }
   ]
 }
