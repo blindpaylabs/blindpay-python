@@ -1,0 +1,18 @@
+name: Main
+on:
+  pull_request:
+  push:
+    branches: 
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+  typecheck:
+    needs: lint
+    uses: ./.github/workflows/typecheck.yaml
