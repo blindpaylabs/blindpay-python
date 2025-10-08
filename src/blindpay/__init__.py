@@ -1,3 +1,5 @@
+__version__ = "1.0.0"
+
 from .client import BlindPay, BlindPaySync
 from .internal.exceptions import BlindPayError
 from .types import (
@@ -24,7 +26,6 @@ from .types import (
     TransactionStatus,
 )
 
-__version__ = "1.0.0"
 __all__ = [
     "BlindPay",
     "BlindPaySync",

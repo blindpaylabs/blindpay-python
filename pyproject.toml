@@ -1,5 +1,5 @@
 [project]
-name = "blindpay"
+name = "alves-blindpay"
 version = "1.0.0"
 description = "Official Python SDK for the Blindpay API — Global payments infrastructure"
 readme = "README.md"
@@ -25,19 +25,23 @@ classifiers = [
 Homepage = "https://github.com/blindpaylabs/blindpay-python"
 Repository = "https://github.com/blindpaylabs/blindpay-python"
 Documentation = "https://api.blindpay.com/reference"
+"Bug Tracker" = "https://github.com/blindpaylabs/blindpay-python/issues"
 
 [build-system]
-requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
+requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
+[tool.hatch.version]
+path = "src/blindpay/__init__.py" 
+
 [tool.hatch.build]
-include = ["src/*", "README.md", "LICENSE", "pyproject.toml"]
+include = ["src/*", "README.md", "LICENSE", "py.typed"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blindpay"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/*", "/README.md", "/LICENSE", "/pyproject.toml"]
+include = ["/src", "/README.md", "/LICENSE", "/pyproject.toml", "/py.typed"]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"
