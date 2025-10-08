@@ -1,12 +1,10 @@
 name: Publish to PyPI
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  workflow_call:
+    secrets:
+      PYPI_API_TOKEN:
+        required: true
   workflow_dispatch:
 
 permissions:
@@ -33,7 +31,7 @@ jobs:
           bump-patch-for-minor-pre-major: false
           include-v-in-tag: true
           extra-files: |
-            src/alves-blindpay/__init__.py
+            src/blindpay/__init__.py
 
   publish:
     needs: release-please
@@ -56,7 +54,6 @@ jobs:
 
       - name: Publish to PyPI
         env:
-          UV_PUBLISH_USERNAME: __token__
-          UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           uv publish
