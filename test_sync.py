@@ -21,4 +21,3 @@ else:
         print(f"✅ Success! Found {len(rails)} available rails:\n")
         for rail in rails:
             print(f"  • {rail['label']:25} {rail['value']:15} ({rail['country']})")
-

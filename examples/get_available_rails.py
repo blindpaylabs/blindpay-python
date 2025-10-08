@@ -10,7 +10,7 @@ import asyncio
 from blindpay import BlindPay, BlindPaySync
 
 
-async def async_example():
+async def async_example() -> None:
     print("=== Async Example ===\n")
 
     client = BlindPay(
@@ -55,7 +55,7 @@ async def async_example():
         print(f"  • {detail['label']} ({detail['key']}) - {required}")
 
 
-def sync_example():
+def sync_example() -> None:
     print("\n\n=== Sync Example ===\n")
 
     client = BlindPaySync(
@@ -100,69 +100,7 @@ def sync_example():
         print(f"  • {detail['label']} ({detail['key']}) - {required}")
 
 
-def context_manager_example():
-    """Example using context manager (auto-closes connection)"""
-    print("\n\n=== Context Manager Example ===\n")
-
-    with BlindPaySync(
-        api_key="your_api_key_here",
-        instance_id="your_instance_id_here",
-    ) as client:
-        rails_response = client.available.get_rails()
-
-        if rails_response["error"]:
-            print(f"Error: {rails_response['error']['message']}")
-        elif rails_response["data"]:
-            rails = rails_response["data"]
-            print(f"Available rails: {[r['value'] for r in rails]}")
-        else:
-            print("No data returned")
-
-    # Connection is automatically closed when exiting the context
-
-
-def error_handling_example():
-    """Example with proper error handling"""
-    print("\n\n=== Error Handling Example ===\n")
-
-    try:
-        client = BlindPaySync(
-            api_key="your_api_key_here",
-            instance_id="your_instance_id_here",
-        )
-
-        response = client.available.get_rails()
-
-        # Check for errors
-        if response["error"]:
-            error_msg = response["error"]["message"]
-            print(f"❌ API Error: {error_msg}")
-            # Handle the error appropriately
-            return
-
-        # Process the successful response
-        rails = response["data"]
-        if rails is None:
-            print("⚠️  No data returned")
-            return
-
-        print(f"✅ Success! Retrieved {len(rails)} rails")
-
-        # Do something with the data
-        for rail in rails:
-            print(f"   - {rail['label']}: {rail['value']}")
-
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        # Handle unexpected errors
-
-
 if __name__ == "__main__":
     asyncio.run(async_example())
 
     sync_example()
-
-    context_manager_example()
-
-    error_handling_example()
-

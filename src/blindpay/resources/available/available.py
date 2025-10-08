@@ -57,7 +57,7 @@ BankDetailKey = Literal[
 ]
 
 
-class BankDetailItem(TypedDict, total=False):
+class BankDetailItem(TypedDict):
     label: str
     value: str
     is_active: Optional[bool]

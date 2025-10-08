@@ -28,7 +28,7 @@ from ...types import (
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 
 
-class Payout(TypedDict, total=False):
+class Payout(TypedDict):
     receiver_id: str
     id: str
     status: TransactionStatus
@@ -94,8 +94,8 @@ class Payout(TypedDict, total=False):
     has_virtual_account: bool
 
 
-class ListPayoutsInput(PaginationParams):
-    receiver_id: Optional[str] = None
+class ListPayoutsInput(PaginationParams, total=False):
+    receiver_id: str
 
 
 class ListPayoutsResponse(TypedDict):
@@ -103,7 +103,7 @@ class ListPayoutsResponse(TypedDict):
     pagination: PaginationMetadata
 
 
-class CreatePayoutInput(TypedDict, total=False):
+class CreatePayoutInput(TypedDict):
     receiver_id: str
     bank_account_id: str
     amount: float
@@ -115,8 +115,8 @@ class CreatePayoutInput(TypedDict, total=False):
 
 
 class ExportPayoutsInput(TypedDict, total=False):
-    limit: Optional[str]
-    offset: Optional[str]
+    limit: str
+    offset: str
 
 
 ExportPayoutsResponse = List[Payout]
@@ -131,7 +131,7 @@ class AuthorizeStellarTokenResponse(TypedDict):
     transaction_hash: str
 
 
-class CreateStellarPayoutInput(TypedDict, total=False):
+class CreateStellarPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
     signed_transaction: Optional[str]
@@ -174,7 +174,6 @@ class PayoutsResource:
     async def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
         query_string = ""
         if params:
-            # Filter out None values
             filtered_params = {k: v for k, v in params.items() if v is not None}
             if filtered_params:
                 query_string = f"?{urlencode(filtered_params)}"

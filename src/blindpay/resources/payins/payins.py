@@ -1,7 +1,5 @@
-from typing import List, Optional
+from typing import Dict, List, Optional, TypedDict, Union
 from urllib.parse import urlencode
-
-from typing_extensions import TypedDict
 
 from ...internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -18,19 +16,46 @@ from ...types import (
 )
 
 
+class BlindpayAchDetails(TypedDict):
+    routing_number: str
+    account_number: str
+
+
+class BlindpayWireDetails(TypedDict):
+    routing_number: str
+    account_number: str
+
+
+class BlindpayRtpDetails(TypedDict):
+    routing_number: str
+    account_number: str
+
+
+class BlindpayBeneficiaryDetails(TypedDict):
+    name: str
+    address_line_1: str
+    address_line_2: Optional[str]
+
+
+class BlindpayReceivingBankDetails(TypedDict):
+    name: str
+    address_line_1: str
+    address_line_2: Optional[str]
+
+
 class BlindpayBankDetails(TypedDict):
     routing_number: str
     account_number: str
     account_type: str
     swift_bic_code: str
-    ach: dict  # {"routing_number": str, "account_number": str}
-    wire: dict  # {"routing_number": str, "account_number": str}
-    rtp: dict  # {"routing_number": str, "account_number": str}
-    beneficiary: dict  # {"name": str, "address_line_1": str, "address_line_2": str}
-    receiving_bank: dict  # {"name": str, "address_line_1": str, "address_line_2": str}
+    ach: BlindpayAchDetails
+    wire: BlindpayWireDetails
+    rtp: BlindpayRtpDetails
+    beneficiary: BlindpayBeneficiaryDetails
+    receiving_bank: BlindpayReceivingBankDetails
 
 
-class Payin(TypedDict, total=False):
+class Payin(TypedDict):
     receiver_id: str
     id: str
     pix_code: Optional[str]
@@ -76,7 +101,7 @@ class ListPayinsResponse(TypedDict):
     pagination: PaginationMetadata
 
 
-class CreatePayinInput(TypedDict, total=False):
+class CreatePayinInput(TypedDict):
     quote_id: str
     sender_address: str
     receiver_address: str
@@ -110,9 +135,9 @@ class GetPayinTrackResponse(TypedDict):
     payin_quote_id: str
     instance_id: str
     tracking_transaction: GetPayinTrackingTransaction
-    tracking_payment: dict
-    tracking_complete: dict
-    tracking_partner_fee: dict
+    tracking_payment: Dict[str, Union[str, float, int, None]]
+    tracking_complete: Dict[str, Union[str, float, int, None]]
+    tracking_partner_fee: Dict[str, Union[str, float, int, None]]
     created_at: str
     updated_at: str
     image_url: str
@@ -175,9 +200,6 @@ class PayinsResource:
 
     async def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
         return await self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
-
-    async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return await self._client.get(f"/e/payins/{payin_id}")
 
     async def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
         filtered_params = {k: v for k, v in params.items() if v is not None}

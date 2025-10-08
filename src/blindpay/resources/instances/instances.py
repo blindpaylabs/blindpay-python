@@ -22,7 +22,7 @@ class InstanceMember(TypedDict):
 GetInstanceMembersResponse = List[InstanceMember]
 
 
-class UpdateInstanceInput(TypedDict, total=False):
+class UpdateInstanceInput(TypedDict):
     name: str
     receiver_invite_redirect_url: Optional[str]
 

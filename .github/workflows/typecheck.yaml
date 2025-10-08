@@ -1,10 +1,10 @@
-name: Lint
+name: Type Check
 on:
   workflow_call:
 
 jobs:
-  lint:
-    name: Run lint
+  typecheck:
+    name: Run type checking
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,9 @@ jobs:
       - name: Sync dev deps
         run: uv sync --group dev
 
-      - name: Lint check (ruff)
-        run: |
-          uv run ruff format --check
-          uv run ruff check .
+      - name: Type check
+        run: uv run pyright
+
+      - name: Type check
+        run: uv run mypy .
+

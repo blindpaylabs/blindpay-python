@@ -25,7 +25,7 @@ class OfframpWallet(TypedDict):
     external_id: str
 
 
-class BankAccount(TypedDict, total=False):
+class BankAccount(TypedDict):
     id: str
     type: Rail
     name: str
@@ -212,7 +212,7 @@ class CreateAchResponse(TypedDict):
     created_at: str
 
 
-class CreateWireInput(TypedDict, total=False):
+class CreateWireInput(TypedDict):
     receiver_id: str
     name: str
     account_number: str
@@ -234,7 +234,7 @@ class CreateWireResponse(TypedDict):
     routing_number: str
     account_number: str
     address_line_1: str
-    address_line_2: str
+    address_line_2: Optional[str]
     city: str
     state_province_region: str
     country: Country
@@ -242,7 +242,7 @@ class CreateWireResponse(TypedDict):
     created_at: str
 
 
-class CreateInternationalSwiftInput(TypedDict, total=False):
+class CreateInternationalSwiftInput(TypedDict):
     receiver_id: str
     name: str
     swift_account_holder_name: str
@@ -301,7 +301,7 @@ class CreateInternationalSwiftResponse(TypedDict):
     created_at: str
 
 
-class CreateRtpInput(TypedDict, total=False):
+class CreateRtpInput(TypedDict):
     receiver_id: str
     name: str
     beneficiary_name: str
