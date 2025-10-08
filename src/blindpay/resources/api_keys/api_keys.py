@@ -24,7 +24,7 @@ class ApiKey(TypedDict):
 ListApiKeysResponse = List[ApiKey]
 
 
-class CreateApiKeyInput(TypedDict, total=False):
+class CreateApiKeyInput(TypedDict):
     name: str
     permission: Literal["full_access"]
     ip_whitelist: Optional[List[str]]

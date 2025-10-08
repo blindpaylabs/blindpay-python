@@ -1,0 +1,20 @@
+{
+    "packages": {
+      ".": {
+        "release-type": "python",
+        "bump-minor-pre-major": true,
+        "bump-patch-for-minor-pre-major": false,
+        "draft": false,
+        "prerelease": false,
+        "include-v-in-tag": true,
+        "extra-files": [
+          {
+            "type": "py",
+            "path": "src/blindpay/__init__.py",
+            "glob": false
+          }
+        ]
+      }
+    },
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+  }

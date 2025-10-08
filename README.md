@@ -51,30 +51,6 @@ async def main():
 asyncio.run(main())
 ```
 
-## Using with Context Manager
-
-```python
-import asyncio
-from blindpay import BlindPay
-
-async def main():
-    async with BlindPay(
-        api_key="your-api-key",
-        instance_id="your-instance-id"
-    ) as client:
-        # Your code here
-        response = await client.quotes["create"](
-            bank_account_id="bank-account-id",
-            currency_type="receiver",
-            request_amount=1000,
-            cover_fees=False,
-            # ... other fields
-        )
-        print(response)
-
-asyncio.run(main())
-```
-
 ## Resources
 
 The SDK provides access to the following resources:

@@ -21,7 +21,7 @@ class PartnerFee(TypedDict):
 ListPartnerFeesResponse = List[PartnerFee]
 
 
-class CreatePartnerFeeInput(TypedDict, total=False):
+class CreatePartnerFeeInput(TypedDict):
     virtual_account_set: Optional[bool]
     evm_wallet_address: str
     name: str
