@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 
 from typing_extensions import TypedDict
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -101,17 +101,6 @@ class ListPayoutsInput(PaginationParams, total=False):
 class ListPayoutsResponse(TypedDict):
     data: List[Payout]
     pagination: PaginationMetadata
-
-
-class CreatePayoutInput(TypedDict):
-    receiver_id: str
-    bank_account_id: str
-    amount: float
-    currency: str
-    description: Optional[str]
-    reference: Optional[str]
-    network: Optional[Network]
-    token: Optional[StablecoinToken]
 
 
 class ExportPayoutsInput(TypedDict, total=False):

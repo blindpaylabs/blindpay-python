@@ -2,6 +2,7 @@ from .partner_fees import (
     CreatePartnerFeeInput,
     CreatePartnerFeeResponse,
     GetPartnerFeeResponse,
+    ListPartnerFeesResponse,
     PartnerFeesResource,
     PartnerFeesResourceSync,
     create_partner_fees_resource,
@@ -16,4 +17,5 @@ __all__ = [
     "CreatePartnerFeeInput",
     "CreatePartnerFeeResponse",
     "GetPartnerFeeResponse",
+    "ListPartnerFeesResponse",
 ]

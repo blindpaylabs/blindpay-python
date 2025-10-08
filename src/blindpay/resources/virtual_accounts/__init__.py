@@ -1,6 +1,12 @@
 from .virtual_accounts import (
+    BankAccountInfo,
+    BeneficiaryInfo,
     CreateVirtualAccountInput,
+    CreateVirtualAccountResponse,
+    GetVirtualAccountResponse,
+    ReceivingBankInfo,
     UpdateVirtualAccountInput,
+    USBankDetails,
     VirtualAccount,
     VirtualAccountsResource,
     VirtualAccountsResourceSync,
@@ -16,4 +22,10 @@ __all__ = [
     "VirtualAccount",
     "CreateVirtualAccountInput",
     "UpdateVirtualAccountInput",
+    "CreateVirtualAccountResponse",
+    "GetVirtualAccountResponse",
+    "USBankDetails",
+    "BeneficiaryInfo",
+    "ReceivingBankInfo",
+    "BankAccountInfo",
 ]

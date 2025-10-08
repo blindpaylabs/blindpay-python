@@ -1,7 +1,7 @@
-from typing import Dict, List, Optional, TypedDict, Union
+from typing import List, Optional, TypedDict
 from urllib.parse import urlencode
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
     Network,
@@ -16,43 +16,43 @@ from ...types import (
 )
 
 
-class BlindpayAchDetails(TypedDict):
+class AchDetails(TypedDict):
     routing_number: str
     account_number: str
 
 
-class BlindpayWireDetails(TypedDict):
+class WireDetails(TypedDict):
     routing_number: str
     account_number: str
 
 
-class BlindpayRtpDetails(TypedDict):
+class RtpDetails(TypedDict):
     routing_number: str
     account_number: str
 
 
-class BlindpayBeneficiaryDetails(TypedDict):
+class BeneficiaryDetails(TypedDict):
     name: str
     address_line_1: str
     address_line_2: Optional[str]
 
 
-class BlindpayReceivingBankDetails(TypedDict):
+class ReceivingBankDetails(TypedDict):
     name: str
     address_line_1: str
     address_line_2: Optional[str]
 
 
-class BlindpayBankDetails(TypedDict):
+class BankDetails(TypedDict):
     routing_number: str
     account_number: str
     account_type: str
     swift_bic_code: str
-    ach: BlindpayAchDetails
-    wire: BlindpayWireDetails
-    rtp: BlindpayRtpDetails
-    beneficiary: BlindpayBeneficiaryDetails
-    receiving_bank: BlindpayReceivingBankDetails
+    ach: AchDetails
+    wire: WireDetails
+    rtp: RtpDetails
+    beneficiary: BeneficiaryDetails
+    receiving_bank: ReceivingBankDetails
 
 
 class Payin(TypedDict):
@@ -88,7 +88,7 @@ class Payin(TypedDict):
     name: str
     address: str
     network: Network
-    blindpay_bank_details: BlindpayBankDetails
+    blindpay_bank_details: BankDetails
 
 
 class ListPayinsInput(PaginationParams):
@@ -134,10 +134,10 @@ class GetPayinTrackResponse(TypedDict):
     status: str
     payin_quote_id: str
     instance_id: str
-    tracking_transaction: GetPayinTrackingTransaction
-    tracking_payment: Dict[str, Union[str, float, int, None]]
-    tracking_complete: Dict[str, Union[str, float, int, None]]
-    tracking_partner_fee: Dict[str, Union[str, float, int, None]]
+    tracking_transaction: TrackingTransaction
+    tracking_payment: TrackingPayment
+    tracking_complete: TrackingComplete
+    tracking_partner_fee: TrackingPartnerFee
     created_at: str
     updated_at: str
     image_url: str
@@ -158,7 +158,7 @@ class GetPayinTrackResponse(TypedDict):
     name: str
     address: str
     network: Network
-    blindpay_bank_details: BlindpayBankDetails
+    blindpay_bank_details: BankDetails
 
 
 class ExportPayinsInput(TypedDict):
@@ -180,7 +180,7 @@ class CreateEvmPayinResponse(TypedDict):
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
-    blindpay_bank_details: BlindpayBankDetails
+    blindpay_bank_details: BankDetails
     receiver_id: str
     receiver_amount: float
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 
 import httpx
 
-from .internal.exceptions import BlindPayError
+from ._internal.exceptions import BlindPayError
 from .types import BlindpayApiResponse
 
 if TYPE_CHECKING:
@@ -226,9 +226,9 @@ class _WalletsNamespace:
 
 
 class BlindPay:
-    api_key: str
-    instance_id: str
-    base_url: str
+    _api_key: str
+    _instance_id: str
+    _base_url: str
 
     def __init__(self, *, api_key: str, instance_id: str):
         if not api_key:
@@ -237,18 +237,18 @@ class BlindPay:
         if not instance_id:
             raise BlindPayError("Instance id not provided, get your instance id on blindpay dashboard")
 
-        self.api_key = api_key
-        self.instance_id = instance_id
-        self.base_url = "https://api.blindpay.com/v1"
+        self._api_key = api_key
+        self._instance_id = instance_id
+        self._base_url = "https://api.blindpay.com/v1"
 
-        self.headers = {
+        self._headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {self._api_key}",
         }
 
-        self._api = ApiClientImpl(self.base_url, self.headers)
+        self._api = ApiClientImpl(self._base_url, self._headers)
 
     @cached_property
     def available(self) -> "AvailableResource":
@@ -258,43 +258,43 @@ class BlindPay:
 
     @cached_property
     def instances(self) -> _InstancesNamespace:
-        return _InstancesNamespace(self.instance_id, self._api)
+        return _InstancesNamespace(self._instance_id, self._api)
 
     @cached_property
     def partner_fees(self) -> "PartnerFeesResource":
         from blindpay.resources.partner_fees import create_partner_fees_resource
 
-        return create_partner_fees_resource(self.instance_id, self._api)
+        return create_partner_fees_resource(self._instance_id, self._api)
 
     @cached_property
     def payins(self) -> _PayinsNamespace:
-        return _PayinsNamespace(self.instance_id, self._api)
+        return _PayinsNamespace(self._instance_id, self._api)
 
     @cached_property
     def quotes(self) -> "QuotesResource":
         from blindpay.resources.quotes import create_quotes_resource
 
-        return create_quotes_resource(self.instance_id, self._api)
+        return create_quotes_resource(self._instance_id, self._api)
 
     @cached_property
     def payouts(self) -> "PayoutsResource":
         from blindpay.resources.payouts import create_payouts_resource
 
-        return create_payouts_resource(self.instance_id, self._api)
+        return create_payouts_resource(self._instance_id, self._api)
 
     @cached_property
     def receivers(self) -> _ReceiversNamespace:
-        return _ReceiversNamespace(self.instance_id, self._api)
+        return _ReceiversNamespace(self._instance_id, self._api)
 
     @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResource":
         from blindpay.resources.virtual_accounts import create_virtual_accounts_resource
 
-        return create_virtual_accounts_resource(self.instance_id, self._api)
+        return create_virtual_accounts_resource(self._instance_id, self._api)
 
     @cached_property
     def wallets(self) -> _WalletsNamespace:
-        return _WalletsNamespace(self.instance_id, self._api)
+        return _WalletsNamespace(self._instance_id, self._api)
 
     def verify_webhook_signature(
         self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
@@ -420,9 +420,9 @@ class _WalletsNamespaceSync:
 
 
 class BlindPaySync:
-    api_key: str
-    instance_id: str
-    base_url: str
+    _api_key: str
+    _instance_id: str
+    _base_url: str
 
     def __init__(self, *, api_key: str, instance_id: str):
         if not api_key:
@@ -431,18 +431,18 @@ class BlindPaySync:
         if not instance_id:
             raise BlindPayError("Instance id not provided, get your instance id on blindpay dashboard")
 
-        self.api_key = api_key
-        self.instance_id = instance_id
-        self.base_url = "https://api.blindpay.com/v1"
+        self._api_key = api_key
+        self._instance_id = instance_id
+        self._base_url = "https://api.blindpay.com/v1"
 
-        self.headers = {
+        self._headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {self._api_key}",
         }
 
-        self._api = ApiClientImplSync(self.base_url, self.headers)
+        self._api = ApiClientImplSync(self._base_url, self._headers)
 
     @cached_property
     def available(self) -> "AvailableResourceSync":
@@ -452,43 +452,43 @@ class BlindPaySync:
 
     @cached_property
     def instances(self) -> _InstancesNamespaceSync:
-        return _InstancesNamespaceSync(self.instance_id, self._api)
+        return _InstancesNamespaceSync(self._instance_id, self._api)
 
     @cached_property
     def partner_fees(self) -> "PartnerFeesResourceSync":
         from blindpay.resources.partner_fees import create_partner_fees_resource_sync
 
-        return create_partner_fees_resource_sync(self.instance_id, self._api)
+        return create_partner_fees_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def payins(self) -> _PayinsNamespaceSync:
-        return _PayinsNamespaceSync(self.instance_id, self._api)
+        return _PayinsNamespaceSync(self._instance_id, self._api)
 
     @cached_property
     def quotes(self) -> "QuotesResourceSync":
         from blindpay.resources.quotes import create_quotes_resource_sync
 
-        return create_quotes_resource_sync(self.instance_id, self._api)
+        return create_quotes_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def payouts(self) -> "PayoutsResourceSync":
         from blindpay.resources.payouts import create_payouts_resource_sync
 
-        return create_payouts_resource_sync(self.instance_id, self._api)
+        return create_payouts_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def receivers(self) -> _ReceiversNamespaceSync:
-        return _ReceiversNamespaceSync(self.instance_id, self._api)
+        return _ReceiversNamespaceSync(self._instance_id, self._api)
 
     @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResourceSync":
         from blindpay.resources.virtual_accounts import create_virtual_accounts_resource_sync
 
-        return create_virtual_accounts_resource_sync(self.instance_id, self._api)
+        return create_virtual_accounts_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def wallets(self) -> _WalletsNamespaceSync:
-        return _WalletsNamespaceSync(self.instance_id, self._api)
+        return _WalletsNamespaceSync(self._instance_id, self._api)
 
     def verify_webhook_signature(
         self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str

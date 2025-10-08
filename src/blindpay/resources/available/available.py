@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 from typing_extensions import TypedDict
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse, Rail
 
 BankDetailKey = Literal[

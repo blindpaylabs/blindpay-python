@@ -3,6 +3,8 @@ from .webhooks import (
     CreateWebhookEndpointResponse,
     GetPortalAccessUrlResponse,
     GetWebhookEndpointSecretResponse,
+    ListWebhookEndpointsResponse,
+    WebhookEndpoint,
     WebhookEndpointsResource,
     WebhookEndpointsResourceSync,
     WebhookEvents,
@@ -20,4 +22,6 @@ __all__ = [
     "CreateWebhookEndpointResponse",
     "GetWebhookEndpointSecretResponse",
     "GetPortalAccessUrlResponse",
+    "WebhookEndpoint",
+    "ListWebhookEndpointsResponse",
 ]

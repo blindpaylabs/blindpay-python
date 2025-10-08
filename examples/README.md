@@ -6,7 +6,7 @@ This directory contains example code demonstrating how to use the BlindPay Pytho
 
 Before running these examples, you need:
 
-1. **API Credentials**: Get your API key and instance ID from the [BlindPay Dashboard](https://app.blindpay.com)
+1. **API Credentials**: Get your API key and instance ID from the [BlindPay dashboard](https://app.blindpay.com)
 2. **Python 3.12+**: Ensure you have Python 3.12 or higher installed
 3. **Install the SDK**: 
    ```bash
@@ -50,7 +50,6 @@ async def main():
         print(f"Error: {response['error']['message']}")
         return
     
-    # Success!
     rails = response["data"]
     for rail in rails:
         print(f"{rail['label']}: {rail['value']}")
@@ -80,19 +79,6 @@ else:
         print(f"{rail['label']}: {rail['value']}")
 ```
 
-### Context Manager (Auto-cleanup)
-
-```python
-from blindpay import BlindPaySync
-
-with BlindPaySync(
-    api_key="your_api_key_here",
-    instance_id="your_instance_id_here",
-) as client:
-    response = client.available.get_rails()
-    # Connection is automatically closed when exiting
-```
-
 ## Response Format
 
 All API methods return a response in this format:
@@ -116,7 +102,7 @@ All API methods return a response in this format:
 Always check for errors before accessing data:
 
 ```python
-response = await client.available.get_rails()
+response = await blindpay.available.get_rails()
 
 if response["error"]:
     # Handle error
@@ -124,63 +110,6 @@ if response["error"]:
 else:
     # Use data
     data = response["data"]
-```
-
-## Available Resources
-
-The SDK provides access to the following resources:
-
-### Core Resources
-- `client.available` - Available payment rails and bank details
-- `client.instances` - Instance management and members
-- `client.quotes` - Payment quotes management
-- `client.partner_fees` - Partner fee management
-
-### Receivers
-- `client.receivers` - Receiver management
-  - `client.receivers.bank_accounts` - Bank account management
-
-### Payments
-- `client.payins` - Payins management
-  - `client.payins.quotes` - Payin quotes management
-- `client.payouts` - Payouts management
-
-### Virtual Accounts
-- `client.virtual_accounts` - Virtual account management
-
-### Wallets
-- `client.wallets.blockchain` - Blockchain wallet operations
-- `client.wallets.offramp` - Offramp wallet operations
-
-### API Keys & Webhooks
-- `client.instances.api_keys` - API key management
-- `client.instances.webhook_endpoints` - Webhook configuration
-
-
-## Error Handling Best Practices
-
-```python
-try:
-    blindpay = BlindPay(
-        api_key="your_api_key",
-        instance_id="your_instance_id",
-    )
-    
-    response = await blindpay.available.get_rails()
-    
-    if response["error"]:
-        error_message = response["error"]["message"]
-        logger.error(f"API error: {error_message}")
-        # Handle the error appropriately
-        return
-    
-    # Successful response
-    data = response["data"]
-    
-except Exception as e:
-    # Unexpected error (network, etc.)
-    logger.exception("Unexpected error occurred")
-    # Handle unexpected errors
 ```
 
 ## Environment Variables

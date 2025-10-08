@@ -2,7 +2,8 @@ name: Main
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: 
+      - main
 
 permissions:
   contents: write
@@ -12,7 +13,6 @@ permissions:
 jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
-
   typecheck:
     needs: lint
     uses: ./.github/workflows/typecheck.yaml

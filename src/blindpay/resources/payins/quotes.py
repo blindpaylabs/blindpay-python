@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 from typing_extensions import TypedDict
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
     Currency,
@@ -13,7 +13,7 @@ from ...types import (
 PaymentMethod = Literal["ach", "wire", "pix", "spei"]
 
 
-class PayerRules(TypedDict):
+class PayerRules(TypedDict, total=False):
     pix_allowed_tax_ids: List[str]
 
 

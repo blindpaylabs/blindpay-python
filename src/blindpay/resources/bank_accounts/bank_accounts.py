@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 from typing_extensions import TypedDict
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import AccountClass, BankAccountType, BlindpayApiResponse, Country, Rail, SpeiProtocol
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]

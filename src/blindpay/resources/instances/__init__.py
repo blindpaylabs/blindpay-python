@@ -1,4 +1,6 @@
 from .instances import (
+    GetInstanceMembersResponse,
+    InstanceMember,
     InstanceMemberRole,
     InstancesResource,
     InstancesResourceSync,
@@ -16,4 +18,6 @@ __all__ = [
     "UpdateInstanceInput",
     "UpdateInstanceMemberRoleInput",
     "InstanceMemberRole",
+    "GetInstanceMembersResponse",
+    "InstanceMember",
 ]

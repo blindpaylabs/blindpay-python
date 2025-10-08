@@ -1,4 +1,6 @@
 from .quotes import (
+    Contract,
+    ContractNetwork,
     CreateQuoteInput,
     CreateQuoteResponse,
     GetFxRateInput,
@@ -18,4 +20,6 @@ __all__ = [
     "CreateQuoteResponse",
     "GetFxRateInput",
     "GetFxRateResponse",
+    "ContractNetwork",
+    "Contract",
 ]

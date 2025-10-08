@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from typing_extensions import Literal, TypedDict
 
-from ...internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
     Country,
@@ -353,13 +353,13 @@ class PayoutLimit(TypedDict):
     monthly: float
 
 
-class LimitsDict(TypedDict):
+class Limits(TypedDict):
     payin: PayinLimit
     payout: PayoutLimit
 
 
 class GetReceiverLimitsResponse(TypedDict):
-    limits: LimitsDict
+    limits: Limits
 
 
 class ReceiversResource:

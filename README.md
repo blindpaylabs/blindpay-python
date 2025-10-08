@@ -1,4 +1,4 @@
-# Blindpay Python SDK
+# BlindPay Python SDK
 
 The official Python SDK for Blindpay - Global payments infrastructure made simple.
 
@@ -17,14 +17,19 @@ pip install blindpay
 All API methods return a response dictionary with either `data` or `error`:
 
 ```python
-response = await client.receivers.get("receiver-id")
+    blindpay = BlindPay(
+        api_key="your_api_key_here",
+        instance_id="your_instance_id_here"
+    )
 
-if response.error:
-    print(f"Error: {response.error.message}")
-    return
+    response = await blindpay.receivers.get("receiver-id")
 
-receiver = response.data
-print(f"Receiver: {receiver}")
+    if response['error']:
+        print(f"Error: {response['error']['message']}")
+        return
+
+    receiver = response['data']
+    print(f"Receiver: {receiver}")
 ```
 
 ## Types
