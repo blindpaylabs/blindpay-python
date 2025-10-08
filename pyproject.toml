@@ -28,7 +28,7 @@ Documentation = "https://api.blindpay.com/reference"
 "Bug Tracker" = "https://github.com/blindpaylabs/blindpay-python/issues"
 
 [build-system]
-requires = ["hatchling==1.26.3"]
+requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
