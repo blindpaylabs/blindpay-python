@@ -16,13 +16,3 @@ jobs:
   typecheck:
     needs: lint
     uses: ./.github/workflows/typecheck.yaml
-
-  publish:
-    needs: typecheck
-    uses: ./.github/workflows/publish.yaml
-    secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-    permissions:
-      contents: write
-      pull-requests: write
-      id-token: write
