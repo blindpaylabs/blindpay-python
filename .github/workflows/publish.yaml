@@ -2,7 +2,18 @@ name: Publish
 
 on:
   push:
+<<<<<<< Updated upstream
     branches: [main]
+=======
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+>>>>>>> Stashed changes
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -11,7 +22,27 @@ permissions:
   id-token: write
 
 jobs:
+<<<<<<< Updated upstream
   build-and-publish:
+=======
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: python
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+>>>>>>> Stashed changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +55,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@v4
 
+<<<<<<< Updated upstream
       - name: Sync build deps
         run: uv sync
 
@@ -34,3 +66,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.12.2
         with:
           skip-existing: true
+=======
+      - name: Publish to PyPI
+        env:
+          UV_PUBLISH_USERNAME: __token__
+          UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          uv publish
+>>>>>>> Stashed changes
