@@ -51,6 +51,17 @@ IdentificationDocument = Literal["PASSPORT", "ID_CARD", "DRIVERS"]
 
 OwnerRole = Literal["beneficial_controlling", "beneficial_owner", "controlling_person"]
 
+LimitIncreaseRequestStatus = Literal["in_review", "approved", "rejected"]
+
+LimitIncreaseRequestSupportingDocumentType = Literal[
+    "individual_bank_statement",
+    "individual_tax_return",
+    "individual_proof_of_income",
+    "business_bank_statement",
+    "business_financial_statements",
+    "business_tax_return",
+]
+
 
 class KycWarning(TypedDict):
     code: Optional[str]
@@ -362,6 +373,35 @@ class GetReceiverLimitsResponse(TypedDict):
     limits: Limits
 
 
+class LimitIncreaseRequest(TypedDict):
+    id: str
+    receiver_id: str
+    status: LimitIncreaseRequestStatus
+    daily: float
+    monthly: float
+    per_transaction: float
+    supporting_document_file: str
+    supporting_document_type: LimitIncreaseRequestSupportingDocumentType
+    created_at: str
+    updated_at: str
+
+
+GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]
+
+
+class RequestLimitIncreaseInput(TypedDict):
+    receiver_id: str
+    daily: float
+    monthly: float
+    per_transaction: float
+    supporting_document_file: str
+    supporting_document_type: LimitIncreaseRequestSupportingDocumentType
+
+
+class RequestLimitIncreaseResponse(TypedDict):
+    id: str
+
+
 class ReceiversResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -401,6 +441,22 @@ class ReceiversResource:
 
     async def get_limits(self, receiver_id: str) -> BlindpayApiResponse[GetReceiverLimitsResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/limits/receivers/{receiver_id}")
+
+    async def get_limit_increase_requests(
+        self, receiver_id: str
+    ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase"
+        )
+
+    async def request_limit_increase(
+        self, data: RequestLimitIncreaseInput
+    ) -> BlindpayApiResponse[RequestLimitIncreaseResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        return await self._client.post(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase", payload
+        )
 
 
 class ReceiversResourceSync:
@@ -442,6 +498,22 @@ class ReceiversResourceSync:
 
     def get_limits(self, receiver_id: str) -> BlindpayApiResponse[GetReceiverLimitsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/limits/receivers/{receiver_id}")
+
+    def get_limit_increase_requests(
+        self, receiver_id: str
+    ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase"
+        )
+
+    def request_limit_increase(
+        self, data: RequestLimitIncreaseInput
+    ) -> BlindpayApiResponse[RequestLimitIncreaseResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        return self._client.post(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase", payload
+        )
 
 
 def create_receivers_resource(instance_id: str, client: InternalApiClient) -> ReceiversResource:
