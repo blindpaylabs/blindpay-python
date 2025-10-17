@@ -445,9 +445,7 @@ class ReceiversResource:
     async def get_limit_increase_requests(
         self, receiver_id: str
     ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return await self._client.get(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase"
-        )
+        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase")
 
     async def request_limit_increase(
         self, data: RequestLimitIncreaseInput
@@ -499,21 +497,15 @@ class ReceiversResourceSync:
     def get_limits(self, receiver_id: str) -> BlindpayApiResponse[GetReceiverLimitsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/limits/receivers/{receiver_id}")
 
-    def get_limit_increase_requests(
-        self, receiver_id: str
-    ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return self._client.get(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase"
-        )
+    def get_limit_increase_requests(self, receiver_id: str) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase")
 
     def request_limit_increase(
         self, data: RequestLimitIncreaseInput
     ) -> BlindpayApiResponse[RequestLimitIncreaseResponse]:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return self._client.post(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase", payload
-        )
+        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/limit-increase", payload)
 
 
 def create_receivers_resource(instance_id: str, client: InternalApiClient) -> ReceiversResource:
