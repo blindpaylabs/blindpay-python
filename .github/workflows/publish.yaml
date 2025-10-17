@@ -4,14 +4,17 @@ on:
   push:
     branches:
       - main
+    secrets:
+      PYPI_API_TOKEN:
+        required: true
   workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
   pull-requests: write
   id-token: write
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release-please:

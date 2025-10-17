@@ -1,4 +1,4 @@
-name: Lint
+name: Lint Check
 on:
   workflow_call:
 
@@ -20,7 +20,7 @@ jobs:
       - name: Sync dev deps
         run: uv sync --group dev
 
-      - name: Lint check (ruff)
+      - name: Lint check
         run: |
           uv run ruff format --check
           uv run ruff check .
