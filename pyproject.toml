@@ -1,6 +1,6 @@
 [project]
 name = "blindpay"
-version = "1.1.0"
+version = "0.2.0"
 description = "Official Python SDK for the Blindpay API — Global payments infrastructure"
 readme = "README.md"
 authors = [{ name = "Blindpay", email = "gabriel@blindpay.com" }]
