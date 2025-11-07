@@ -80,6 +80,17 @@ class RailInfo(TypedDict):
 GetBankDetailsResponse = List[BankDetail]
 GetRailsResponse = List[RailInfo]
 
+class SwiftCodeBankDetail(TypedDict):
+    id: str
+    bank: str
+    city: str
+    branch: str
+    swiftCode: str
+    swiftCodeLink: str
+    country: str
+    countrySlug: str
+
+GetSwiftCodeBankDetailsResponse = List[SwiftCodeBankDetail]
 
 class AvailableResource:
     def __init__(self, client: InternalApiClient):
@@ -92,6 +103,9 @@ class AvailableResource:
         return await self._client.get("/available/rails")
 
 
+    async def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
+        return await self._client.get(f"/available/swift/{swift}")
+
 class AvailableResourceSync:
     """Synchronous version of AvailableResource"""
 
@@ -103,6 +117,9 @@ class AvailableResourceSync:
 
     def get_rails(self) -> BlindpayApiResponse[GetRailsResponse]:
         return self._client.get("/available/rails")
+
+    def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
+        return self._client.get(f"/available/swift/{swift}")
 
 
 def create_available_resource(client: InternalApiClient) -> AvailableResource:
