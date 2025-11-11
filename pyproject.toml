@@ -58,8 +58,6 @@ dev = [
   "ruff",
   "pyright==1.1.399",
   "mypy",
-  "pytest>=8.0.0",
-  "pytest-asyncio>=0.23.0",
 ]
 
 [tool.ruff]
@@ -81,14 +79,6 @@ known-first-party = ["blindpay"]
 
 [tool.ruff.lint.per-file-ignores]
 "examples/*.py" = ["T201"]
-"tests/*.py" = ["T201"]
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
 
 [tool.mypy]
 pretty = true
@@ -108,5 +98,4 @@ disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 exclude = [
     "^examples/",
-    "^tests/",
 ]
