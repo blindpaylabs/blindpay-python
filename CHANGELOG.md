@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.0.0...v1.1.0) (2025-11-11)
+
+
+### Features
+
+* add swift code check endpoint ([a260b26](https://github.com/blindpaylabs/blindpay-python/commit/a260b268230b43cbc3b29cd8065355af0f80d25e))
+
 ## [1.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v0.1.0...v1.0.0) (2025-10-17)
 
 
