@@ -365,7 +365,6 @@ class _InstancesNamespaceSync:
 
         return create_webhook_endpoints_resource_sync(self._instance_id, self._api)
 
-
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResourceSync":
         from blindpay.resources.terms_of_service import create_terms_of_service_resource_sync

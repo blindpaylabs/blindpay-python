@@ -1,4 +1,4 @@
-from typing_extensions import TypedDict, Optional
+from typing_extensions import Optional, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse
