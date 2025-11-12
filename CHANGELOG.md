@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.1.0...v1.2.0) (2025-11-12)
+
+
+### Features
+
+* add new tos and solana endpoints ([#10](https://github.com/blindpaylabs/blindpay-python/issues/10)) ([1a37f28](https://github.com/blindpaylabs/blindpay-python/commit/1a37f285464a0b23ebbe532c6f7b14d58b8a04ec))
+
 ## [1.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.0.0...v1.1.0) (2025-11-11)
 
 
