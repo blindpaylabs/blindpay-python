@@ -20,6 +20,10 @@ if TYPE_CHECKING:
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
     from blindpay.resources.receivers.receivers import ReceiversResource, ReceiversResourceSync
+    from blindpay.resources.terms_of_service.terms_of_service import (
+        TermsOfServiceResource,
+        TermsOfServiceResourceSync,
+    )
     from blindpay.resources.virtual_accounts.virtual_accounts import (
         VirtualAccountsResource,
         VirtualAccountsResourceSync,
@@ -160,6 +164,12 @@ class _InstancesNamespace:
         from blindpay.resources.webhooks.webhooks import create_webhook_endpoints_resource
 
         return create_webhook_endpoints_resource(self._instance_id, self._api)
+
+    @cached_property
+    def terms_of_service(self) -> "TermsOfServiceResource":
+        from blindpay.resources.terms_of_service import create_terms_of_service_resource
+
+        return create_terms_of_service_resource(self._instance_id, self._api)
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._base, name)
@@ -354,6 +364,13 @@ class _InstancesNamespaceSync:
         from blindpay.resources.webhooks.webhooks import create_webhook_endpoints_resource_sync
 
         return create_webhook_endpoints_resource_sync(self._instance_id, self._api)
+
+
+    @cached_property
+    def terms_of_service(self) -> "TermsOfServiceResourceSync":
+        from blindpay.resources.terms_of_service import create_terms_of_service_resource_sync
+
+        return create_terms_of_service_resource_sync(self._instance_id, self._api)
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._base, name)

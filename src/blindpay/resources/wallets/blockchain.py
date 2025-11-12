@@ -59,6 +59,27 @@ class MintUsdbStellarInput(TypedDict):
     signedXdr: str
 
 
+class MintUsdbSolanaInput(TypedDict):
+    address: str
+    amount: str
+
+
+class MintUsdbSolanaResponse(TypedDict):
+    success: bool
+    signature: str
+
+
+class PrepareSolanaDelegationTransactionInput(TypedDict):
+    amount: str
+    owner_address: str
+    token_address: str
+
+
+class PrepareSolanaDelegationTransactionResponse(TypedDict):
+    success: bool
+    transaction: str
+
+
 class BlockchainWalletsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -109,6 +130,14 @@ class BlockchainWalletsResource:
 
     async def mint_usdb_stellar(self, data: MintUsdbStellarInput) -> BlindpayApiResponse[None]:
         return await self._client.post(f"/instances/{self._instance_id}/mint-usdb-stellar", data)
+
+    async def mint_usdb_solana(self, data: MintUsdbSolanaInput) -> BlindpayApiResponse[MintUsdbSolanaResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/mint-usdb-solana", data)
+
+    async def prepare_solana_delegation_transaction(
+        self, data: PrepareSolanaDelegationTransactionInput
+    ) -> BlindpayApiResponse[PrepareSolanaDelegationTransactionResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/prepare-delegate-solana", data)
 
 
 class BlockchainWalletsResourceSync:
