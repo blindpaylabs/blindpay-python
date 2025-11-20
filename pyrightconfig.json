@@ -17,8 +17,7 @@
       "root": "tests",
       "reportPrivateUsage": "none",
       "reportUnknownMemberType": "none",
-      "reportUnknownArgumentType": "none",
-      "reportUntypedFunctionDecorator": "none"
+      "reportUnknownArgumentType": "none"
     }
   ]
 }
