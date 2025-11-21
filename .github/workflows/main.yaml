@@ -12,7 +12,15 @@ permissions:
 
 jobs:
   lint:
+    name: Lint
     uses: ./.github/workflows/lint.yaml
+  
   typecheck:
+    name: Type Check
     needs: lint
     uses: ./.github/workflows/typecheck.yaml
+  
+  tests:
+    name: Tests
+    needs: [lint, typecheck]
+    uses: ./.github/workflows/tests.yaml

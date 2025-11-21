@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src", "tests"],
   "exclude": [".venv", ".git", "examples/**", "**/__pycache__"],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.12",
@@ -8,10 +8,17 @@
       "root": "src/blindpay/resources",
       "reportArgumentType": "error",
       "reportTypedDictNotRequiredAccess": "error",
-      "reportMissingTypeArgument": "error",
+      "reportMissingTypeArgument": "error"
     },
     {
-      "root": "src/blindpay",
+      "root": "src/blindpay"
+    },
+    {
+      "root": "tests",
+      "reportPrivateUsage": "none",
+      "reportUnknownMemberType": "none",
+      "reportUnknownArgumentType": "none",
+      "reportUntypedFunctionDecorator": "none"
     }
   ]
 }

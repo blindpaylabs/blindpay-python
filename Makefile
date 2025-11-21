@@ -1,4 +1,4 @@
-.PHONY: lint-check lint-fix typecheck
+.PHONY: lint-check lint-fix typecheck test
 
 lint-check:
 	uv run ruff format --check
@@ -11,3 +11,6 @@ lint-fix:
 typecheck:
 	uv run pyright
 	uv run mypy .
+
+test:
+	uv run pytest
