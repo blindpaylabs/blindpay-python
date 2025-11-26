@@ -1,4 +1,5 @@
 name: Type Check
+
 on:
   workflow_call:
 

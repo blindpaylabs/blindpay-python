@@ -1,4 +1,5 @@
 name: Main
+
 on:
   pull_request:
   push:
@@ -24,3 +25,9 @@ jobs:
     name: Tests
     needs: [lint, typecheck]
     uses: ./.github/workflows/tests.yaml
+
+  snyk:
+    name: Snyk
+    needs: [lint, typecheck, tests]
+    uses: ./.github/workflows/snyk.yaml
+    secrets: inherit
