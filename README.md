@@ -1,6 +1,10 @@
-# BlindPay Python SDK
+<h1>BlindPay Python SDK <img src="https://github.com/user-attachments/assets/c42b121d-adf1-467c-88ce-6f5be1efa93c" align="right" width="102"/></h1>
 
-The official Python SDK for Blindpay - Stablecoin API for global payments.
+[![chat on Discord](https://img.shields.io/discord/856971667393609759.svg?logo=discord)](https://discord.gg/x7ap6Gkbe9)
+[![twitter](https://img.shields.io/twitter/follow/blindpaylabs?style=social)](https://twitter.com/intent/follow?screen_name=blindpaylabs)
+[![Version](https://img.shields.io/github/v/release/blindpaylabs/blindpay-swift?include_prereleases)](https://github.com/blindpaylabs/blindpay-swift/releases)
+
+The official Python SDK for [BlindPay](https://blindpay.com) - Stablecoin API for global payments.
 
 ## Installation
 
