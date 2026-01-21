@@ -1,6 +1,6 @@
 # BlindPay Python SDK
 
-The official Python SDK for Blindpay - Global payments infrastructure made simple.
+The official Python SDK for Blindpay - Stablecoin API for global payments.
 
 ## Installation
 
