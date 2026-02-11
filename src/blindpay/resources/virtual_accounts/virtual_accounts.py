@@ -1,7 +1,9 @@
-from typing_extensions import Optional, TypedDict
+from typing_extensions import Literal, Optional, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse, StablecoinToken
+
+BankingPartner = Literal["jpmorgan", "citi", "hsbc"]
 
 
 class BankAccountInfo(TypedDict):
@@ -40,8 +42,10 @@ class VirtualAccount(TypedDict):
 
 class CreateVirtualAccountInput(TypedDict):
     receiver_id: str
+    banking_partner: BankingPartner
     blockchain_wallet_id: str
     token: StablecoinToken
+    signed_agreement_id: Optional[str]
 
 
 CreateVirtualAccountResponse = VirtualAccount

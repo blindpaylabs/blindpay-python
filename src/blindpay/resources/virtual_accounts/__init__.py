@@ -1,5 +1,6 @@
 from .virtual_accounts import (
     BankAccountInfo,
+    BankingPartner,
     BeneficiaryInfo,
     CreateVirtualAccountInput,
     CreateVirtualAccountResponse,
@@ -28,4 +29,5 @@ __all__ = [
     "BeneficiaryInfo",
     "ReceivingBankInfo",
     "BankAccountInfo",
+    "BankingPartner",
 ]

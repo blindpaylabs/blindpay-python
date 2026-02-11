@@ -31,6 +31,63 @@ PurposeOfTransactions = Literal[
     "other",
 ]
 
+AccountPurpose = Literal[
+    "charitable_donations",
+    "ecommerce_retail_payments",
+    "investment_purposes",
+    "business_expenses",
+    "payments_to_friends_or_family_abroad",
+    "personal_or_living_expenses",
+    "protect_wealth",
+    "purchase_goods_and_services",
+    "receive_payments_for_goods_and_services",
+    "tax_optimization",
+    "third_party_money_transmission",
+    "other",
+    "payroll",
+    "treasury_management",
+]
+
+ReceiverBusinessType = Literal[
+    "corporation",
+    "llc",
+    "partnership",
+    "sole_proprietorship",
+    "trust",
+    "non_profit",
+]
+
+BusinessIndustry = Literal[
+    "541511", "541512", "541519", "518210", "511210",
+    "541611", "541618", "541330", "541990", "522110",
+    "523110", "523920", "423430", "423690", "423110",
+    "423830", "423840", "423510", "424210", "424690",
+    "424990", "454110", "334111", "334118", "325412",
+    "339112", "336111", "336390", "551112", "561499",
+    "488510", "484121", "493110", "424410", "424480",
+    "315990", "313110", "213112", "517110", "541214",
+]
+
+EstimatedAnnualRevenue = Literal[
+    "0_99999",
+    "100000_999999",
+    "1000000_9999999",
+    "10000000_49999999",
+    "50000000_249999999",
+    "2500000000_plus",
+]
+
+SourceOfWealth = Literal[
+    "business_dividends_or_profits",
+    "investments",
+    "asset_sales",
+    "client_investor_contributions",
+    "gambling",
+    "charitable_contributions",
+    "inheritance",
+    "affiliate_or_royalty_income",
+]
+
 SourceOfFundsDocType = Literal[
     "business_income",
     "gambling_proceeds",
@@ -96,7 +153,9 @@ class Owner(TypedDict):
     id_doc_front_file: str
     id_doc_back_file: Optional[str]
     proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_address_doc_file: str
+    proof_of_address_doc_file: Optional[str]
+    ownership_percentage: Optional[float]
+    title: Optional[str]
 
 
 class IndividualWithStandardKYC(TypedDict):
@@ -208,26 +267,33 @@ class BusinessWithStandardKYB(TypedDict):
 
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
-    external_id: Optional[str]
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
     country: Country
-    date_of_birth: str
     email: str
-    first_name: str
-    phone_number: Optional[str]
-    id_doc_country: Country
-    id_doc_front_file: str
-    id_doc_type: IdentificationDocument
+    account_purpose: Optional[AccountPurpose]
+    address_line_1: Optional[str]
+    address_line_2: Optional[str]
+    city: Optional[str]
+    date_of_birth: Optional[str]
+    external_id: Optional[str]
+    first_name: Optional[str]
     id_doc_back_file: Optional[str]
-    last_name: str
-    postal_code: str
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    id_doc_country: Optional[Country]
+    id_doc_front_file: Optional[str]
+    id_doc_type: Optional[IdentificationDocument]
+    image_url: Optional[str]
+    ip_address: Optional[str]
+    last_name: Optional[str]
+    phone_number: Optional[str]
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    selfie_file: Optional[str]
+    source_of_funds_doc_file: Optional[str]
+    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
+    source_of_wealth: Optional[SourceOfWealth]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -235,31 +301,35 @@ class CreateIndividualWithStandardKYCResponse(TypedDict):
 
 
 class CreateIndividualWithEnhancedKYCInput(TypedDict):
-    external_id: Optional[str]
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
     country: Country
-    date_of_birth: str
     email: str
-    first_name: str
-    id_doc_country: Country
-    id_doc_front_file: str
-    id_doc_type: IdentificationDocument
+    account_purpose: Optional[AccountPurpose]
+    address_line_1: Optional[str]
+    address_line_2: Optional[str]
+    city: Optional[str]
+    date_of_birth: Optional[str]
+    external_id: Optional[str]
+    first_name: Optional[str]
     id_doc_back_file: Optional[str]
-    individual_holding_doc_front_file: str
-    last_name: str
-    postal_code: str
+    id_doc_country: Optional[Country]
+    id_doc_front_file: Optional[str]
+    id_doc_type: Optional[IdentificationDocument]
+    image_url: Optional[str]
+    ip_address: Optional[str]
+    last_name: Optional[str]
     phone_number: Optional[str]
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    purpose_of_transactions: PurposeOfTransactions
-    source_of_funds_doc_file: str
-    source_of_funds_doc_type: SourceOfFundsDocType
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    purpose_of_transactions: Optional[PurposeOfTransactions]
     purpose_of_transactions_explanation: Optional[str]
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    selfie_file: Optional[str]
+    source_of_funds_doc_file: Optional[str]
+    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
+    source_of_wealth: Optional[SourceOfWealth]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -267,24 +337,36 @@ class CreateIndividualWithEnhancedKYCResponse(TypedDict):
 
 
 class CreateBusinessWithStandardKYBInput(TypedDict):
-    external_id: Optional[str]
-    address_line_1: str
-    address_line_2: Optional[str]
-    alternate_name: str
-    city: str
     country: Country
     email: str
-    formation_date: str
-    incorporation_doc_file: str
-    legal_name: str
-    owners: List[Owner]
-    postal_code: str
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_ownership_doc_file: str
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    account_purpose: Optional[AccountPurpose]
+    address_line_1: Optional[str]
+    address_line_2: Optional[str]
+    alternate_name: Optional[str]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    business_type: Optional[ReceiverBusinessType]
+    city: Optional[str]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    external_id: Optional[str]
+    formation_date: Optional[str]
+    image_url: Optional[str]
+    incorporation_doc_file: Optional[str]
+    ip_address: Optional[str]
+    legal_name: Optional[str]
+    owners: Optional[List[Owner]]
+    phone_number: Optional[str]
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_ownership_doc_file: Optional[str]
+    publicly_traded: Optional[bool]
+    source_of_funds_doc_file: Optional[str]
+    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
+    source_of_wealth: Optional[SourceOfWealth]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
     website: Optional[str]
 
 
@@ -297,61 +379,49 @@ ListReceiversResponse = List[Union[IndividualWithStandardKYC, IndividualWithEnha
 GetReceiverResponse = Union[IndividualWithStandardKYC, IndividualWithEnhancedKYC, BusinessWithStandardKYB]
 
 
-class OwnerUpdate(TypedDict):
-    id: str
-    first_name: str
-    last_name: str
-    role: OwnerRole
-    date_of_birth: str
-    tax_id: str
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
-    state_province_region: str
-    country: Country
-    postal_code: str
-    id_doc_country: Country
-    id_doc_type: IdentificationDocument
-    id_doc_front_file: str
-    id_doc_back_file: Optional[str]
-
-
 class UpdateReceiverInput(TypedDict):
     receiver_id: str
-    email: Optional[str]
-    tax_id: Optional[str]
+    account_purpose: Optional[AccountPurpose]
     address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Country]
-    postal_code: Optional[str]
-    ip_address: Optional[str]
-    image_url: Optional[str]
-    phone_number: Optional[str]
-    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
-    proof_of_address_doc_file: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    date_of_birth: Optional[str]
-    id_doc_country: Optional[Country]
-    id_doc_type: Optional[IdentificationDocument]
-    id_doc_front_file: Optional[str]
-    id_doc_back_file: Optional[str]
-    legal_name: Optional[str]
     alternate_name: Optional[str]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    business_type: Optional[ReceiverBusinessType]
+    city: Optional[str]
+    country: Optional[Country]
+    date_of_birth: Optional[str]
+    email: Optional[str]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    external_id: Optional[str]
+    first_name: Optional[str]
     formation_date: Optional[str]
-    website: Optional[str]
-    owners: Optional[List[OwnerUpdate]]
+    id_doc_back_file: Optional[str]
+    id_doc_country: Optional[Country]
+    id_doc_front_file: Optional[str]
+    id_doc_type: Optional[IdentificationDocument]
+    image_url: Optional[str]
     incorporation_doc_file: Optional[str]
+    ip_address: Optional[str]
+    last_name: Optional[str]
+    legal_name: Optional[str]
+    owners: Optional[List[Owner]]
+    phone_number: Optional[str]
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
     proof_of_ownership_doc_file: Optional[str]
-    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
-    source_of_funds_doc_file: Optional[str]
-    individual_holding_doc_front_file: Optional[str]
+    publicly_traded: Optional[bool]
     purpose_of_transactions: Optional[PurposeOfTransactions]
     purpose_of_transactions_explanation: Optional[str]
-    external_id: Optional[str]
+    selfie_file: Optional[str]
+    source_of_funds_doc_file: Optional[str]
+    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
+    source_of_wealth: Optional[SourceOfWealth]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
     tos_id: Optional[str]
+    website: Optional[str]
 
 
 class PayinLimit(TypedDict):
