@@ -130,5 +130,5 @@ blindpay = BlindPay(
 
 - **Documentation**: [https://api.blindpay.com/reference](https://api.blindpay.com/reference)
 - **Dashboard**: [https://app.blindpay.com](https://app.blindpay.com)
-- **Support**: [gabriel@blindpay.com](mailto:gabriel@blindpay.com)
+- **Support**: [alves@blindpay.com](mailto:alves@blindpay.com)
 

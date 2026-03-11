@@ -73,4 +73,4 @@ MIT
 
 ## Support
 
-For support, please contact gabriel@blindpay.com or visit [blindpay](https://blindpay.com)
+For support, please contact alves@blindpay.com or visit [blindpay](https://blindpay.com)
