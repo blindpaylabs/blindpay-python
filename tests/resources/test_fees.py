@@ -40,8 +40,12 @@ class TestFees:
             response = await self.blindpay.fees.get()
 
             assert response["error"] is None
+            assert response["data"] is not None
+            assert response["data"]["ach"] is not None
             assert response["data"]["ach"]["payout_flat"] == 5.0
+            assert response["data"]["domestic_wire"] is not None
             assert response["data"]["domestic_wire"]["payout_flat"] == 25.0
+            assert response["data"]["pix"] is not None
             assert response["data"]["pix"]["payout_flat"] == 3.0
             assert response["data"]["pix"]["payout_percentage"] == 0.5
             assert response["data"]["solana"] is None
@@ -82,6 +86,8 @@ class TestFeesSync:
             response = self.blindpay.fees.get()
 
             assert response["error"] is None
+            assert response["data"] is not None
+            assert response["data"]["ach"] is not None
             assert response["data"]["ach"]["payout_flat"] == 5.0
             assert response["data"]["solana"] is None
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/billing/fees")

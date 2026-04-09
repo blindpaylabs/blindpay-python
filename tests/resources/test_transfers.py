@@ -33,6 +33,7 @@ class TestTransfers:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tq_000000000000"
             assert response["data"]["amount"] == 100.00
             assert response["data"]["fee_amount"] == 1.50
@@ -70,6 +71,7 @@ class TestTransfers:
             response = await self.blindpay.transfers.create({"quote_id": "tq_000000000000"})
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tr_000000000000"
             assert response["data"]["status"] == "processing"
             assert response["data"]["amount"] == 100.00
@@ -103,6 +105,7 @@ class TestTransfers:
             response = await self.blindpay.transfers.get("tr_000000000000")
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tr_000000000000"
             assert response["data"]["status"] == "completed"
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/transfers/tr_000000000000")
@@ -140,6 +143,7 @@ class TestTransfers:
             response = await self.blindpay.transfers.list()
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert len(response["data"]["data"]) == 1
             assert response["data"]["data"][0]["id"] == "tr_000000000000"
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/transfers")
@@ -172,6 +176,7 @@ class TestTransfersSync:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tq_000000000000"
             mock_request.assert_called_once_with(
                 "POST",
@@ -206,6 +211,7 @@ class TestTransfersSync:
             response = self.blindpay.transfers.create({"quote_id": "tq_000000000000"})
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tr_000000000000"
             mock_request.assert_called_once_with(
                 "POST",
@@ -236,6 +242,7 @@ class TestTransfersSync:
             response = self.blindpay.transfers.get("tr_000000000000")
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "tr_000000000000"
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/transfers/tr_000000000000")
 
@@ -271,5 +278,6 @@ class TestTransfersSync:
             response = self.blindpay.transfers.list()
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert len(response["data"]["data"]) == 1
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/transfers")

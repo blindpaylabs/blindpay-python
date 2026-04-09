@@ -186,8 +186,11 @@ class CreateColombiaAchResponse(TypedDict):
     created_at: str
 
 
-class CreateAchInput(TypedDict, total=False):
+class _CreateAchInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateAchInput(_CreateAchInputRequired, total=False):
     name: str
     account_class: AccountClass
     account_number: str
@@ -232,8 +235,11 @@ class CreateAchResponse(TypedDict):
     created_at: str
 
 
-class CreateWireInput(TypedDict, total=False):
+class _CreateWireInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateWireInput(_CreateWireInputRequired, total=False):
     name: str
     account_number: str
     account_class: AccountClass
@@ -268,8 +274,11 @@ class CreateWireResponse(TypedDict):
     created_at: str
 
 
-class CreateInternationalSwiftInput(TypedDict, total=False):
+class _CreateInternationalSwiftInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, total=False):
     name: str
     account_class: AccountClass
     recipient_relationship: RecipientRelationship
@@ -334,8 +343,11 @@ class CreateInternationalSwiftResponse(TypedDict):
     created_at: str
 
 
-class CreateRtpInput(TypedDict, total=False):
+class _CreateRtpInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateRtpInput(_CreateRtpInputRequired, total=False):
     name: str
     account_class: AccountClass
     beneficiary_name: str

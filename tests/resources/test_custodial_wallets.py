@@ -32,6 +32,7 @@ class TestCustodialWallets:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             assert response["data"]["network"] == "solana"
             assert response["data"]["address"] == "So1ana1234567890"
@@ -60,6 +61,7 @@ class TestCustodialWallets:
             response = await self.blindpay.wallets.custodial.list("re_000000000000")
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert len(response["data"]) == 1
             assert response["data"][0]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_000000000000/wallets")
@@ -83,6 +85,7 @@ class TestCustodialWallets:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
                 "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000"
@@ -112,7 +115,10 @@ class TestCustodialWallets:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
+            assert response["data"]["usdc"] is not None
             assert response["data"]["usdc"]["amount"] == 150.50
+            assert response["data"]["usdt"] is not None
             assert response["data"]["usdt"]["amount"] == 0.0
             assert response["data"]["usdb"] is None
             mock_request.assert_called_once_with(
@@ -160,6 +166,7 @@ class TestCustodialWalletsSync:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
                 "POST",
@@ -185,6 +192,7 @@ class TestCustodialWalletsSync:
             response = self.blindpay.wallets.custodial.list("re_000000000000")
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert len(response["data"]) == 1
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_000000000000/wallets")
 
@@ -204,6 +212,7 @@ class TestCustodialWalletsSync:
             response = self.blindpay.wallets.custodial.get({"receiver_id": "re_000000000000", "id": "cw_000000000000"})
 
             assert response["error"] is None
+            assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
                 "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000"
@@ -232,6 +241,8 @@ class TestCustodialWalletsSync:
             )
 
             assert response["error"] is None
+            assert response["data"] is not None
+            assert response["data"]["usdc"] is not None
             assert response["data"]["usdc"]["amount"] == 150.50
             mock_request.assert_called_once_with(
                 "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000/balance"
