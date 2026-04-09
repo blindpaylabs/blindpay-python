@@ -95,6 +95,14 @@ class SwiftCodeBankDetail(TypedDict):
 GetSwiftCodeBankDetailsResponse = List[SwiftCodeBankDetail]
 
 
+class NaicsCode(TypedDict):
+    code: str
+    title: str
+
+
+GetNaicsCodesResponse = List[NaicsCode]
+
+
 class AvailableResource:
     def __init__(self, client: InternalApiClient):
         self._client = client
@@ -107,6 +115,9 @@ class AvailableResource:
 
     async def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
         return await self._client.get(f"/available/swift/{swift}")
+
+    async def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
+        return await self._client.get("/available/naics")
 
 
 class AvailableResourceSync:
@@ -123,6 +134,9 @@ class AvailableResourceSync:
 
     def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
         return self._client.get(f"/available/swift/{swift}")
+
+    def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
+        return self._client.get("/available/naics")
 
 
 def create_available_resource(client: InternalApiClient) -> AvailableResource:
