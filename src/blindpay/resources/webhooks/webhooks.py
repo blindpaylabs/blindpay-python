@@ -18,6 +18,16 @@ WebhookEvents = Literal[
     "payin.update",
     "payin.complete",
     "payin.partnerFee",
+    "tos.accept",
+    "limitIncrease.new",
+    "limitIncrease.update",
+    "virtualAccount.new",
+    "virtualAccount.complete",
+    "transfer.new",
+    "transfer.update",
+    "transfer.complete",
+    "wallet.new",
+    "wallet.inbound",
 ]
 
 

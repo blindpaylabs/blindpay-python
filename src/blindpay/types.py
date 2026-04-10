@@ -35,6 +35,8 @@ Network = Literal[
     "stellar",
     "stellar_testnet",
     "tron",
+    "solana",
+    "solana_devnet",
 ]
 
 StablecoinToken = Literal["USDC", "USDT", "USDB"]
@@ -47,11 +49,13 @@ BankAccountType = Literal["checking", "savings"]
 
 Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
-Rail = Literal["wire", "ach", "pix", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"]
+Rail = Literal[
+    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
+]
 
 AccountClass = Literal["individual", "business"]
 
-TransactionStatus = Literal["refunded", "processing", "completed", "failed", "on_hold"]
+TransactionStatus = Literal["refunded", "processing", "completed", "failed", "on_hold", "pending_review"]
 
 SpeiProtocol = Literal["clabe", "debitcard", "phonenum"]
 
@@ -307,8 +311,8 @@ Country = Literal[
     "AX",
 ]
 
-PaginationLimit = Literal["10", "50", "100", "200", "1000"]
-PaginationOffset = Literal["0", "10", "50", "100", "200", "1000"]
+PaginationLimit = Literal["10", "50", "100", "200", "500", "1000"]
+PaginationOffset = Literal["0", "10", "50", "100", "200", "500", "1000"]
 
 
 class PaginationParams(TypedDict, total=False):
@@ -359,3 +363,19 @@ class TrackingPartnerFee(TypedDict):
     step: str
     transaction_hash: str
     completed_at: str
+
+
+RecipientRelationship = Literal[
+    "first_party",
+    "employee",
+    "independent_contractor",
+    "vendor_supplier",
+    "client_customer",
+    "subsidiary_affiliate",
+    "joint_venture_partner",
+    "landlord_property_manager",
+    "government_agency",
+    "other",
+]
+
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]

@@ -1,4 +1,4 @@
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 from ._internal.exceptions import BlindPayError
 from .client import BlindPay, BlindPaySync
@@ -15,7 +15,9 @@ from .types import (
     Network,
     PaginationMetadata,
     PaginationParams,
+    PaymentMethod,
     Rail,
+    RecipientRelationship,
     StablecoinToken,
     TrackingComplete,
     TrackingLiquidity,
@@ -36,7 +38,9 @@ __all__ = [
     "Currency",
     "CurrencyType",
     "Network",
+    "PaymentMethod",
     "Rail",
+    "RecipientRelationship",
     "StablecoinToken",
     "TransactionDocumentType",
     "TransactionStatus",

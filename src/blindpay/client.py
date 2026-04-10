@@ -13,6 +13,11 @@ if TYPE_CHECKING:
     from blindpay.resources.api_keys.api_keys import ApiKeysResource, ApiKeysResourceSync
     from blindpay.resources.available.available import AvailableResource, AvailableResourceSync
     from blindpay.resources.bank_accounts.bank_accounts import BankAccountsResource, BankAccountsResourceSync
+    from blindpay.resources.custodial_wallets.custodial_wallets import (
+        CustodialWalletsResource,
+        CustodialWalletsResourceSync,
+    )
+    from blindpay.resources.fees.fees import FeesResource, FeesResourceSync
     from blindpay.resources.instances.instances import InstancesResource, InstancesResourceSync
     from blindpay.resources.partner_fees.partner_fees import PartnerFeesResource, PartnerFeesResourceSync
     from blindpay.resources.payins.payins import PayinsResource, PayinsResourceSync
@@ -24,6 +29,7 @@ if TYPE_CHECKING:
         TermsOfServiceResource,
         TermsOfServiceResourceSync,
     )
+    from blindpay.resources.transfers.transfers import TransfersResource, TransfersResourceSync
     from blindpay.resources.virtual_accounts.virtual_accounts import (
         VirtualAccountsResource,
         VirtualAccountsResourceSync,
@@ -32,7 +38,7 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
-__version__ = "1.1.0"
+__version__ = "1.3.0"
 
 T = TypeVar("T")
 
@@ -234,6 +240,12 @@ class _WalletsNamespace:
 
         return create_offramp_wallets_resource(self._instance_id, self._api)
 
+    @cached_property
+    def custodial(self) -> "CustodialWalletsResource":
+        from blindpay.resources.custodial_wallets.custodial_wallets import create_custodial_wallets_resource
+
+        return create_custodial_wallets_resource(self._instance_id, self._api)
+
 
 class BlindPay:
     _api_key: str
@@ -305,6 +317,18 @@ class BlindPay:
     @cached_property
     def wallets(self) -> _WalletsNamespace:
         return _WalletsNamespace(self._instance_id, self._api)
+
+    @cached_property
+    def transfers(self) -> "TransfersResource":
+        from blindpay.resources.transfers import create_transfers_resource
+
+        return create_transfers_resource(self._instance_id, self._api)
+
+    @cached_property
+    def fees(self) -> "FeesResource":
+        from blindpay.resources.fees import create_fees_resource
+
+        return create_fees_resource(self._instance_id, self._api)
 
     def verify_webhook_signature(
         self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
@@ -434,6 +458,12 @@ class _WalletsNamespaceSync:
 
         return create_offramp_wallets_resource_sync(self._instance_id, self._api)
 
+    @cached_property
+    def custodial(self) -> "CustodialWalletsResourceSync":
+        from blindpay.resources.custodial_wallets.custodial_wallets import create_custodial_wallets_resource_sync
+
+        return create_custodial_wallets_resource_sync(self._instance_id, self._api)
+
 
 class BlindPaySync:
     _api_key: str
@@ -505,6 +535,18 @@ class BlindPaySync:
     @cached_property
     def wallets(self) -> _WalletsNamespaceSync:
         return _WalletsNamespaceSync(self._instance_id, self._api)
+
+    @cached_property
+    def transfers(self) -> "TransfersResourceSync":
+        from blindpay.resources.transfers import create_transfers_resource_sync
+
+        return create_transfers_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def fees(self) -> "FeesResourceSync":
+        from blindpay.resources.fees import create_fees_resource_sync
+
+        return create_fees_resource_sync(self._instance_id, self._api)
 
     def verify_webhook_signature(
         self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str

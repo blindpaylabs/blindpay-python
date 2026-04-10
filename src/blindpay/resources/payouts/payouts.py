@@ -155,6 +155,18 @@ class CreateEvmPayoutResponse(TypedDict):
     receiver_id: str
 
 
+class SubmitPayoutDocumentsInput(TypedDict):
+    payout_id: str
+    transaction_document_type: TransactionDocumentType
+    transaction_document_id: str
+    transaction_document_file: str
+    description: Optional[str]
+
+
+class SubmitPayoutDocumentsResponse(TypedDict):
+    id: str
+
+
 class PayoutsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -192,6 +204,13 @@ class PayoutsResource:
 
     async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+
+    async def submit_documents(
+        self, data: SubmitPayoutDocumentsInput
+    ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
+        payout_id = data["payout_id"]
+        payload = {k: v for k, v in data.items() if k != "payout_id"}
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
 
 
 class PayoutsResourceSync:
@@ -231,6 +250,11 @@ class PayoutsResourceSync:
 
     def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+
+    def submit_documents(self, data: SubmitPayoutDocumentsInput) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
+        payout_id = data["payout_id"]
+        payload = {k: v for k, v in data.items() if k != "payout_id"}
+        return self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
 
 
 def create_payouts_resource(instance_id: str, client: InternalApiClient) -> PayoutsResource:

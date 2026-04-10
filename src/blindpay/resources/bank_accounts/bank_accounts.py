@@ -3,7 +3,15 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import AccountClass, BankAccountType, BlindpayApiResponse, Country, Rail, SpeiProtocol
+from ...types import (
+    AccountClass,
+    BankAccountType,
+    BlindpayApiResponse,
+    Country,
+    Rail,
+    RecipientRelationship,
+    SpeiProtocol,
+)
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 AchCopDocument = Literal["CC", "CE", "NIT", "PASS", "PEP"]
@@ -16,6 +24,7 @@ AchType = Literal["ach"]
 WireType = Literal["wire"]
 InternationalSwiftType = Literal["international_swift"]
 RtpType = Literal["rtp"]
+PixSafeType = Literal["pix_safe"]
 
 
 class OfframpWallet(TypedDict):
@@ -177,14 +186,28 @@ class CreateColombiaAchResponse(TypedDict):
     created_at: str
 
 
-class CreateAchInput(TypedDict):
+class _CreateAchInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateAchInput(_CreateAchInputRequired, total=False):
     name: str
     account_class: AccountClass
     account_number: str
     account_type: BankAccountType
     beneficiary_name: str
     routing_number: str
+    recipient_relationship: RecipientRelationship
+    address_line_1: str
+    city: str
+    state_province_region: str
+    country: Country
+    postal_code: str
+    address_line_2: Optional[str]
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
 
 
 class CreateAchResponse(TypedDict):
@@ -212,18 +235,27 @@ class CreateAchResponse(TypedDict):
     created_at: str
 
 
-class CreateWireInput(TypedDict):
+class _CreateWireInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateWireInput(_CreateWireInputRequired, total=False):
     name: str
     account_number: str
+    account_class: AccountClass
     beneficiary_name: str
     routing_number: str
+    recipient_relationship: RecipientRelationship
     address_line_1: str
     address_line_2: Optional[str]
     city: str
     state_province_region: str
     country: Country
     postal_code: str
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
 
 
 class CreateWireResponse(TypedDict):
@@ -242,9 +274,14 @@ class CreateWireResponse(TypedDict):
     created_at: str
 
 
-class CreateInternationalSwiftInput(TypedDict):
+class _CreateInternationalSwiftInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, total=False):
     name: str
+    account_class: AccountClass
+    recipient_relationship: RecipientRelationship
     swift_account_holder_name: str
     swift_account_number_iban: str
     swift_bank_address_line_1: str
@@ -265,6 +302,11 @@ class CreateInternationalSwiftInput(TypedDict):
     swift_intermediary_bank_country: Optional[Country]
     swift_intermediary_bank_name: Optional[str]
     swift_intermediary_bank_swift_code_bic: Optional[str]
+    swift_payment_code: Optional[str]
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
 
 
 class CreateInternationalSwiftResponse(TypedDict):
@@ -301,18 +343,27 @@ class CreateInternationalSwiftResponse(TypedDict):
     created_at: str
 
 
-class CreateRtpInput(TypedDict):
+class _CreateRtpInputRequired(TypedDict):
     receiver_id: str
+
+
+class CreateRtpInput(_CreateRtpInputRequired, total=False):
     name: str
+    account_class: AccountClass
     beneficiary_name: str
     routing_number: str
     account_number: str
+    recipient_relationship: RecipientRelationship
     address_line_1: str
     address_line_2: Optional[str]
     city: str
     state_province_region: str
     country: Country
     postal_code: str
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
 
 
 class CreateRtpResponse(TypedDict):
@@ -328,6 +379,28 @@ class CreateRtpResponse(TypedDict):
     state_province_region: str
     country: Country
     postal_code: str
+    created_at: str
+
+
+class CreatePixSafeInput(TypedDict):
+    receiver_id: str
+    name: str
+    account_number: str
+    account_type: BankAccountType
+    pix_safe_bank_code: str
+    pix_safe_branch_code: str
+    pix_safe_cpf_cnpj: str
+
+
+class CreatePixSafeResponse(TypedDict):
+    id: str
+    type: PixSafeType
+    name: str
+    account_number: str
+    account_type: BankAccountType
+    pix_safe_bank_code: str
+    pix_safe_branch_code: str
+    pix_safe_cpf_cnpj: str
     created_at: str
 
 
@@ -397,6 +470,12 @@ class BankAccountsResource:
         payload["type"] = "rtp"
         return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
+    async def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "pix_safe"
+        return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
 
 class BankAccountsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -462,6 +541,12 @@ class BankAccountsResourceSync:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "rtp"
+        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
+    def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "pix_safe"
         return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
 

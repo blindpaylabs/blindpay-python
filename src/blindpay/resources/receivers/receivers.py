@@ -434,7 +434,7 @@ class ReceiversResource:
     async def update(self, data: UpdateReceiverInput) -> BlindpayApiResponse[None]:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return await self._client.patch(f"/instances/{self._instance_id}/receivers/{receiver_id}", payload)
+        return await self._client.put(f"/instances/{self._instance_id}/receivers/{receiver_id}", payload)
 
     async def delete(self, receiver_id: str) -> BlindpayApiResponse[None]:
         return await self._client.delete(f"/instances/{self._instance_id}/receivers/{receiver_id}")
@@ -489,7 +489,7 @@ class ReceiversResourceSync:
     def update(self, data: UpdateReceiverInput) -> BlindpayApiResponse[None]:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return self._client.patch(f"/instances/{self._instance_id}/receivers/{receiver_id}", payload)
+        return self._client.put(f"/instances/{self._instance_id}/receivers/{receiver_id}", payload)
 
     def delete(self, receiver_id: str) -> BlindpayApiResponse[None]:
         return self._client.delete(f"/instances/{self._instance_id}/receivers/{receiver_id}")
