@@ -47,7 +47,9 @@ class TestSandbox:
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with("POST", "/instances/in_000000000000/sandbox", {"name": "My Sandbox Item"})
+            mock_request.assert_called_once_with(
+                "POST", "/instances/in_000000000000/sandbox", {"name": "My Sandbox Item"}
+            )
 
     @pytest.mark.asyncio
     async def test_update(self):
@@ -114,7 +116,9 @@ class TestSandboxSync:
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with("POST", "/instances/in_000000000000/sandbox", {"name": "My Sandbox Item"})
+            mock_request.assert_called_once_with(
+                "POST", "/instances/in_000000000000/sandbox", {"name": "My Sandbox Item"}
+            )
 
     def test_update(self):
         mocked_data = {"id": "sb_000000000000", "name": "Updated Name", "status": "active"}
