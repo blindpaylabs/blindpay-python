@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -12,7 +13,7 @@ class TestSandbox:
 
     @pytest.mark.asyncio
     async def test_list(self):
-        mocked_data = [{"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}]
+        mocked_data: Any = [{"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -25,7 +26,7 @@ class TestSandbox:
 
     @pytest.mark.asyncio
     async def test_get(self):
-        mocked_data = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -38,7 +39,7 @@ class TestSandbox:
 
     @pytest.mark.asyncio
     async def test_create(self):
-        mocked_data = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -53,7 +54,7 @@ class TestSandbox:
 
     @pytest.mark.asyncio
     async def test_update(self):
-        mocked_data = {"id": "sb_000000000000", "name": "Updated Name", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "Updated Name", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -83,7 +84,7 @@ class TestSandboxSync:
         self.blindpay = BlindPaySync(api_key="test-key", instance_id="in_000000000000")
 
     def test_list(self):
-        mocked_data = [{"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}]
+        mocked_data: Any = [{"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -95,7 +96,7 @@ class TestSandboxSync:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/sandbox")
 
     def test_get(self):
-        mocked_data = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -107,7 +108,7 @@ class TestSandboxSync:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/sandbox/sb_000000000000")
 
     def test_create(self):
-        mocked_data = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "My Sandbox Item", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
@@ -121,7 +122,7 @@ class TestSandboxSync:
             )
 
     def test_update(self):
-        mocked_data = {"id": "sb_000000000000", "name": "Updated Name", "status": "active"}
+        mocked_data: Any = {"id": "sb_000000000000", "name": "Updated Name", "status": "active"}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
