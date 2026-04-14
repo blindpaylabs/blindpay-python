@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
     from blindpay.resources.receivers.receivers import ReceiversResource, ReceiversResourceSync
+    from blindpay.resources.sandbox.sandbox import SandboxResource, SandboxResourceSync
     from blindpay.resources.terms_of_service.terms_of_service import (
         TermsOfServiceResource,
         TermsOfServiceResourceSync,
@@ -38,7 +39,7 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 T = TypeVar("T")
 
@@ -309,6 +310,12 @@ class BlindPay:
         return _ReceiversNamespace(self._instance_id, self._api)
 
     @cached_property
+    def sandbox(self) -> "SandboxResource":
+        from blindpay.resources.sandbox import create_sandbox_resource
+
+        return create_sandbox_resource(self._instance_id, self._api)
+
+    @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResource":
         from blindpay.resources.virtual_accounts import create_virtual_accounts_resource
 
@@ -525,6 +532,12 @@ class BlindPaySync:
     @cached_property
     def receivers(self) -> _ReceiversNamespaceSync:
         return _ReceiversNamespaceSync(self._instance_id, self._api)
+
+    @cached_property
+    def sandbox(self) -> "SandboxResourceSync":
+        from blindpay.resources.sandbox import create_sandbox_resource_sync
+
+        return create_sandbox_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResourceSync":
