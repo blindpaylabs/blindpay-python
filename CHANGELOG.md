@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.3.0...v1.4.0) (2026-04-14)
+
+
+### Features
+
+* stricter prompt for lint/type checks + auto-fix CI failures on api-sync PRs ([599b5f8](https://github.com/blindpaylabs/blindpay-python/commit/599b5f84ac10102120432b505a669b2175abf934))
+
+
+### Bug Fixes
+
+* add id-token: write permission for claude-code-action ([80ba72f](https://github.com/blindpaylabs/blindpay-python/commit/80ba72f6cc9901e224ebcaa6883ead0fa2e0c765))
+* allow bash/file tools and skip PR when no changes ([d8580c6](https://github.com/blindpaylabs/blindpay-python/commit/d8580c674ec1be8f3e88bc05e1edb744757273c3))
+* exclude workflow files from api-sync commits ([5c2efeb](https://github.com/blindpaylabs/blindpay-python/commit/5c2efebac06dc389dd64a741c704ccf6b0a4dd48))
+* fetch openapi.json from raw URL instead of artifact download ([048ebe3](https://github.com/blindpaylabs/blindpay-python/commit/048ebe3565bd1fafb6b266745a9bcd433337e021))
+* improve prompt to implement all endpoints for affected resources ([cc6f947](https://github.com/blindpaylabs/blindpay-python/commit/cc6f9470a31c71101fd7085fbb06b6df3f431acc))
+* read openapi spec from api-sync-data branch (no cross-repo auth) ([7dc51af](https://github.com/blindpaylabs/blindpay-python/commit/7dc51af4268275a529228697b604147c4e8b82f1))
+* remove invalid model input from claude-code-action ([625cc91](https://github.com/blindpaylabs/blindpay-python/commit/625cc91255aa2637f42cb7536d69ecd8a0ae0008))
+* restore git remote auth before push ([8f2805a](https://github.com/blindpaylabs/blindpay-python/commit/8f2805a12dcf00e2b5fe343b0fdc6b07680940fe))
+* use claude_code_oauth_token instead of anthropic_api_key ([23d0512](https://github.com/blindpaylabs/blindpay-python/commit/23d0512050f61e48e5f1a7e96e7bce2ec6004a67))
+* use gh api with PAT to fetch openapi.json from private repo ([927d263](https://github.com/blindpaylabs/blindpay-python/commit/927d2633df52a2a086d8b4990e11e59d25c13a2d))
+* use PAT for push and PR to trigger CI workflows ([40a773b](https://github.com/blindpaylabs/blindpay-python/commit/40a773baee41c3ad58d066e25950d8ddbd64d842))
+
 ## [1.2.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.1.0...v1.2.0) (2025-11-12)
 
 
