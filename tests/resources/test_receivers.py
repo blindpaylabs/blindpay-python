@@ -15,7 +15,10 @@ class TestReceivers:
         mocked_data = [{"id": "re_000000000000"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": mocked_data, "pagination": {"has_more": False}}, "error": None}
+            mock_request.return_value = {
+                "data": {"data": mocked_data, "pagination": {"has_more": False}},
+                "error": None,
+            }
 
             response = await self.blindpay.receivers.list()
 
@@ -27,14 +30,15 @@ class TestReceivers:
         mocked_data = [{"id": "re_000000000000"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": mocked_data, "pagination": {"has_more": False}}, "error": None}
+            mock_request.return_value = {
+                "data": {"data": mocked_data, "pagination": {"has_more": False}},
+                "error": None,
+            }
 
             response = await self.blindpay.receivers.list({"status": "approved", "limit": "10"})
 
             assert response["error"] is None
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
 
     @pytest.mark.asyncio
     async def test_create(self):
@@ -298,9 +302,7 @@ class TestReceivers:
 
             assert response["error"] is None
             assert response["data"] == mocked_limits
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/limits/receivers/re_000000000000"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/receivers/re_000000000000")
 
     @pytest.mark.asyncio
     async def test_get_limit_increase_requests(self):
@@ -372,7 +374,10 @@ class TestReceiversSync:
         mocked_data = [{"id": "re_000000000000"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": mocked_data, "pagination": {"has_more": False}}, "error": None}
+            mock_request.return_value = {
+                "data": {"data": mocked_data, "pagination": {"has_more": False}},
+                "error": None,
+            }
 
             response = self.blindpay.receivers.list()
 
@@ -383,14 +388,15 @@ class TestReceiversSync:
         mocked_data = [{"id": "re_000000000000"}]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": mocked_data, "pagination": {"has_more": False}}, "error": None}
+            mock_request.return_value = {
+                "data": {"data": mocked_data, "pagination": {"has_more": False}},
+                "error": None,
+            }
 
             response = self.blindpay.receivers.list({"status": "approved", "limit": "10"})
 
             assert response["error"] is None
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
 
     def test_create(self):
         mocked_response = {"id": "re_000000000000"}
@@ -600,9 +606,7 @@ class TestReceiversSync:
 
             assert response["error"] is None
             assert response["data"] == mocked_limits
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/limits/receivers/re_000000000000"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/receivers/re_000000000000")
 
     def test_get_limit_increase_requests(self):
         mocked_requests = [
