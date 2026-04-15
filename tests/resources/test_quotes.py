@@ -22,6 +22,7 @@ class TestQuotes:
             "sender_amount": 1010,
             "partner_fee_amount": 150,
             "flat_fee": 50,
+            "billing_fee_amount": None,
             "contract": {
                 "abi": [{}],
                 "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
@@ -127,6 +128,7 @@ class TestQuotesSync:
             "sender_amount": 1010,
             "partner_fee_amount": 150,
             "flat_fee": 50,
+            "billing_fee_amount": None,
             "contract": {
                 "abi": [{}],
                 "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",

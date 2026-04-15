@@ -16,11 +16,14 @@ class PayerRules(TypedDict, total=False):
     pix_allowed_tax_ids: List[str]
 
 
-class CreatePayinQuoteInput(TypedDict):
+class _CreatePayinQuoteInputRequired(TypedDict):
     currency_type: CurrencyType
     payment_method: PaymentMethod
     request_amount: int
     token: StablecoinToken
+
+
+class CreatePayinQuoteInput(_CreatePayinQuoteInputRequired, total=False):
     blockchain_wallet_id: Optional[str]
     wallet_id: Optional[str]
     cover_fees: Optional[bool]
