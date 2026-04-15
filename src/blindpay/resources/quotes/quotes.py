@@ -9,6 +9,7 @@ from ...types import (
     CurrencyType,
     Network,
     StablecoinToken,
+    TransactionDocumentType,
 )
 
 
@@ -35,6 +36,9 @@ class CreateQuoteInput(TypedDict):
     cover_fees: Optional[bool]
     description: Optional[str]
     partner_fee_id: Optional[str]
+    transaction_document_file: Optional[str]
+    transaction_document_id: Optional[str]
+    transaction_document_type: Optional[TransactionDocumentType]
 
 
 class CreateQuoteResponse(TypedDict):
@@ -54,7 +58,7 @@ class CreateQuoteResponse(TypedDict):
 
 class GetFxRateInput(TypedDict):
     currency_type: CurrencyType
-    from_currency: StablecoinToken  # 'from' is reserved in Python
+    from_currency: Currency  # 'from' is reserved in Python
     to: Currency
     request_amount: int
 
