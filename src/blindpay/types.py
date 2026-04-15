@@ -369,12 +369,12 @@ RecipientRelationship = Literal[
     "first_party",
     "employee",
     "independent_contractor",
-    "vendor_supplier",
-    "client_customer",
-    "subsidiary_affiliate",
-    "joint_venture_partner",
-    "landlord_property_manager",
-    "government_agency",
+    "vendor_or_supplier",
+    "subsidiary_or_affiliate",
+    "merchant_or_partner",
+    "customer",
+    "landlord",
+    "family",
     "other",
 ]
 

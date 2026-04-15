@@ -120,22 +120,40 @@ class AuthorizeStellarTokenResponse(TypedDict):
     transaction_hash: str
 
 
+class CreatePayoutResponse(TypedDict):
+    id: str
+    status: TransactionStatus
+    sender_wallet_address: str
+    billing_fee_amount: Optional[float]
+    transaction_fee_amount: Optional[float]
+    partner_fee: Optional[int]
+    tracking_complete: TrackingComplete
+    tracking_payment: TrackingPayment
+    tracking_transaction: TrackingTransaction
+    tracking_partner_fee: Optional[TrackingPartnerFee]
+    tracking_liquidity: Optional[TrackingLiquidity]
+    tracking_documents: Optional[TrackingPartnerFee]
+    receiver_id: Optional[str]
+    bank_account_id: Optional[str]
+    offramp_wallet_id: Optional[str]
+
+
 class CreateStellarPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
     signed_transaction: Optional[str]
 
 
-class CreateStellarPayoutResponse(TypedDict):
-    id: str
-    status: TransactionStatus
+CreateStellarPayoutResponse = CreatePayoutResponse
+
+
+class CreateSolanaPayoutInput(TypedDict):
+    quote_id: str
     sender_wallet_address: str
-    tracking_complete: Optional[TrackingComplete]
-    tracking_payment: Optional[TrackingPayment]
-    tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    tracking_liquidity: Optional[TrackingLiquidity]
-    receiver_id: str
+    signed_transaction: Optional[str]
+
+
+CreateSolanaPayoutResponse = CreatePayoutResponse
 
 
 class CreateEvmPayoutInput(TypedDict):
@@ -143,16 +161,7 @@ class CreateEvmPayoutInput(TypedDict):
     sender_wallet_address: str
 
 
-class CreateEvmPayoutResponse(TypedDict):
-    id: str
-    status: TransactionStatus
-    sender_wallet_address: str
-    tracking_complete: Optional[TrackingComplete]
-    tracking_payment: Optional[TrackingPayment]
-    tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    tracking_liquidity: Optional[TrackingLiquidity]
-    receiver_id: str
+CreateEvmPayoutResponse = CreatePayoutResponse
 
 
 class SubmitPayoutDocumentsInput(TypedDict):
@@ -164,7 +173,7 @@ class SubmitPayoutDocumentsInput(TypedDict):
 
 
 class SubmitPayoutDocumentsResponse(TypedDict):
-    id: str
+    success: bool
 
 
 class PayoutsResource:
@@ -201,6 +210,9 @@ class PayoutsResource:
 
     async def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+
+    async def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
 
     async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
@@ -247,6 +259,9 @@ class PayoutsResourceSync:
 
     def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+
+    def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
 
     def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)

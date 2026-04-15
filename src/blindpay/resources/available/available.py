@@ -8,7 +8,11 @@ from ...types import BlindpayApiResponse, Rail
 BankDetailKey = Literal[
     "type",
     "name",
+    "status",
+    "recipient_relationship",
+    "swift_payment_code",
     "pix_key",
+    "force_cpf_cnpj",
     "beneficiary_name",
     "routing_number",
     "account_number",
@@ -22,6 +26,10 @@ BankDetailKey = Literal[
     "postal_code",
     "checkbook_account_id",
     "checkbook_user_key",
+    "onemoney_external_account_id",
+    "pix_safe_bank_code",
+    "pix_safe_branch_code",
+    "pix_safe_cpf_cnpj",
     "spei_protocol",
     "spei_institution_code",
     "spei_clabe",
@@ -54,6 +62,10 @@ BankDetailKey = Literal[
     "swift_intermediary_bank_account_number_iban",
     "swift_intermediary_bank_name",
     "swift_intermediary_bank_country",
+    "business_industry",
+    "phone_number",
+    "tax_id",
+    "date_of_birth",
 ]
 
 
@@ -68,7 +80,7 @@ class BankDetail(TypedDict):
     regex: str
     key: BankDetailKey
     items: Optional[List[BankDetailItem]]
-    required: bool
+    required: Optional[bool]
 
 
 class RailInfo(TypedDict):
@@ -96,8 +108,8 @@ GetSwiftCodeBankDetailsResponse = List[SwiftCodeBankDetail]
 
 
 class NaicsCode(TypedDict):
-    code: str
-    title: str
+    label: str
+    value: str
 
 
 GetNaicsCodesResponse = List[NaicsCode]

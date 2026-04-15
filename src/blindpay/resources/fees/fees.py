@@ -7,17 +7,33 @@ from ...types import BlindpayApiResponse
 
 
 class FeeOptions(TypedDict):
-    payin_flat: float
-    payin_percentage: float
-    payout_flat: float
-    payout_percentage: float
+    payin_flat: int
+    payin_percentage: int
+    payout_flat: int
+    payout_percentage: int
 
 
 class FeesResponse(TypedDict):
-    ach: Optional[FeeOptions]
-    domestic_wire: Optional[FeeOptions]
-    pix: Optional[FeeOptions]
-    solana: Optional[FeeOptions]
+    id: str
+    instance_id: str
+    ach: FeeOptions
+    domestic_wire: FeeOptions
+    rtp: FeeOptions
+    international_swift: FeeOptions
+    pix: FeeOptions
+    pix_safe: FeeOptions
+    ach_colombia: FeeOptions
+    transfers_3: FeeOptions
+    spei: FeeOptions
+    tron: FeeOptions
+    ethereum: FeeOptions
+    polygon: FeeOptions
+    base: FeeOptions
+    arbitrum: FeeOptions
+    stellar: FeeOptions
+    solana: FeeOptions
+    created_at: Optional[str]
+    updated_at: Optional[str]
 
 
 class FeesResource:

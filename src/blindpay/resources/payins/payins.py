@@ -1,4 +1,4 @@
-from typing import List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict
 from urllib.parse import urlencode
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
@@ -64,31 +64,39 @@ class Payin(TypedDict):
     status: TransactionStatus
     payin_quote_id: str
     instance_id: str
-    tracking_transaction: Optional[TrackingTransaction]
-    tracking_payment: Optional[TrackingPayment]
-    tracking_complete: Optional[TrackingComplete]
+    partner_fee: Optional[int]
+    tracking_transaction: TrackingTransaction
+    tracking_payment: TrackingPayment
+    tracking_complete: TrackingComplete
     tracking_partner_fee: Optional[TrackingPartnerFee]
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     image_url: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     legal_name: Optional[str]
     type: str
     payment_method: str
-    sender_amount: float
-    receiver_amount: float
+    sender_amount: Optional[float]
+    receiver_amount: Optional[float]
     token: StablecoinToken
-    partner_fee_amount: float
-    total_fee_amount: float
-    commercial_quotation: float
-    blindpay_quotation: float
+    partner_fee_amount: Optional[float]
+    total_fee_amount: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
     currency: str
-    billing_fee: float
+    billing_fee_amount: Optional[float]
+    transaction_fee_amount: Optional[float]
+    is_otc: Optional[bool]
+    payer_rules: Optional[Dict[str, Any]]
     name: str
-    address: str
+    address: Optional[str]
     network: Network
-    blindpay_bank_details: BankDetails
+    blindpay_bank_details: Optional[BankDetails]
+    pse_payment_link: Optional[str]
+    pse_full_name: Optional[str]
+    pse_tax_id: Optional[str]
+    pse_document_type: Optional[str]
 
 
 class ListPayinsInput(PaginationParams):
@@ -125,40 +133,7 @@ class GetPayinTrackingTransaction(TypedDict):
     description: str
 
 
-class GetPayinTrackResponse(TypedDict):
-    receiver_id: str
-    id: str
-    pix_code: str
-    memo_code: str
-    clabe: str
-    status: str
-    payin_quote_id: str
-    instance_id: str
-    tracking_transaction: TrackingTransaction
-    tracking_payment: TrackingPayment
-    tracking_complete: TrackingComplete
-    tracking_partner_fee: TrackingPartnerFee
-    created_at: str
-    updated_at: str
-    image_url: str
-    first_name: str
-    last_name: str
-    legal_name: str
-    type: str
-    payment_method: str
-    sender_amount: float
-    receiver_amount: float
-    token: StablecoinToken
-    partner_fee_amount: float
-    total_fee_amount: float
-    commercial_quotation: float
-    blindpay_quotation: float
-    currency: str
-    billing_fee: float
-    name: str
-    address: str
-    network: Network
-    blindpay_bank_details: BankDetails
+GetPayinTrackResponse = Payin
 
 
 class ExportPayinsInput(TypedDict):
@@ -176,13 +151,18 @@ class CreateEvmPayinResponse(TypedDict):
     pix_code: Optional[str]
     memo_code: Optional[str]
     clabe: Optional[str]
-    tracking_complete: Optional[TrackingComplete]
-    tracking_payment: Optional[TrackingPayment]
-    tracking_transaction: Optional[TrackingTransaction]
+    partner_fee: Optional[int]
+    tracking_complete: TrackingComplete
+    tracking_payment: TrackingPayment
+    tracking_transaction: TrackingTransaction
     tracking_partner_fee: Optional[TrackingPartnerFee]
+    billing_fee_amount: Optional[float]
+    transaction_fee_amount: Optional[float]
     blindpay_bank_details: BankDetails
-    receiver_id: str
-    receiver_amount: float
+    receiver_id: Optional[str]
+    receiver_amount: Optional[float]
+    payment_method: Optional[str]
+    sender_amount: Optional[float]
 
 
 class PayinsResource:
@@ -205,6 +185,9 @@ class PayinsResource:
         filtered_params = {k: v for k, v in params.items() if v is not None}
         query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
         return await self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
+
+    async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        return await self._client.get(f"/e/payins/{payin_id}")
 
     async def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})

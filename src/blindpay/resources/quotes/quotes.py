@@ -9,7 +9,6 @@ from ...types import (
     CurrencyType,
     Network,
     StablecoinToken,
-    TransactionDocumentType,
 )
 
 
@@ -30,36 +29,34 @@ class Contract(TypedDict):
 class CreateQuoteInput(TypedDict):
     bank_account_id: str
     currency_type: CurrencyType
-    network: Optional[Network]
-    request_amount: float
-    token: Optional[StablecoinToken]
+    request_amount: int
+    network: Network
+    token: StablecoinToken
     cover_fees: Optional[bool]
     description: Optional[str]
     partner_fee_id: Optional[str]
-    transaction_document_file: Optional[str]
-    transaction_document_id: Optional[str]
-    transaction_document_type: TransactionDocumentType
 
 
 class CreateQuoteResponse(TypedDict):
     id: str
-    expires_at: int
-    commercial_quotation: float
-    blindpay_quotation: float
-    receiver_amount: float
-    sender_amount: float
-    partner_fee_amount: float
-    flat_fee: float
-    contract: Contract
-    receiver_local_amount: float
-    description: str
+    expires_at: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: Optional[float]
+    sender_amount: Optional[float]
+    partner_fee_amount: Optional[float]
+    flat_fee: Optional[float]
+    billing_fee_amount: Optional[float]
+    contract: Optional[Contract]
+    receiver_local_amount: Optional[float]
+    description: Optional[str]
 
 
 class GetFxRateInput(TypedDict):
     currency_type: CurrencyType
-    from_currency: Currency  # 'from' is reserved in Python
+    from_currency: StablecoinToken  # 'from' is reserved in Python
     to: Currency
-    request_amount: float
+    request_amount: int
 
 
 class GetFxRateResponse(TypedDict):

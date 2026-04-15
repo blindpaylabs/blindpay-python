@@ -1,56 +1,127 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 from urllib.parse import urlencode
 
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BlindpayApiResponse, Currency, PaginationMetadata, PaginationParams, TransactionStatus
+from ...types import (
+    BlindpayApiResponse,
+    Network,
+    PaginationMetadata,
+    PaginationParams,
+    StablecoinToken,
+    TransactionStatus,
+)
+
+TransferTrackingStep = Literal["processing", "on_hold", "pending_review", "completed"]
 
 
-class TransferTrackingStep(TypedDict):
-    status: str
-    date: Optional[str]
+class TrackingBridgeSwap(TypedDict):
+    step: TransferTrackingStep
+    transaction_hash: Optional[str]
+    gas_fee: Optional[str]
+    completed_at: Optional[str]
+    error_message: Optional[str]
 
 
-class TransferQuote(TypedDict):
-    id: str
-    amount: float
-    currency: Currency
-    fee_amount: float
-    source_wallet_id: str
-    destination_wallet_id: str
+class TrackingPaymaster(TypedDict):
+    step: TransferTrackingStep
+    transaction_hash: Optional[str]
+    gas_fee: Optional[str]
+    completed_at: Optional[str]
+    error_message: Optional[str]
+
+
+class TrackingTransactionMonitoring(TypedDict):
+    step: TransferTrackingStep
+    blockchain_screening: Optional[float]
+    risk_score: Optional[float]
+    completed_at: Optional[str]
+
+
+class TrackingTransferComplete(TypedDict):
+    step: TransferTrackingStep
+    transaction_hash: Optional[str]
+    gas_fee: Optional[str]
+    completed_at: Optional[str]
+    error_message: Optional[str]
+
+
+class TrackingTransferPartnerFee(TypedDict):
+    step: TransferTrackingStep
+    transaction_hash: Optional[str]
+    gas_fee: Optional[str]
+    completed_at: Optional[str]
+    error_message: Optional[str]
 
 
 class Transfer(TypedDict):
     id: str
-    instance_id: str
     status: TransactionStatus
-    quote_id: str
-    source_wallet_id: str
-    destination_wallet_id: str
-    amount: float
-    currency: Currency
-    tracking_transaction: TransferTrackingStep
-    tracking_transaction_monitoring: TransferTrackingStep
-    tracking_complete: TransferTrackingStep
-    created_at: str
-    updated_at: str
+    transfer_quote_id: str
+    instance_id: str
+    tracking_transaction_monitoring: TrackingTransactionMonitoring
+    tracking_paymaster: TrackingPaymaster
+    tracking_bridge_swap: TrackingBridgeSwap
+    tracking_complete: TrackingTransferComplete
+    tracking_partner_fee: TrackingTransferPartnerFee
+    created_at: Optional[str]
+    updated_at: Optional[str]
+    image_url: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    legal_name: Optional[str]
+    wallet_id: str
+    sender_token: StablecoinToken
+    sender_amount: float
+    receiver_amount: float
+    receiver_network: Network
+    receiver_token: StablecoinToken
+    receiver_wallet_address: str
+    partner_fee_amount: Optional[float]
+    external_id: Optional[str]
+    receiver_id: str
+    address: Optional[str]
+    network: Network
 
 
 class CreateTransferQuoteInput(TypedDict):
-    source_wallet_id: str
-    destination_wallet_id: str
-    amount: float
+    wallet_id: str
+    amount_reference: Literal["sender", "receiver"]
+    request_amount: int
+    sender_token: StablecoinToken
+    receiver_wallet_address: str
+    receiver_token: StablecoinToken
+    receiver_network: Network
+    cover_fees: Optional[bool]
+    partner_fee_id: Optional[str]
 
 
-CreateTransferQuoteResponse = TransferQuote
+class CreateTransferQuoteResponse(TypedDict):
+    id: str
+    expires_at: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: Optional[float]
+    sender_amount: Optional[float]
+    partner_fee_amount: Optional[float]
+    flat_fee: Optional[float]
 
 
 class CreateTransferInput(TypedDict):
-    quote_id: str
+    transfer_quote_id: str
 
 
-CreateTransferResponse = Transfer
+class CreateTransferResponse(TypedDict):
+    id: str
+    status: TransactionStatus
+    tracking_bridge_swap: TrackingBridgeSwap
+    tracking_complete: TrackingTransferComplete
+    tracking_paymaster: TrackingPaymaster
+    tracking_transaction_monitoring: TrackingTransactionMonitoring
+    tracking_partner_fee: TrackingTransferPartnerFee
+
+
 GetTransferResponse = Transfer
 
 

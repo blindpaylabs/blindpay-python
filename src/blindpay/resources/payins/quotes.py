@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import TypedDict
 
@@ -7,10 +7,9 @@ from ...types import (
     BlindpayApiResponse,
     Currency,
     CurrencyType,
+    PaymentMethod,
     StablecoinToken,
 )
-
-PaymentMethod = Literal["ach", "wire", "pix", "spei"]
 
 
 class PayerRules(TypedDict, total=False):
@@ -18,32 +17,36 @@ class PayerRules(TypedDict, total=False):
 
 
 class CreatePayinQuoteInput(TypedDict):
-    blockchain_wallet_id: str
     currency_type: CurrencyType
     payment_method: PaymentMethod
-    request_amount: float
+    request_amount: int
     token: StablecoinToken
-    cover_fees: bool
+    blockchain_wallet_id: Optional[str]
+    wallet_id: Optional[str]
+    cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
-    payer_rules: PayerRules
+    payer_rules: Optional[PayerRules]
+    is_otc: Optional[bool]
 
 
 class CreatePayinQuoteResponse(TypedDict):
     id: str
-    expires_at: int
-    commercial_quotation: float
-    blindpay_quotation: float
-    receiver_amount: float
-    sender_amount: float
+    expires_at: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: Optional[float]
+    sender_amount: Optional[float]
     partner_fee_amount: Optional[float]
     flat_fee: Optional[float]
+    billing_fee_amount: Optional[float]
+    is_otc: Optional[bool]
 
 
 class GetPayinFxRateInput(TypedDict):
     currency_type: CurrencyType
-    from_currency: Currency  # 'from' is a reserved keyword in Python
-    to: Currency
-    request_amount: float
+    from_currency: Union[StablecoinToken, Currency]  # 'from' is a reserved keyword in Python
+    to: Union[StablecoinToken, Currency]
+    request_amount: int
 
 
 class GetPayinFxRateResponse(TypedDict):

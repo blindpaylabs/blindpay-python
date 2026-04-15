@@ -15,6 +15,7 @@ from ...types import (
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 AchCopDocument = Literal["CC", "CE", "NIT", "PASS", "PEP"]
+BankAccountStatus = Literal["verifying", "approved", "rejected", "deprecated"]
 OfframpNetwork = Literal["tron"]
 PixType = Literal["pix"]
 TransfersBitsoType = Literal["transfers_bitso"]
@@ -84,26 +85,24 @@ class BankAccount(TypedDict):
     swift_intermediary_bank_country: Optional[Country]
     tron_wallet_hash: Optional[str]
     offramp_wallets: Optional[List[OfframpWallet]]
-    created_at: str
+    status: Optional[BankAccountStatus]
+    recipient_relationship: Optional[RecipientRelationship]
+    swift_payment_code: Optional[str]
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
+    pix_safe_bank_code: Optional[str]
+    pix_safe_branch_code: Optional[str]
+    pix_safe_cpf_cnpj: Optional[str]
+    created_at: Optional[str]
 
 
 class ListBankAccountsResponse(TypedDict):
     data: List[BankAccount]
 
 
-class GetBankAccountResponse(TypedDict):
-    id: str
-    receiver_id: str
-    account_holder_name: str
-    account_number: str
-    routing_number: str
-    account_type: BankAccountType
-    bank_name: str
-    swift_code: Optional[str]
-    iban: Optional[str]
-    is_primary: bool
-    created_at: str
-    updated_at: str
+GetBankAccountResponse = BankAccount
 
 
 class CreatePixInput(TypedDict):
