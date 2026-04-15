@@ -517,7 +517,7 @@ class TestPayouts:
             )
 
             assert response["error"] is None
-            assert response["data"] == mocked_stellar_payout
+            assert response["data"] == mocked_stellar_payout  # type: ignore[comparison-overlap]
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/payouts/stellar",
@@ -580,7 +580,7 @@ class TestPayouts:
             )
 
             assert response["error"] is None
-            assert response["data"] == mocked_evm_payout
+            assert response["data"] == mocked_evm_payout  # type: ignore[comparison-overlap]
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/payouts/evm",
@@ -1097,7 +1097,7 @@ class TestPayoutsSync:
             )
 
             assert response["error"] is None
-            assert response["data"] == mocked_stellar_payout
+            assert response["data"] == mocked_stellar_payout  # type: ignore[comparison-overlap]
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/payouts/stellar",
@@ -1159,7 +1159,7 @@ class TestPayoutsSync:
             )
 
             assert response["error"] is None
-            assert response["data"] == mocked_evm_payout
+            assert response["data"] == mocked_evm_payout  # type: ignore[comparison-overlap]
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/payouts/evm",
