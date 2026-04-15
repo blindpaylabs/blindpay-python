@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Optional
 from urllib.parse import urlencode
 
 from typing_extensions import TypedDict
@@ -6,121 +6,54 @@ from typing_extensions import TypedDict
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
-    Network,
+    Currency,
     PaginationMetadata,
     PaginationParams,
-    StablecoinToken,
     TransactionStatus,
 )
 
-TransferTrackingStep = Literal["processing", "on_hold", "pending_review", "completed"]
 
-
-class TrackingBridgeSwap(TypedDict):
-    step: TransferTrackingStep
-    transaction_hash: Optional[str]
-    gas_fee: Optional[str]
-    completed_at: Optional[str]
-    error_message: Optional[str]
-
-
-class TrackingPaymaster(TypedDict):
-    step: TransferTrackingStep
-    transaction_hash: Optional[str]
-    gas_fee: Optional[str]
-    completed_at: Optional[str]
-    error_message: Optional[str]
-
-
-class TrackingTransactionMonitoring(TypedDict):
-    step: TransferTrackingStep
-    blockchain_screening: Optional[float]
-    risk_score: Optional[float]
-    completed_at: Optional[str]
-
-
-class TrackingTransferComplete(TypedDict):
-    step: TransferTrackingStep
-    transaction_hash: Optional[str]
-    gas_fee: Optional[str]
-    completed_at: Optional[str]
-    error_message: Optional[str]
-
-
-class TrackingTransferPartnerFee(TypedDict):
-    step: TransferTrackingStep
-    transaction_hash: Optional[str]
-    gas_fee: Optional[str]
-    completed_at: Optional[str]
-    error_message: Optional[str]
+class TrackingStep(TypedDict):
+    status: str
+    date: Optional[str]
 
 
 class Transfer(TypedDict):
     id: str
-    status: TransactionStatus
-    transfer_quote_id: str
     instance_id: str
-    tracking_transaction_monitoring: TrackingTransactionMonitoring
-    tracking_paymaster: TrackingPaymaster
-    tracking_bridge_swap: TrackingBridgeSwap
-    tracking_complete: TrackingTransferComplete
-    tracking_partner_fee: TrackingTransferPartnerFee
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
-    wallet_id: str
-    sender_token: StablecoinToken
-    sender_amount: float
-    receiver_amount: float
-    receiver_network: Network
-    receiver_token: StablecoinToken
-    receiver_wallet_address: str
-    partner_fee_amount: Optional[float]
-    external_id: Optional[str]
-    receiver_id: str
-    address: Optional[str]
-    network: Network
+    status: TransactionStatus
+    quote_id: str
+    source_wallet_id: str
+    destination_wallet_id: str
+    amount: float
+    currency: Currency
+    tracking_transaction: TrackingStep
+    tracking_transaction_monitoring: TrackingStep
+    tracking_complete: TrackingStep
+    created_at: str
+    updated_at: str
 
 
 class CreateTransferQuoteInput(TypedDict):
-    wallet_id: str
-    amount_reference: Literal["sender", "receiver"]
-    request_amount: int
-    sender_token: StablecoinToken
-    receiver_wallet_address: str
-    receiver_token: StablecoinToken
-    receiver_network: Network
-    cover_fees: Optional[bool]
-    partner_fee_id: Optional[str]
+    source_wallet_id: str
+    destination_wallet_id: str
+    amount: float
 
 
 class CreateTransferQuoteResponse(TypedDict):
     id: str
-    expires_at: Optional[float]
-    commercial_quotation: Optional[float]
-    blindpay_quotation: Optional[float]
-    receiver_amount: Optional[float]
-    sender_amount: Optional[float]
-    partner_fee_amount: Optional[float]
-    flat_fee: Optional[float]
+    amount: float
+    currency: Currency
+    fee_amount: float
+    source_wallet_id: str
+    destination_wallet_id: str
 
 
 class CreateTransferInput(TypedDict):
-    transfer_quote_id: str
+    quote_id: str
 
 
-class CreateTransferResponse(TypedDict):
-    id: str
-    status: TransactionStatus
-    tracking_bridge_swap: TrackingBridgeSwap
-    tracking_complete: TrackingTransferComplete
-    tracking_paymaster: TrackingPaymaster
-    tracking_transaction_monitoring: TrackingTransactionMonitoring
-    tracking_partner_fee: TrackingTransferPartnerFee
-
+CreateTransferResponse = Transfer
 
 GetTransferResponse = Transfer
 
