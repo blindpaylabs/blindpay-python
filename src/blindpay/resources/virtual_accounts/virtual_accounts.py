@@ -76,7 +76,9 @@ class VirtualAccountsResource:
     async def list(self, receiver_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
 
-    async def update(self, receiver_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput) -> BlindpayApiResponse[None]:
+    async def update(
+        self, receiver_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput
+    ) -> BlindpayApiResponse[None]:
         return await self._client.put(
             f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}", data
         )
@@ -102,7 +104,9 @@ class VirtualAccountsResourceSync:
     def list(self, receiver_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
 
-    def update(self, receiver_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput) -> BlindpayApiResponse[None]:
+    def update(
+        self, receiver_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput
+    ) -> BlindpayApiResponse[None]:
         return self._client.put(
             f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}", data
         )
