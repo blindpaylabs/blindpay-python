@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.4.0...v1.5.0) (2026-04-16)
+
+
+### Features
+
+* use detailed changelog instead of path list for SDK sync ([3228d34](https://github.com/blindpaylabs/blindpay-python/commit/3228d34fec7bc0c558fce8c56c04ae1ea95c1228))
+
+
+### Bug Fixes
+
+* remove openapi.json fetch from api-sync-data ([67a30a3](https://github.com/blindpaylabs/blindpay-python/commit/67a30a3d8399d9bd7265fb3e9f813cc1e2c0760c))
+* remove openapi.json reference from prompt, use self-contained changelog only ([89d9389](https://github.com/blindpaylabs/blindpay-python/commit/89d9389f770318736c66e1175e75ac046e3ae9cb))
+
 ## [1.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.3.0...v1.4.0) (2026-04-16)
 
 
