@@ -3,6 +3,8 @@ from .payouts import (
     AuthorizeStellarTokenResponse,
     CreateEvmPayoutInput,
     CreateEvmPayoutResponse,
+    CreateSolanaPayoutInput,
+    CreateSolanaPayoutResponse,
     CreateStellarPayoutInput,
     CreateStellarPayoutResponse,
     ExportPayoutsInput,
@@ -30,6 +32,8 @@ __all__ = [
     "AuthorizeStellarTokenResponse",
     "CreateStellarPayoutInput",
     "CreateStellarPayoutResponse",
+    "CreateSolanaPayoutInput",
+    "CreateSolanaPayoutResponse",
     "CreateEvmPayoutInput",
     "CreateEvmPayoutResponse",
 ]

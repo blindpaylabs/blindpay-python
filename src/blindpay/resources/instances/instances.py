@@ -22,9 +22,11 @@ class InstanceMember(TypedDict):
 GetInstanceMembersResponse = List[InstanceMember]
 
 
-class UpdateInstanceInput(TypedDict):
+class UpdateInstanceInput(TypedDict, total=False):
     name: str
     receiver_invite_redirect_url: Optional[str]
+    email_notifications: bool
+    require_passkey: bool
 
 
 class UpdateInstanceMemberRoleInput(TypedDict):

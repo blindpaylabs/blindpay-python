@@ -1,7 +1,9 @@
-from typing_extensions import Optional, TypedDict
+from typing import List, Optional
+
+from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BlindpayApiResponse, StablecoinToken
+from ...types import BankingPartner, BlindpayApiResponse, StablecoinToken
 
 
 class BankAccountInfo(TypedDict):
@@ -36,12 +38,18 @@ class VirtualAccount(TypedDict):
     us: USBankDetails
     token: StablecoinToken
     blockchain_wallet_id: str
+    banking_partner: Optional[BankingPartner]
+    kyc_status: Optional[str]
+    blockchain_wallet: Optional[str]
 
 
-class CreateVirtualAccountInput(TypedDict):
+class CreateVirtualAccountInput(TypedDict, total=False):
     receiver_id: str
     blockchain_wallet_id: str
     token: StablecoinToken
+    banking_partner: BankingPartner
+    sole_proprietor_doc_type: str
+    sole_proprietor_doc_file: str
 
 
 CreateVirtualAccountResponse = VirtualAccount
@@ -50,8 +58,13 @@ GetVirtualAccountResponse = VirtualAccount
 
 class UpdateVirtualAccountInput(TypedDict):
     receiver_id: str
+    virtual_account_id: str
     blockchain_wallet_id: str
     token: StablecoinToken
+
+
+class ListVirtualAccountsResponse(TypedDict):
+    data: List[VirtualAccount]
 
 
 class VirtualAccountsResource:
@@ -59,11 +72,15 @@ class VirtualAccountsResource:
         self._instance_id = instance_id
         self._client = client
 
+    async def list(self, receiver_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
+
     async def update(self, data: UpdateVirtualAccountInput) -> BlindpayApiResponse[None]:
         receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        virtual_account_id = data["virtual_account_id"]
+        payload = {k: v for k, v in data.items() if k not in ["receiver_id", "virtual_account_id"]}
         return await self._client.put(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts", payload
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}", payload
         )
 
     async def create(self, data: CreateVirtualAccountInput) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
@@ -73,8 +90,10 @@ class VirtualAccountsResource:
             f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts", payload
         )
 
-    async def get(self, receiver_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
+    async def get(self, receiver_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}"
+        )
 
 
 class VirtualAccountsResourceSync:
@@ -82,18 +101,26 @@ class VirtualAccountsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
+    def list(self, receiver_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
+
     def update(self, data: UpdateVirtualAccountInput) -> BlindpayApiResponse[None]:
         receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return self._client.put(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts", payload)
+        virtual_account_id = data["virtual_account_id"]
+        payload = {k: v for k, v in data.items() if k not in ["receiver_id", "virtual_account_id"]}
+        return self._client.put(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}", payload
+        )
 
     def create(self, data: CreateVirtualAccountInput) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts", payload)
 
-    def get(self, receiver_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts")
+    def get(self, receiver_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/receivers/{receiver_id}/virtual-accounts/{virtual_account_id}"
+        )
 
 
 def create_virtual_accounts_resource(instance_id: str, client: InternalApiClient) -> VirtualAccountsResource:

@@ -35,12 +35,19 @@ class Transfer(TypedDict):
     tracking_complete: TransferTrackingStep
     created_at: str
     updated_at: str
+    external_id: Optional[str]
+    receiver_network: Optional[str]
+    receiver_token: Optional[str]
+    sender_token: Optional[str]
 
 
-class CreateTransferQuoteInput(TypedDict):
+class CreateTransferQuoteInput(TypedDict, total=False):
     source_wallet_id: str
     destination_wallet_id: str
     amount: float
+    amount_reference: str
+    cover_fees: bool
+    partner_fee_id: str
 
 
 CreateTransferQuoteResponse = TransferQuote

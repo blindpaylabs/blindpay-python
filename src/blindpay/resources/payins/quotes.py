@@ -17,7 +17,7 @@ class PayerRules(TypedDict, total=False):
     pix_allowed_tax_ids: List[str]
 
 
-class CreatePayinQuoteInput(TypedDict):
+class CreatePayinQuoteInput(TypedDict, total=False):
     blockchain_wallet_id: str
     currency_type: CurrencyType
     payment_method: PaymentMethod
@@ -26,6 +26,8 @@ class CreatePayinQuoteInput(TypedDict):
     cover_fees: bool
     partner_fee_id: Optional[str]
     payer_rules: PayerRules
+    is_otc: bool
+    wallet_id: str
 
 
 class CreatePayinQuoteResponse(TypedDict):
