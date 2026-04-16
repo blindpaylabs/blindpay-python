@@ -1,10 +1,11 @@
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 from ._internal.exceptions import BlindPayError
 from .client import BlindPay, BlindPaySync
 from .types import (
     AccountClass,
     BankAccountType,
+    BankingPartner,
     BlindpayApiResponse,
     BlindpayErrorResponse,
     BlindpaySuccessResponse,
@@ -18,6 +19,8 @@ from .types import (
     PaymentMethod,
     Rail,
     RecipientRelationship,
+    RecipientRelationshipNew,
+    SoleProprietorDocType,
     StablecoinToken,
     TrackingComplete,
     TrackingLiquidity,
@@ -34,6 +37,7 @@ __all__ = [
     "BlindPayError",
     "AccountClass",
     "BankAccountType",
+    "BankingPartner",
     "Country",
     "Currency",
     "CurrencyType",
@@ -41,6 +45,8 @@ __all__ = [
     "PaymentMethod",
     "Rail",
     "RecipientRelationship",
+    "RecipientRelationshipNew",
+    "SoleProprietorDocType",
     "StablecoinToken",
     "TransactionDocumentType",
     "TransactionStatus",

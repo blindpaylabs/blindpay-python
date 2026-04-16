@@ -9,6 +9,8 @@ from ...types import (
     Country,
     PaginationMetadata,
     PaginationParams,
+    RecipientRelationshipNew,
+    SoleProprietorDocType,
 )
 
 IndividualType = Literal["individual"]
@@ -91,38 +93,71 @@ BusinessIndustry = Literal[
     "112120",
     "113310",
     "115114",
-    "541211",
-    "541810",
-    "541430",
-    "541715",
-    "541930",
-    "561422",
-    "561311",
-    "561612",
-    "561740",
-    "561730",
+    "211120",
+    "212114",
+    "213112",
+    "221310",
     "236115",
     "236220",
     "237310",
     "238210",
-    "811111",
-    "812111",
-    "812112",
-    "532111",
-    "624410",
-    "541922",
-    "811210",
-    "812199",
-    "611110",
-    "611310",
-    "611410",
-    "611710",
-    "211120",
-    "212114",
-    "221310",
-    "562111",
-    "562920",
-    "213112",
+    "311421",
+    "312130",
+    "313110",
+    "315990",
+    "322220",
+    "325412",
+    "334111",
+    "334118",
+    "334210",
+    "336110",
+    "336390",
+    "337121",
+    "339112",
+    "339910",
+    "339920",
+    "339930",
+    "423110",
+    "423430",
+    "423510",
+    "423690",
+    "423830",
+    "423840",
+    "423940",
+    "424210",
+    "424410",
+    "424480",
+    "424690",
+    "424990",
+    "444110",
+    "445110",
+    "445320",
+    "449210",
+    "454110",
+    "455110",
+    "455219",
+    "456110",
+    "457110",
+    "458110",
+    "458210",
+    "458310",
+    "459120",
+    "459210",
+    "481111",
+    "483111",
+    "484121",
+    "485210",
+    "488510",
+    "493110",
+    "511210",
+    "512250",
+    "513130",
+    "516120",
+    "517111",
+    "517112",
+    "517410",
+    "518210",
+    "519130",
     "522110",
     "522210",
     "522320",
@@ -130,51 +165,6 @@ BusinessIndustry = Literal[
     "523940",
     "523999",
     "524113",
-    "813110",
-    "813211",
-    "813219",
-    "551112",
-    "721110",
-    "722511",
-    "722513",
-    "561510",
-    "713110",
-    "713210",
-    "712110",
-    "711110",
-    "711211",
-    "621111",
-    "621210",
-    "622110",
-    "623110",
-    "621511",
-    "623220",
-    "541940",
-    "621399",
-    "621910",
-    "541110",
-    "311421",
-    "337121",
-    "322220",
-    "339920",
-    "334210",
-    "339930",
-    "312130",
-    "334111",
-    "334118",
-    "325412",
-    "339112",
-    "336110",
-    "336390",
-    "315990",
-    "313110",
-    "339910",
-    "516120",
-    "513130",
-    "512250",
-    "519130",
-    "711410",
-    "711510",
     "531110",
     "531120",
     "531130",
@@ -184,52 +174,75 @@ BusinessIndustry = Literal[
     "531312",
     "531320",
     "531390",
-    "454110",
-    "445110",
-    "455110",
-    "457110",
-    "449210",
-    "444110",
-    "459210",
-    "459120",
-    "445320",
-    "458110",
-    "458210",
-    "458310",
-    "455219",
-    "424210",
-    "456110",
+    "532111",
+    "541110",
+    "541211",
+    "541214",
+    "541330",
+    "541430",
     "541511",
     "541512",
     "541519",
-    "518210",
-    "511210",
-    "517111",
-    "517112",
-    "517410",
-    "481111",
-    "483111",
-    "485210",
-    "488510",
-    "484121",
-    "493110",
-    "423430",
-    "423690",
-    "423110",
-    "423830",
-    "423840",
-    "423510",
-    "424690",
-    "424990",
-    "424410",
-    "424480",
-    "423940",
     "541611",
     "541618",
-    "541330",
+    "541715",
+    "541810",
+    "541922",
+    "541930",
+    "541940",
     "541990",
-    "541214",
+    "551112",
+    "561311",
+    "561422",
     "561499",
+    "561510",
+    "561612",
+    "561730",
+    "561740",
+    "562111",
+    "562920",
+    "611110",
+    "611310",
+    "611410",
+    "611710",
+    "621111",
+    "621210",
+    "621399",
+    "621511",
+    "621910",
+    "622110",
+    "623110",
+    "623220",
+    "624410",
+    "711110",
+    "711211",
+    "711410",
+    "711510",
+    "712110",
+    "713110",
+    "713210",
+    "721110",
+    "722511",
+    "722513",
+    "811111",
+    "811210",
+    "812111",
+    "812112",
+    "812199",
+    "813110",
+    "813211",
+    "813219",
+    "dapp",
+    "exchange",
+    "gambling",
+    "gaming",
+    "infra",
+    "marketplace",
+    "neo_bank",
+    "other",
+    "saas",
+    "social",
+    "wallet",
 ]
 
 EstimatedAnnualRevenue = Literal[
@@ -359,6 +372,8 @@ class IndividualWithStandardKYC(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class IndividualWithEnhancedKYC(TypedDict):
@@ -414,6 +429,8 @@ class IndividualWithEnhancedKYC(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class BusinessWithStandardKYB(TypedDict):
@@ -464,6 +481,8 @@ class BusinessWithStandardKYB(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
@@ -493,6 +512,8 @@ class CreateIndividualWithStandardKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -532,6 +553,8 @@ class CreateIndividualWithEnhancedKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -571,6 +594,8 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     source_of_wealth: Optional[SourceOfWealth]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateBusinessWithStandardKYBResponse(TypedDict):
@@ -667,6 +692,8 @@ class UpdateReceiverInput(TypedDict):
     source_of_wealth: Optional[SourceOfWealth]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationshipNew]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class PayinLimit(TypedDict):
