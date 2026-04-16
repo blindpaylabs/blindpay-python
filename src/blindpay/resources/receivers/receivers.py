@@ -493,6 +493,13 @@ class CreateIndividualWithStandardKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    is_fbo: Optional[bool]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -532,6 +539,12 @@ class CreateIndividualWithEnhancedKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -571,6 +584,7 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     source_of_wealth: Optional[SourceOfWealth]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
+    is_fbo: Optional[bool]
 
 
 class CreateBusinessWithStandardKYBResponse(TypedDict):

@@ -591,6 +591,71 @@ class TestPayouts:
             )
 
 
+    @pytest.mark.asyncio
+    async def test_create_solana_payout(self):
+        mocked_solana_payout = {
+            "id": "pa_000000000000",
+            "status": "processing",
+            "sender_wallet_address": "0x123...890",
+            "tracking_complete": {
+                "step": "on_hold",
+                "status": "tokens_refunded",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_payment": {
+                "step": "on_hold",
+                "provider_name": "blockchain",
+                "provider_transaction_id": "0x123...890",
+                "provider_status": "canceled",
+                "estimated_time_of_arrival": "5_min",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_transaction": {
+                "step": "processing",
+                "status": "failed",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_partner_fee": {
+                "step": "on_hold",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_liquidity": {
+                "step": "processing",
+                "provider_transaction_id": "0x123...890",
+                "provider_status": "deposited",
+                "estimated_time_of_arrival": "1_business_day",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "receiver_id": "re_000000000000",
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_solana_payout, "error": None}
+
+            response = await self.blindpay.payouts.create_solana(
+                {
+                    "quote_id": "qu_000000000000",
+                    "sender_wallet_address": "0x123...890",
+                    "signed_transaction": "signed_solana_tx",
+                }
+            )
+
+            assert response["error"] is None
+            assert response["data"] == mocked_solana_payout
+            mock_request.assert_called_once_with(
+                "POST",
+                "/instances/in_000000000000/payouts/solana",
+                {
+                    "quote_id": "qu_000000000000",
+                    "sender_wallet_address": "0x123...890",
+                    "signed_transaction": "signed_solana_tx",
+                },
+            )
+
+
 class TestPayoutsSync:
     @pytest.fixture(autouse=True)
     def setup(self):
@@ -1166,5 +1231,68 @@ class TestPayoutsSync:
                 {
                     "quote_id": "qu_000000000000",
                     "sender_wallet_address": "0x123...890",
+                },
+            )
+
+    def test_create_solana_payout(self):
+        mocked_solana_payout = {
+            "id": "pa_000000000000",
+            "status": "processing",
+            "sender_wallet_address": "0x123...890",
+            "tracking_complete": {
+                "step": "on_hold",
+                "status": "tokens_refunded",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_payment": {
+                "step": "on_hold",
+                "provider_name": "blockchain",
+                "provider_transaction_id": "0x123...890",
+                "provider_status": "canceled",
+                "estimated_time_of_arrival": "5_min",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_transaction": {
+                "step": "processing",
+                "status": "failed",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_partner_fee": {
+                "step": "on_hold",
+                "transaction_hash": "0x123...890",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "tracking_liquidity": {
+                "step": "processing",
+                "provider_transaction_id": "0x123...890",
+                "provider_status": "deposited",
+                "estimated_time_of_arrival": "1_business_day",
+                "completed_at": "2011-10-05T14:48:00.000Z",
+            },
+            "receiver_id": "re_000000000000",
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_solana_payout, "error": None}
+
+            response = self.blindpay.payouts.create_solana(
+                {
+                    "quote_id": "qu_000000000000",
+                    "sender_wallet_address": "0x123...890",
+                    "signed_transaction": "signed_solana_tx",
+                }
+            )
+
+            assert response["error"] is None
+            assert response["data"] == mocked_solana_payout
+            mock_request.assert_called_once_with(
+                "POST",
+                "/instances/in_000000000000/payouts/solana",
+                {
+                    "quote_id": "qu_000000000000",
+                    "sender_wallet_address": "0x123...890",
+                    "signed_transaction": "signed_solana_tx",
                 },
             )

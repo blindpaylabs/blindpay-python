@@ -27,6 +27,33 @@ from ...types import (
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 
+PayoutStatus = Literal["processing", "failed", "refunded", "completed", "on_hold"]
+
+PayoutPaymentMethod = Literal[
+    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
+]
+
+TrackingDocumentsStatus = Literal["waiting_documents", "compliance_reviewing"]
+
+
+class TrackingDocuments(TypedDict):
+    step: str
+    status: Optional[str]
+    reviewed_by: Optional[str]
+    completed_at: Optional[str]
+
+
+class JpmTrackData(TypedDict):
+    jpm_trace_number: Optional[str]
+    jpm_processing_status: Optional[str]
+    extended_tracking_status: Optional[str]
+    jpm_reference_number: Optional[str]
+    uetr: Optional[str]
+    fed_imad: Optional[str]
+    payment_date: Optional[str]
+    payment_amount: Optional[str]
+    payment_currency: Optional[str]
+
 
 class Payout(TypedDict):
     receiver_id: str
@@ -36,11 +63,14 @@ class Payout(TypedDict):
     signed_transaction: str
     quote_id: str
     instance_id: str
+    partner_fee: Optional[int]
     tracking_transaction: TrackingTransaction
     tracking_payment: TrackingPayment
     tracking_liquidity: TrackingLiquidity
     tracking_complete: TrackingComplete
     tracking_partner_fee: TrackingPartnerFee
+    tracking_documents: Optional[TrackingDocuments]
+    jpm_track_data: Optional[JpmTrackData]
     created_at: str
     updated_at: str
     image_url: str
@@ -58,12 +88,16 @@ class Payout(TypedDict):
     total_fee_amount: float
     receiver_local_amount: float
     currency: Currency  # Excluding "USDT" | "USDB"
+    transaction_fee_amount: Optional[float]
     transaction_document_file: str
     transaction_document_type: TransactionDocumentType
     transaction_document_id: str
     name: str
     type: Rail
     pix_key: Optional[str]
+    pix_safe_bank_code: Optional[str]
+    pix_safe_branch_code: Optional[str]
+    pix_safe_cpf_cnpj: Optional[str]
     account_number: Optional[str]
     routing_number: Optional[str]
     country: Optional[Country]
@@ -96,6 +130,13 @@ class Payout(TypedDict):
 
 class ListPayoutsInput(PaginationParams, total=False):
     receiver_id: str
+    status: PayoutStatus
+    receiver_name: str
+    bank_account_id: str
+    country: str
+    payment_method: PayoutPaymentMethod
+    network: str
+    token: str
 
 
 class ListPayoutsResponse(TypedDict):
@@ -144,6 +185,24 @@ class CreateEvmPayoutInput(TypedDict):
 
 
 class CreateEvmPayoutResponse(TypedDict):
+    id: str
+    status: TransactionStatus
+    sender_wallet_address: str
+    tracking_complete: Optional[TrackingComplete]
+    tracking_payment: Optional[TrackingPayment]
+    tracking_transaction: Optional[TrackingTransaction]
+    tracking_partner_fee: Optional[TrackingPartnerFee]
+    tracking_liquidity: Optional[TrackingLiquidity]
+    receiver_id: str
+
+
+class CreateSolanaPayoutInput(TypedDict):
+    quote_id: str
+    sender_wallet_address: str
+    signed_transaction: Optional[str]
+
+
+class CreateSolanaPayoutResponse(TypedDict):
     id: str
     status: TransactionStatus
     sender_wallet_address: str
@@ -205,6 +264,9 @@ class PayoutsResource:
     async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
 
+    async def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+
     async def submit_documents(
         self, data: SubmitPayoutDocumentsInput
     ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
@@ -250,6 +312,9 @@ class PayoutsResourceSync:
 
     def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+
+    def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
 
     def submit_documents(self, data: SubmitPayoutDocumentsInput) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
