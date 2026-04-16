@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/blindpaylabs/blindpay-python/compare/v1.5.0...v1.5.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* complete API sync — all endpoints, fields, and methods ([#34](https://github.com/blindpaylabs/blindpay-python/issues/34)) ([7a0bf9e](https://github.com/blindpaylabs/blindpay-python/commit/7a0bf9e48507bfb3bd8fa0b32e2f3f5d05cda896))
+
 ## [1.5.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.4.0...v1.5.0) (2026-04-16)
 
 
