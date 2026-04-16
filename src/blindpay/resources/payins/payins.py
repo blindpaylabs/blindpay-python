@@ -89,6 +89,12 @@ class Payin(TypedDict):
     address: str
     network: Network
     blindpay_bank_details: BankDetails
+    is_otc: Optional[bool]
+    billing_fee_amount: Optional[str]
+    pse_document_type: Optional[str]
+    pse_full_name: Optional[str]
+    pse_payment_link: Optional[str]
+    pse_tax_id: Optional[str]
 
 
 class ListPayinsInput(PaginationParams):
@@ -205,6 +211,9 @@ class PayinsResource:
         filtered_params = {k: v for k, v in params.items() if v is not None}
         query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
         return await self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
+
+    async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        return await self._client.get(f"/e/payins/{payin_id}")
 
     async def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})

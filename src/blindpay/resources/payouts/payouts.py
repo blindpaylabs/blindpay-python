@@ -155,6 +155,23 @@ class CreateEvmPayoutResponse(TypedDict):
     receiver_id: str
 
 
+class CreateSolanaPayoutInput(TypedDict):
+    quote_id: str
+    sender_wallet_address: str
+
+
+class CreateSolanaPayoutResponse(TypedDict):
+    id: str
+    status: TransactionStatus
+    sender_wallet_address: str
+    tracking_complete: Optional[TrackingComplete]
+    tracking_payment: Optional[TrackingPayment]
+    tracking_transaction: Optional[TrackingTransaction]
+    tracking_partner_fee: Optional[TrackingPartnerFee]
+    tracking_liquidity: Optional[TrackingLiquidity]
+    receiver_id: str
+
+
 class SubmitPayoutDocumentsInput(TypedDict):
     payout_id: str
     transaction_document_type: TransactionDocumentType
@@ -205,6 +222,9 @@ class PayoutsResource:
     async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
 
+    async def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+
     async def submit_documents(
         self, data: SubmitPayoutDocumentsInput
     ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
@@ -250,6 +270,9 @@ class PayoutsResourceSync:
 
     def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
         return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+
+    def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
 
     def submit_documents(self, data: SubmitPayoutDocumentsInput) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
