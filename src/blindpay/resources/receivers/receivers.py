@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+from urllib.parse import urlencode
 
 from typing_extensions import Literal, TypedDict
 
@@ -6,6 +7,8 @@ from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
     Country,
+    PaginationMetadata,
+    PaginationParams,
 )
 
 IndividualType = Literal["individual"]
@@ -62,6 +65,212 @@ LimitIncreaseRequestSupportingDocumentType = Literal[
     "business_tax_return",
 ]
 
+ReceiverStatus = Literal["verifying", "approved", "rejected", "deprecated", "pending_review"]
+
+AccountPurpose = Literal[
+    "charitable_donations",
+    "ecommerce_retail_payments",
+    "investment_purposes",
+    "business_expenses",
+    "payments_to_friends_or_family_abroad",
+    "personal_or_living_expenses",
+    "protect_wealth",
+    "purchase_goods_and_services",
+    "receive_payments_for_goods_and_services",
+    "tax_optimization",
+    "third_party_money_transmission",
+    "payroll",
+    "treasury_management",
+    "other",
+]
+
+ReceiverBusinessType = Literal["corporation", "llc", "partnership", "sole_proprietorship", "trust", "non_profit"]
+
+BusinessIndustry = Literal[
+    "111998",
+    "112120",
+    "113310",
+    "115114",
+    "541211",
+    "541810",
+    "541430",
+    "541715",
+    "541930",
+    "561422",
+    "561311",
+    "561612",
+    "561740",
+    "561730",
+    "236115",
+    "236220",
+    "237310",
+    "238210",
+    "811111",
+    "812111",
+    "812112",
+    "532111",
+    "624410",
+    "541922",
+    "811210",
+    "812199",
+    "611110",
+    "611310",
+    "611410",
+    "611710",
+    "211120",
+    "212114",
+    "221310",
+    "562111",
+    "562920",
+    "213112",
+    "522110",
+    "522210",
+    "522320",
+    "523150",
+    "523940",
+    "523999",
+    "524113",
+    "813110",
+    "813211",
+    "813219",
+    "551112",
+    "721110",
+    "722511",
+    "722513",
+    "561510",
+    "713110",
+    "713210",
+    "712110",
+    "711110",
+    "711211",
+    "621111",
+    "621210",
+    "622110",
+    "623110",
+    "621511",
+    "623220",
+    "541940",
+    "621399",
+    "621910",
+    "541110",
+    "311421",
+    "337121",
+    "322220",
+    "339920",
+    "334210",
+    "339930",
+    "312130",
+    "334111",
+    "334118",
+    "325412",
+    "339112",
+    "336110",
+    "336390",
+    "315990",
+    "313110",
+    "339910",
+    "516120",
+    "513130",
+    "512250",
+    "519130",
+    "711410",
+    "711510",
+    "531110",
+    "531120",
+    "531130",
+    "531190",
+    "531210",
+    "531311",
+    "531312",
+    "531320",
+    "531390",
+    "454110",
+    "445110",
+    "455110",
+    "457110",
+    "449210",
+    "444110",
+    "459210",
+    "459120",
+    "445320",
+    "458110",
+    "458210",
+    "458310",
+    "455219",
+    "424210",
+    "456110",
+    "541511",
+    "541512",
+    "541519",
+    "518210",
+    "511210",
+    "517111",
+    "517112",
+    "517410",
+    "481111",
+    "483111",
+    "485210",
+    "488510",
+    "484121",
+    "493110",
+    "423430",
+    "423690",
+    "423110",
+    "423830",
+    "423840",
+    "423510",
+    "424690",
+    "424990",
+    "424410",
+    "424480",
+    "423940",
+    "541611",
+    "541618",
+    "541330",
+    "541990",
+    "541214",
+    "561499",
+]
+
+EstimatedAnnualRevenue = Literal[
+    "0_99999",
+    "100000_999999",
+    "1000000_9999999",
+    "10000000_49999999",
+    "50000000_249999999",
+    "2500000000_plus",
+]
+
+SourceOfWealth = Literal[
+    "business_dividends_or_profits",
+    "investments",
+    "asset_sales",
+    "client_investor_contributions",
+    "gambling",
+    "charitable_contributions",
+    "inheritance",
+    "affiliate_or_royalty_income",
+]
+
+TaxType = Literal["SSN", "ITIN"]
+
+AmlStatus = Literal["clear", "hit", "error"]
+
+
+class FraudWarning(TypedDict):
+    id: Optional[str]
+    name: Optional[str]
+    operation: Optional[str]
+    score: Optional[float]
+
+
+class AmlHits(TypedDict):
+    has_sanction_match: bool
+    has_pep_match: bool
+    has_watchlist_match: bool
+    has_crimelist_match: bool
+    has_adversemedia_match: bool
+
 
 class KycWarning(TypedDict):
     code: Optional[str]
@@ -97,6 +306,9 @@ class Owner(TypedDict):
     id_doc_back_file: Optional[str]
     proof_of_address_doc_type: ProofOfAddressDocType
     proof_of_address_doc_file: str
+    ownership_percentage: Optional[int]
+    title: Optional[str]
+    tax_type: Optional[TaxType]
 
 
 class IndividualWithStandardKYC(TypedDict):
@@ -131,6 +343,22 @@ class IndividualWithStandardKYC(TypedDict):
     created_at: str
     updated_at: str
     limit: TransactionLimit
+    fraud_warnings: Optional[List[FraudWarning]]
+    selfie_file: Optional[str]
+    is_fbo: Optional[bool]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
+    occupation: Optional[str]
+    external_id: Optional[str]
+    aml_status: Optional[AmlStatus]
+    aml_hits: Optional[AmlHits]
+    is_tos_accepted: Optional[bool]
 
 
 class IndividualWithEnhancedKYC(TypedDict):
@@ -170,6 +398,22 @@ class IndividualWithEnhancedKYC(TypedDict):
     created_at: str
     updated_at: str
     limit: TransactionLimit
+    fraud_warnings: Optional[List[FraudWarning]]
+    selfie_file: Optional[str]
+    is_fbo: Optional[bool]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
+    occupation: Optional[str]
+    external_id: Optional[str]
+    aml_status: Optional[AmlStatus]
+    aml_hits: Optional[AmlHits]
+    is_tos_accepted: Optional[bool]
 
 
 class BusinessWithStandardKYB(TypedDict):
@@ -205,6 +449,21 @@ class BusinessWithStandardKYB(TypedDict):
     created_at: str
     updated_at: str
     limit: TransactionLimit
+    fraud_warnings: Optional[List[FraudWarning]]
+    selfie_file: Optional[str]
+    is_fbo: Optional[bool]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
+    occupation: Optional[str]
+    aml_status: Optional[AmlStatus]
+    aml_hits: Optional[AmlHits]
+    is_tos_accepted: Optional[bool]
 
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
@@ -228,6 +487,12 @@ class CreateIndividualWithStandardKYCInput(TypedDict):
     state_province_region: str
     tax_id: str
     tos_id: str
+    ip_address: Optional[str]
+    image_url: Optional[str]
+    selfie_file: Optional[str]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    occupation: Optional[str]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -260,6 +525,13 @@ class CreateIndividualWithEnhancedKYCInput(TypedDict):
     state_province_region: str
     tax_id: str
     tos_id: str
+    ip_address: Optional[str]
+    image_url: Optional[str]
+    selfie_file: Optional[str]
+    is_fbo: Optional[bool]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    occupation: Optional[str]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -286,6 +558,19 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     tax_id: str
     tos_id: str
     website: Optional[str]
+    ip_address: Optional[str]
+    image_url: Optional[str]
+    phone_number: Optional[str]
+    selfie_file: Optional[str]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
+    occupation: Optional[str]
 
 
 class CreateBusinessWithStandardKYBResponse(TypedDict):
@@ -293,6 +578,21 @@ class CreateBusinessWithStandardKYBResponse(TypedDict):
 
 
 ListReceiversResponse = List[Union[IndividualWithStandardKYC, IndividualWithEnhancedKYC, BusinessWithStandardKYB]]
+
+
+class ListReceiversPaginatedResponse(TypedDict):
+    data: List[Union[IndividualWithStandardKYC, IndividualWithEnhancedKYC, BusinessWithStandardKYB]]
+    pagination: PaginationMetadata
+
+
+class ListReceiversInput(PaginationParams, total=False):
+    full_name: str
+    receiver_name: str
+    status: ReceiverStatus
+    receiver_id: str
+    bank_account_id: str
+    country: str
+
 
 GetReceiverResponse = Union[IndividualWithStandardKYC, IndividualWithEnhancedKYC, BusinessWithStandardKYB]
 
@@ -314,6 +614,11 @@ class OwnerUpdate(TypedDict):
     id_doc_type: IdentificationDocument
     id_doc_front_file: str
     id_doc_back_file: Optional[str]
+    ownership_percentage: Optional[int]
+    title: Optional[str]
+    tax_type: Optional[TaxType]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_address_doc_file: Optional[str]
 
 
 class UpdateReceiverInput(TypedDict):
@@ -352,6 +657,16 @@ class UpdateReceiverInput(TypedDict):
     purpose_of_transactions_explanation: Optional[str]
     external_id: Optional[str]
     tos_id: Optional[str]
+    selfie_file: Optional[str]
+    account_purpose: Optional[AccountPurpose]
+    account_purpose_other: Optional[str]
+    business_type: Optional[ReceiverBusinessType]
+    business_description: Optional[str]
+    business_industry: Optional[BusinessIndustry]
+    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
+    source_of_wealth: Optional[SourceOfWealth]
+    publicly_traded: Optional[bool]
+    occupation: Optional[str]
 
 
 class PayinLimit(TypedDict):
@@ -407,8 +722,15 @@ class ReceiversResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[ListReceiversResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/receivers")
+    async def list(
+        self, params: Optional[ListReceiversInput] = None
+    ) -> BlindpayApiResponse[Union[ListReceiversResponse, ListReceiversPaginatedResponse]]:
+        query_string = ""
+        if params:
+            filtered_params = {k: v for k, v in params.items() if v is not None}
+            if filtered_params:
+                query_string = f"?{urlencode(filtered_params)}"
+        return await self._client.get(f"/instances/{self._instance_id}/receivers{query_string}")
 
     async def create_individual_with_standard_kyc(
         self, data: CreateIndividualWithStandardKYCInput
@@ -462,8 +784,15 @@ class ReceiversResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[ListReceiversResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/receivers")
+    def list(
+        self, params: Optional[ListReceiversInput] = None
+    ) -> BlindpayApiResponse[Union[ListReceiversResponse, ListReceiversPaginatedResponse]]:
+        query_string = ""
+        if params:
+            filtered_params = {k: v for k, v in params.items() if v is not None}
+            if filtered_params:
+                query_string = f"?{urlencode(filtered_params)}"
+        return self._client.get(f"/instances/{self._instance_id}/receivers{query_string}")
 
     def create_individual_with_standard_kyc(
         self, data: CreateIndividualWithStandardKYCInput

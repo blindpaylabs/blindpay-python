@@ -172,6 +172,24 @@ class TestReceivers:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers")
 
     @pytest.mark.asyncio
+    async def test_list_receivers_with_params(self):
+        mocked_data = {
+            "data": [{"id": "re_Euw7HN4OdxPn"}],
+            "pagination": {"has_more": False, "next_page": None, "prev_page": None},
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_data, "error": None}
+
+            response = await self.blindpay.receivers.list({"status": "approved", "limit": "10"})
+
+            assert response["error"] is None
+            assert response["data"] == mocked_data
+            mock_request.assert_called_once_with(
+                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
+            )
+
+    @pytest.mark.asyncio
     async def test_create_individual_with_standard_kyc(self):
         mocked_receiver = {
             "id": "re_Euw7HN4OdxPn",
@@ -707,6 +725,23 @@ class TestReceiversSync:
             assert response["error"] is None
             assert response["data"] == mocked_receivers
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers")
+
+    def test_list_receivers_with_params(self):
+        mocked_data = {
+            "data": [{"id": "re_Euw7HN4OdxPn"}],
+            "pagination": {"has_more": False, "next_page": None, "prev_page": None},
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_data, "error": None}
+
+            response = self.blindpay.receivers.list({"status": "approved", "limit": "10"})
+
+            assert response["error"] is None
+            assert response["data"] == mocked_data
+            mock_request.assert_called_once_with(
+                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
+            )
 
     def test_create_individual_with_standard_kyc(self):
         mocked_receiver = {
