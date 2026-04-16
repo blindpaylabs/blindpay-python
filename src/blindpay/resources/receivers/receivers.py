@@ -230,6 +230,17 @@ BusinessIndustry = Literal[
     "541990",
     "541214",
     "561499",
+    "dapp",
+    "exchange",
+    "gambling",
+    "gaming",
+    "infra",
+    "marketplace",
+    "neo_bank",
+    "other",
+    "saas",
+    "social",
+    "wallet",
 ]
 
 EstimatedAnnualRevenue = Literal[

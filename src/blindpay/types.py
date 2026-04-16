@@ -379,3 +379,5 @@ RecipientRelationship = Literal[
 ]
 
 PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+
+BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
