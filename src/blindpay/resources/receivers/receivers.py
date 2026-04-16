@@ -9,6 +9,7 @@ from ...types import (
     Country,
     PaginationMetadata,
     PaginationParams,
+    RecipientRelationship,
 )
 
 IndividualType = Literal["individual"]
@@ -230,6 +231,17 @@ BusinessIndustry = Literal[
     "541990",
     "541214",
     "561499",
+    "dapp",
+    "exchange",
+    "gambling",
+    "gaming",
+    "infra",
+    "marketplace",
+    "neo_bank",
+    "other",
+    "saas",
+    "social",
+    "wallet",
 ]
 
 EstimatedAnnualRevenue = Literal[
@@ -255,6 +267,8 @@ SourceOfWealth = Literal[
 TaxType = Literal["SSN", "ITIN"]
 
 AmlStatus = Literal["clear", "hit", "error"]
+
+SoleProprietorDocType = Literal["bank_statement", "master_service_agreement", "salary_slip"]
 
 
 class FraudWarning(TypedDict):
@@ -359,6 +373,8 @@ class IndividualWithStandardKYC(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class IndividualWithEnhancedKYC(TypedDict):
@@ -414,6 +430,8 @@ class IndividualWithEnhancedKYC(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class BusinessWithStandardKYB(TypedDict):
@@ -464,6 +482,8 @@ class BusinessWithStandardKYB(TypedDict):
     aml_status: Optional[AmlStatus]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
@@ -493,6 +513,8 @@ class CreateIndividualWithStandardKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -532,6 +554,8 @@ class CreateIndividualWithEnhancedKYCInput(TypedDict):
     account_purpose: Optional[AccountPurpose]
     account_purpose_other: Optional[str]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -571,6 +595,8 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     source_of_wealth: Optional[SourceOfWealth]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class CreateBusinessWithStandardKYBResponse(TypedDict):
@@ -667,6 +693,8 @@ class UpdateReceiverInput(TypedDict):
     source_of_wealth: Optional[SourceOfWealth]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
+    recipient_relationship: Optional[RecipientRelationship]
+    sole_proprietor_doc_type: Optional[SoleProprietorDocType]
 
 
 class PayinLimit(TypedDict):

@@ -1,10 +1,11 @@
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 from ._internal.exceptions import BlindPayError
 from .client import BlindPay, BlindPaySync
 from .types import (
     AccountClass,
     BankAccountType,
+    BankingPartner,
     BlindpayApiResponse,
     BlindpayErrorResponse,
     BlindpaySuccessResponse,
@@ -34,6 +35,7 @@ __all__ = [
     "BlindPayError",
     "AccountClass",
     "BankAccountType",
+    "BankingPartner",
     "Country",
     "Currency",
     "CurrencyType",

@@ -376,6 +376,14 @@ RecipientRelationship = Literal[
     "landlord_property_manager",
     "government_agency",
     "other",
+    "customer",
+    "family",
+    "landlord",
+    "merchant_or_partner",
+    "subsidiary_or_affiliate",
+    "vendor_or_supplier",
 ]
 
 PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+
+BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
