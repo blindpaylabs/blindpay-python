@@ -590,7 +590,6 @@ class TestPayouts:
                 },
             )
 
-
     @pytest.mark.asyncio
     async def test_create_solana_payout(self):
         mocked_solana_payout = {
