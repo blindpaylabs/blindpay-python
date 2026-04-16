@@ -185,9 +185,7 @@ class TestReceivers:
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
 
     @pytest.mark.asyncio
     async def test_create_individual_with_standard_kyc(self):
@@ -739,9 +737,7 @@ class TestReceiversSync:
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers?status=approved&limit=10"
-            )
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
 
     def test_create_individual_with_standard_kyc(self):
         mocked_receiver = {
