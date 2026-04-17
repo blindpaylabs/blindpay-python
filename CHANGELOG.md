@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/blindpaylabs/blindpay-python/compare/v2.0.0...v2.0.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* add upload resource, remove TOS, fix member role field ([#38](https://github.com/blindpaylabs/blindpay-python/issues/38)) ([a833f53](https://github.com/blindpaylabs/blindpay-python/commit/a833f533e1627890498943ace88f2dea1969604f))
+
 ## [2.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.5.1...v2.0.0) (2026-04-17)
 
 
