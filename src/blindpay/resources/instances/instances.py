@@ -52,7 +52,7 @@ class InstancesResource:
         return await self._client.delete(f"/instances/{self._instance_id}/members/{member_id}")
 
     async def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
-        return await self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"role": role})
+        return await self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
 
 
 class InstancesResourceSync:
@@ -73,7 +73,7 @@ class InstancesResourceSync:
         return self._client.delete(f"/instances/{self._instance_id}/members/{member_id}")
 
     def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
-        return self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"role": role})
+        return self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
 
 
 def create_instances_resource(instance_id: str, client: InternalApiClient) -> InstancesResource:
