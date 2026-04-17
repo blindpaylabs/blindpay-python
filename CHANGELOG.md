@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v1.5.1...v2.0.0) (2026-04-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Transfer field names changed to match live API.
+    - source_wallet_id → wallet_id
+    - destination_wallet_id → removed
+    - amount → request_amount
+    - quote_id → transfer_quote_id
+    - Transfer response completely restructured
+
+### Features
+
+* rewrite transfers to match current API spec ([#36](https://github.com/blindpaylabs/blindpay-python/issues/36)) ([14083a8](https://github.com/blindpaylabs/blindpay-python/commit/14083a890fee663cdee10066c4d1d1b33e8148e9))
+
 ## [1.5.1](https://github.com/blindpaylabs/blindpay-python/compare/v1.5.0...v1.5.1) (2026-04-16)
 
 
