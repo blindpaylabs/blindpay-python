@@ -1,4 +1,5 @@
 from .transfers import (
+    AmountReference,
     CreateTransferInput,
     CreateTransferQuoteInput,
     CreateTransferQuoteResponse,
@@ -6,7 +7,6 @@ from .transfers import (
     GetTransferResponse,
     ListTransfersResponse,
     Transfer,
-    TransferQuote,
     TransfersResource,
     TransfersResourceSync,
     TransferTrackingStep,
@@ -19,8 +19,8 @@ __all__ = [
     "create_transfers_resource_sync",
     "TransfersResource",
     "TransfersResourceSync",
+    "AmountReference",
     "Transfer",
-    "TransferQuote",
     "TransferTrackingStep",
     "CreateTransferQuoteInput",
     "CreateTransferQuoteResponse",

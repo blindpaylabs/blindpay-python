@@ -14,11 +14,13 @@ class TestTransfers:
     async def test_create_transfer_quote(self):
         mocked_quote = {
             "id": "tq_000000000000",
-            "amount": 100.00,
-            "currency": "USD",
-            "fee_amount": 1.50,
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
+            "expires_at": 1700000000,
+            "commercial_quotation": 1.0,
+            "blindpay_quotation": 1.0,
+            "receiver_amount": 100.0,
+            "sender_amount": 100.5,
+            "flat_fee": 0.5,
+            "partner_fee_amount": None,
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -26,24 +28,32 @@ class TestTransfers:
 
             response = await self.blindpay.transfers.create_quote(
                 {
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "request_amount": 100,
+                    "amount_reference": "sender",
                 }
             )
 
             assert response["error"] is None
             assert response["data"] is not None
             assert response["data"]["id"] == "tq_000000000000"
-            assert response["data"]["amount"] == 100.00
-            assert response["data"]["fee_amount"] == 1.50
+            assert response["data"]["receiver_amount"] == 100.0
+            assert response["data"]["flat_fee"] == 0.5
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/transfer-quotes",
                 {
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "request_amount": 100,
+                    "amount_reference": "sender",
                 },
             )
 
@@ -53,14 +63,22 @@ class TestTransfers:
             "id": "tr_000000000000",
             "instance_id": "in_000000000000",
             "status": "processing",
-            "quote_id": "tq_000000000000",
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
-            "amount": 100.00,
-            "currency": "USD",
-            "tracking_transaction": {"status": "processing", "date": "2025-01-01T00:00:00Z"},
-            "tracking_transaction_monitoring": {"status": "processing", "date": None},
-            "tracking_complete": {"status": "processing", "date": None},
+            "transfer_quote_id": "tq_000000000000",
+            "wallet_id": "cw_source",
+            "sender_token": "USDC",
+            "sender_amount": 100.5,
+            "receiver_amount": 100.0,
+            "receiver_token": "USDC",
+            "receiver_network": "base",
+            "receiver_wallet_address": "0x1234567890abcdef",
+            "receiver_id": "rc_000000000000",
+            "address": "0x1234567890abcdef",
+            "network": "base",
+            "tracking_transaction_monitoring": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_paymaster": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_bridge_swap": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_complete": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_partner_fee": {"step": "pending", "estimated_time_of_arrival": None},
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
         }
@@ -68,17 +86,17 @@ class TestTransfers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_transfer, "error": None}
 
-            response = await self.blindpay.transfers.create({"quote_id": "tq_000000000000"})
+            response = await self.blindpay.transfers.create({"transfer_quote_id": "tq_000000000000"})
 
             assert response["error"] is None
             assert response["data"] is not None
             assert response["data"]["id"] == "tr_000000000000"
             assert response["data"]["status"] == "processing"
-            assert response["data"]["amount"] == 100.00
+            assert response["data"]["sender_amount"] == 100.5
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/transfers",
-                {"quote_id": "tq_000000000000"},
+                {"transfer_quote_id": "tq_000000000000"},
             )
 
     @pytest.mark.asyncio
@@ -87,14 +105,22 @@ class TestTransfers:
             "id": "tr_000000000000",
             "instance_id": "in_000000000000",
             "status": "completed",
-            "quote_id": "tq_000000000000",
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
-            "amount": 100.00,
-            "currency": "USD",
-            "tracking_transaction": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-            "tracking_transaction_monitoring": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-            "tracking_complete": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
+            "transfer_quote_id": "tq_000000000000",
+            "wallet_id": "cw_source",
+            "sender_token": "USDC",
+            "sender_amount": 100.5,
+            "receiver_amount": 100.0,
+            "receiver_token": "USDC",
+            "receiver_network": "base",
+            "receiver_wallet_address": "0x1234567890abcdef",
+            "receiver_id": "rc_000000000000",
+            "address": "0x1234567890abcdef",
+            "network": "base",
+            "tracking_transaction_monitoring": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_paymaster": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_bridge_swap": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_complete": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_partner_fee": {"step": "completed", "estimated_time_of_arrival": None},
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
         }
@@ -118,14 +144,22 @@ class TestTransfers:
                     "id": "tr_000000000000",
                     "instance_id": "in_000000000000",
                     "status": "completed",
-                    "quote_id": "tq_000000000000",
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
-                    "currency": "USD",
-                    "tracking_transaction": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-                    "tracking_transaction_monitoring": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-                    "tracking_complete": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
+                    "transfer_quote_id": "tq_000000000000",
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "sender_amount": 100.5,
+                    "receiver_amount": 100.0,
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_id": "rc_000000000000",
+                    "address": "0x1234567890abcdef",
+                    "network": "base",
+                    "tracking_transaction_monitoring": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_paymaster": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_bridge_swap": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_complete": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_partner_fee": {"step": "completed", "estimated_time_of_arrival": None},
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                 },
@@ -157,11 +191,13 @@ class TestTransfersSync:
     def test_create_transfer_quote(self):
         mocked_quote = {
             "id": "tq_000000000000",
-            "amount": 100.00,
-            "currency": "USD",
-            "fee_amount": 1.50,
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
+            "expires_at": 1700000000,
+            "commercial_quotation": 1.0,
+            "blindpay_quotation": 1.0,
+            "receiver_amount": 100.0,
+            "sender_amount": 100.5,
+            "flat_fee": 0.5,
+            "partner_fee_amount": None,
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -169,9 +205,13 @@ class TestTransfersSync:
 
             response = self.blindpay.transfers.create_quote(
                 {
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "request_amount": 100,
+                    "amount_reference": "sender",
                 }
             )
 
@@ -182,9 +222,13 @@ class TestTransfersSync:
                 "POST",
                 "/instances/in_000000000000/transfer-quotes",
                 {
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "request_amount": 100,
+                    "amount_reference": "sender",
                 },
             )
 
@@ -193,14 +237,22 @@ class TestTransfersSync:
             "id": "tr_000000000000",
             "instance_id": "in_000000000000",
             "status": "processing",
-            "quote_id": "tq_000000000000",
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
-            "amount": 100.00,
-            "currency": "USD",
-            "tracking_transaction": {"status": "processing", "date": "2025-01-01T00:00:00Z"},
-            "tracking_transaction_monitoring": {"status": "processing", "date": None},
-            "tracking_complete": {"status": "processing", "date": None},
+            "transfer_quote_id": "tq_000000000000",
+            "wallet_id": "cw_source",
+            "sender_token": "USDC",
+            "sender_amount": 100.5,
+            "receiver_amount": 100.0,
+            "receiver_token": "USDC",
+            "receiver_network": "base",
+            "receiver_wallet_address": "0x1234567890abcdef",
+            "receiver_id": "rc_000000000000",
+            "address": "0x1234567890abcdef",
+            "network": "base",
+            "tracking_transaction_monitoring": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_paymaster": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_bridge_swap": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_complete": {"step": "pending", "estimated_time_of_arrival": None},
+            "tracking_partner_fee": {"step": "pending", "estimated_time_of_arrival": None},
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
         }
@@ -208,7 +260,7 @@ class TestTransfersSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_transfer, "error": None}
 
-            response = self.blindpay.transfers.create({"quote_id": "tq_000000000000"})
+            response = self.blindpay.transfers.create({"transfer_quote_id": "tq_000000000000"})
 
             assert response["error"] is None
             assert response["data"] is not None
@@ -216,7 +268,7 @@ class TestTransfersSync:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/transfers",
-                {"quote_id": "tq_000000000000"},
+                {"transfer_quote_id": "tq_000000000000"},
             )
 
     def test_get_transfer(self):
@@ -224,14 +276,22 @@ class TestTransfersSync:
             "id": "tr_000000000000",
             "instance_id": "in_000000000000",
             "status": "completed",
-            "quote_id": "tq_000000000000",
-            "source_wallet_id": "cw_source",
-            "destination_wallet_id": "cw_dest",
-            "amount": 100.00,
-            "currency": "USD",
-            "tracking_transaction": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-            "tracking_transaction_monitoring": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-            "tracking_complete": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
+            "transfer_quote_id": "tq_000000000000",
+            "wallet_id": "cw_source",
+            "sender_token": "USDC",
+            "sender_amount": 100.5,
+            "receiver_amount": 100.0,
+            "receiver_token": "USDC",
+            "receiver_network": "base",
+            "receiver_wallet_address": "0x1234567890abcdef",
+            "receiver_id": "rc_000000000000",
+            "address": "0x1234567890abcdef",
+            "network": "base",
+            "tracking_transaction_monitoring": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_paymaster": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_bridge_swap": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_complete": {"step": "completed", "estimated_time_of_arrival": None},
+            "tracking_partner_fee": {"step": "completed", "estimated_time_of_arrival": None},
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
         }
@@ -253,14 +313,22 @@ class TestTransfersSync:
                     "id": "tr_000000000000",
                     "instance_id": "in_000000000000",
                     "status": "completed",
-                    "quote_id": "tq_000000000000",
-                    "source_wallet_id": "cw_source",
-                    "destination_wallet_id": "cw_dest",
-                    "amount": 100.00,
-                    "currency": "USD",
-                    "tracking_transaction": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-                    "tracking_transaction_monitoring": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
-                    "tracking_complete": {"status": "completed", "date": "2025-01-01T00:00:00Z"},
+                    "transfer_quote_id": "tq_000000000000",
+                    "wallet_id": "cw_source",
+                    "sender_token": "USDC",
+                    "sender_amount": 100.5,
+                    "receiver_amount": 100.0,
+                    "receiver_token": "USDC",
+                    "receiver_network": "base",
+                    "receiver_wallet_address": "0x1234567890abcdef",
+                    "receiver_id": "rc_000000000000",
+                    "address": "0x1234567890abcdef",
+                    "network": "base",
+                    "tracking_transaction_monitoring": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_paymaster": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_bridge_swap": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_complete": {"step": "completed", "estimated_time_of_arrival": None},
+                    "tracking_partner_fee": {"step": "completed", "estimated_time_of_arrival": None},
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                 },

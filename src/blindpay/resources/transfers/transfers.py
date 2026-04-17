@@ -1,60 +1,81 @@
 from typing import List, Optional
 from urllib.parse import urlencode
 
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BlindpayApiResponse, Currency, PaginationMetadata, PaginationParams, TransactionStatus
+from ...types import (
+    BlindpayApiResponse,
+    Network,
+    PaginationMetadata,
+    PaginationParams,
+    StablecoinToken,
+    TransactionStatus,
+)
+
+AmountReference = Literal["sender", "receiver"]
 
 
 class TransferTrackingStep(TypedDict):
-    status: str
-    date: Optional[str]
+    step: str
+    estimated_time_of_arrival: Optional[str]
 
 
-class TransferQuote(TypedDict):
+class CreateTransferQuoteInput(TypedDict, total=False):
+    wallet_id: str
+    sender_token: StablecoinToken
+    receiver_wallet_address: str
+    receiver_token: StablecoinToken
+    receiver_network: Network
+    request_amount: int
+    amount_reference: AmountReference
+    cover_fees: Optional[bool]
+    partner_fee_id: Optional[str]
+
+
+class CreateTransferQuoteResponse(TypedDict):
     id: str
-    amount: float
-    currency: Currency
-    fee_amount: float
-    source_wallet_id: str
-    destination_wallet_id: str
+    expires_at: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: float
+    sender_amount: float
+    flat_fee: float
+    partner_fee_amount: Optional[float]
+
+
+class CreateTransferInput(TypedDict):
+    transfer_quote_id: str
 
 
 class Transfer(TypedDict):
     id: str
     instance_id: str
     status: TransactionStatus
-    quote_id: str
-    source_wallet_id: str
-    destination_wallet_id: str
-    amount: float
-    currency: Currency
-    tracking_transaction: TransferTrackingStep
+    transfer_quote_id: str
+    wallet_id: str
+    sender_token: StablecoinToken
+    sender_amount: float
+    receiver_amount: float
+    receiver_token: StablecoinToken
+    receiver_network: Network
+    receiver_wallet_address: str
+    receiver_id: str
+    address: str
+    network: str
     tracking_transaction_monitoring: TransferTrackingStep
+    tracking_paymaster: TransferTrackingStep
+    tracking_bridge_swap: TransferTrackingStep
     tracking_complete: TransferTrackingStep
+    tracking_partner_fee: TransferTrackingStep
     created_at: str
     updated_at: str
+    image_url: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    legal_name: Optional[str]
+    partner_fee_amount: Optional[float]
     external_id: Optional[str]
-    receiver_network: Optional[str]
-    receiver_token: Optional[str]
-    sender_token: Optional[str]
-
-
-class CreateTransferQuoteInput(TypedDict, total=False):
-    source_wallet_id: str
-    destination_wallet_id: str
-    amount: float
-    amount_reference: str
-    cover_fees: bool
-    partner_fee_id: str
-
-
-CreateTransferQuoteResponse = TransferQuote
-
-
-class CreateTransferInput(TypedDict):
-    quote_id: str
 
 
 CreateTransferResponse = Transfer
