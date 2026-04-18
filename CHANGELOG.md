@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.0.1...v2.1.0) (2026-04-18)
+
+
+### Features
+
+* clear sync baseline when api-sync PR is merged ([729eb96](https://github.com/blindpaylabs/blindpay-python/commit/729eb96a7a683a28baa2dc1fd4c370e9e688d597))
+
+
+### Bug Fixes
+
+* restore TOS endpoints ([#43](https://github.com/blindpaylabs/blindpay-python/issues/43)) ([64d838e](https://github.com/blindpaylabs/blindpay-python/commit/64d838e60ef22643da31821f38469c3421528361))
+
 ## [2.0.1](https://github.com/blindpaylabs/blindpay-python/compare/v2.0.0...v2.0.1) (2026-04-17)
 
 
