@@ -9,6 +9,7 @@ from .payins import create_payin_quotes_resource, create_payins_resource
 from .payouts import create_payouts_resource
 from .quotes import create_quotes_resource
 from .receivers import create_receivers_resource
+from .terms_of_service import create_terms_of_service_resource, create_terms_of_service_resource_sync
 from .transfers import create_transfers_resource
 from .upload import create_upload_resource
 from .virtual_accounts import create_virtual_accounts_resource
@@ -28,6 +29,8 @@ __all__ = [
     "create_payouts_resource",
     "create_quotes_resource",
     "create_receivers_resource",
+    "create_terms_of_service_resource",
+    "create_terms_of_service_resource_sync",
     "create_transfers_resource",
     "create_upload_resource",
     "create_virtual_accounts_resource",
