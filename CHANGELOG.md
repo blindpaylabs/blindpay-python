@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/blindpaylabs/blindpay-python/compare/v2.1.0...v2.1.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* sanitize workflow inputs ([#44](https://github.com/blindpaylabs/blindpay-python/issues/44)) ([e4db01a](https://github.com/blindpaylabs/blindpay-python/commit/e4db01ac2b6094ba1bfc37e3c9fbb00b9c9bf087))
+
 ## [2.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.0.1...v2.1.0) (2026-04-18)
 
 
