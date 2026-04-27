@@ -1,9 +1,13 @@
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 from ._internal.exceptions import BlindPayError
 from .client import BlindPay, BlindPaySync
 from .types import (
     AccountClass,
+    ActorType,
+    AuditActor,
+    AuditLog,
+    AuditLogOut,
     BankAccountType,
     BankingPartner,
     BlindpayApiResponse,
@@ -14,6 +18,7 @@ from .types import (
     CurrencyType,
     ErrorResponse,
     Network,
+    Operation,
     PaginationMetadata,
     PaginationParams,
     PaymentMethod,
@@ -34,12 +39,17 @@ __all__ = [
     "BlindPaySync",
     "BlindPayError",
     "AccountClass",
+    "ActorType",
+    "AuditActor",
+    "AuditLog",
+    "AuditLogOut",
     "BankAccountType",
     "BankingPartner",
     "Country",
     "Currency",
     "CurrencyType",
     "Network",
+    "Operation",
     "PaymentMethod",
     "Rail",
     "RecipientRelationship",
