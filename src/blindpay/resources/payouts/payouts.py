@@ -92,6 +92,7 @@ class Payout(TypedDict):
     transfers_account: Optional[str]
     transfers_type: ArgentinaTransfers
     has_virtual_account: bool
+    partner_fee_id: Optional[str]
 
 
 class ListPayoutsInput(PaginationParams, total=False):

@@ -1,4 +1,4 @@
-from typing import Generic, Literal, TypeVar, Union
+from typing import Any, Dict, Generic, Literal, Optional, TypeVar, Union
 
 from typing_extensions import TypedDict
 
@@ -47,7 +47,7 @@ TransactionDocumentType = Literal[
 
 BankAccountType = Literal["checking", "savings"]
 
-Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
+Currency = Literal["USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
 Rail = Literal[
     "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
@@ -380,4 +380,40 @@ RecipientRelationship = Literal[
 
 BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp"]
+
+ActorType = Literal["api_key", "user"]
+
+Operation = Literal["create", "delete", "update"]
+
+
+class AuditActor(TypedDict):
+    id: str
+    type: ActorType
+    email: Optional[str]
+    name: Optional[str]
+
+
+class AuditLog(TypedDict):
+    id: str
+    instance_id: str
+    actor: AuditActor
+    operation: Operation
+    resource_type: str
+    resource_id: str
+    changes: Dict[str, Any]
+    ip_address: Optional[str]
+    user_agent: Optional[str]
+    timestamp: str
+    api_key_id: Optional[str]
+    user_id: Optional[str]
+    session_id: Optional[str]
+    request_id: str
+    endpoint: str
+    method: str
+    status_code: int
+    response_time_ms: float
+
+
+class AuditLogOut(TypedDict):
+    pass
