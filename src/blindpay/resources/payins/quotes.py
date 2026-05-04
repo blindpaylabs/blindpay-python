@@ -7,10 +7,9 @@ from ...types import (
     BlindpayApiResponse,
     Currency,
     CurrencyType,
+    PaymentMethod,
     StablecoinToken,
 )
-
-PaymentMethod = Literal["ach", "wire", "pix", "spei"]
 
 
 class PayerRules(TypedDict, total=False):

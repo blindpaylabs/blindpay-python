@@ -18,6 +18,7 @@ class FeesResponse(TypedDict):
     domestic_wire: Optional[FeeOptions]
     pix: Optional[FeeOptions]
     solana: Optional[FeeOptions]
+    ted: Optional[FeeOptions]
 
 
 class FeesResource:

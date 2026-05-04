@@ -3,7 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BankingPartner, BlindpayApiResponse, StablecoinToken
+from ...types import BankingPartner, BlindpayApiResponse, KycStatus, StablecoinToken
 
 
 class BankAccountInfo(TypedDict):
@@ -39,7 +39,7 @@ class VirtualAccount(TypedDict):
     token: StablecoinToken
     blockchain_wallet_id: str
     banking_partner: Optional[BankingPartner]
-    kyc_status: Optional[str]
+    kyc_status: Optional[KycStatus]
     blockchain_wallet: Optional[str]
 
 

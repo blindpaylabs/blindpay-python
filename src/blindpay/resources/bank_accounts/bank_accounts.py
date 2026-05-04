@@ -11,6 +11,7 @@ from ...types import (
     Rail,
     RecipientRelationship,
     SpeiProtocol,
+    SwiftPaymentCode,
 )
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
@@ -25,6 +26,7 @@ WireType = Literal["wire"]
 InternationalSwiftType = Literal["international_swift"]
 RtpType = Literal["rtp"]
 PixSafeType = Literal["pix_safe"]
+TedType = Literal["ted"]
 
 
 class OfframpWallet(TypedDict):
@@ -85,6 +87,9 @@ class BankAccount(TypedDict):
     tron_wallet_hash: Optional[str]
     offramp_wallets: Optional[List[OfframpWallet]]
     created_at: str
+    ted_bank_code: Optional[str]
+    ted_branch_code: Optional[str]
+    ted_cpf_cnpj: Optional[str]
 
 
 class ListBankAccountsResponse(TypedDict):
@@ -302,7 +307,7 @@ class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, tota
     swift_intermediary_bank_country: Optional[Country]
     swift_intermediary_bank_name: Optional[str]
     swift_intermediary_bank_swift_code_bic: Optional[str]
-    swift_payment_code: Optional[str]
+    swift_payment_code: Optional[SwiftPaymentCode]
     business_industry: Optional[str]
     phone_number: Optional[str]
     tax_id: Optional[str]
@@ -340,6 +345,7 @@ class CreateInternationalSwiftResponse(TypedDict):
     swift_intermediary_bank_account_number_iban: Optional[str]
     swift_intermediary_bank_name: Optional[str]
     swift_intermediary_bank_country: Optional[Country]
+    swift_payment_code: Optional[SwiftPaymentCode]
     created_at: str
 
 
@@ -401,6 +407,51 @@ class CreatePixSafeResponse(TypedDict):
     pix_safe_bank_code: str
     pix_safe_branch_code: str
     pix_safe_cpf_cnpj: str
+    created_at: str
+
+
+class _CreateTedInputRequired(TypedDict):
+    receiver_id: str
+
+
+class CreateTedInput(_CreateTedInputRequired, total=False):
+    name: str
+    account_class: AccountClass
+    beneficiary_name: str
+    account_number: str
+    ted_bank_code: str
+    ted_branch_code: str
+    ted_cpf_cnpj: str
+    recipient_relationship: RecipientRelationship
+    address_line_1: str
+    address_line_2: Optional[str]
+    city: str
+    state_province_region: str
+    country: Country
+    postal_code: str
+    business_industry: Optional[str]
+    phone_number: Optional[str]
+    tax_id: Optional[str]
+    date_of_birth: Optional[str]
+    swift_payment_code: Optional[SwiftPaymentCode]
+
+
+class CreateTedResponse(TypedDict):
+    id: str
+    type: TedType
+    name: str
+    beneficiary_name: str
+    account_number: str
+    ted_bank_code: str
+    ted_branch_code: str
+    ted_cpf_cnpj: str
+    address_line_1: Optional[str]
+    address_line_2: Optional[str]
+    city: Optional[str]
+    state_province_region: Optional[str]
+    country: Optional[Country]
+    postal_code: Optional[str]
+    swift_payment_code: Optional[SwiftPaymentCode]
     created_at: str
 
 
@@ -476,6 +527,12 @@ class BankAccountsResource:
         payload["type"] = "pix_safe"
         return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
+    async def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "ted"
+        return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
 
 class BankAccountsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -547,6 +604,12 @@ class BankAccountsResourceSync:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "pix_safe"
+        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
+    def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "ted"
         return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
 
