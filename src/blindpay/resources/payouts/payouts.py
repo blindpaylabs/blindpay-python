@@ -57,7 +57,7 @@ class Payout(TypedDict):
     blindpay_quotation: float
     total_fee_amount: float
     receiver_local_amount: float
-    currency: Currency  # Excluding "USDT" | "USDB"
+    currency: Currency
     transaction_document_file: str
     transaction_document_type: TransactionDocumentType
     transaction_document_id: str
@@ -92,6 +92,10 @@ class Payout(TypedDict):
     transfers_account: Optional[str]
     transfers_type: ArgentinaTransfers
     has_virtual_account: bool
+    partner_fee_id: Optional[str]
+    ted_bank_code: Optional[str]
+    ted_branch_code: Optional[str]
+    ted_cpf_cnpj: Optional[str]
 
 
 class ListPayoutsInput(PaginationParams, total=False):

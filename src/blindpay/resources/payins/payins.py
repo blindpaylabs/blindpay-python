@@ -7,6 +7,7 @@ from ...types import (
     Network,
     PaginationMetadata,
     PaginationParams,
+    PaymentMethod,
     StablecoinToken,
     TrackingComplete,
     TrackingPartnerFee,
@@ -75,7 +76,7 @@ class Payin(TypedDict):
     last_name: Optional[str]
     legal_name: Optional[str]
     type: str
-    payment_method: str
+    payment_method: PaymentMethod
     sender_amount: float
     receiver_amount: float
     token: StablecoinToken
@@ -95,6 +96,7 @@ class Payin(TypedDict):
     pse_full_name: Optional[str]
     pse_payment_link: Optional[str]
     pse_tax_id: Optional[str]
+    partner_fee_id: Optional[str]
 
 
 class ListPayinsInput(PaginationParams):
@@ -151,7 +153,7 @@ class GetPayinTrackResponse(TypedDict):
     last_name: str
     legal_name: str
     type: str
-    payment_method: str
+    payment_method: PaymentMethod
     sender_amount: float
     receiver_amount: float
     token: StablecoinToken
@@ -165,6 +167,7 @@ class GetPayinTrackResponse(TypedDict):
     address: str
     network: Network
     blindpay_bank_details: BankDetails
+    partner_fee_id: Optional[str]
 
 
 class ExportPayinsInput(TypedDict):
@@ -189,6 +192,8 @@ class CreateEvmPayinResponse(TypedDict):
     blindpay_bank_details: BankDetails
     receiver_id: str
     receiver_amount: float
+    payment_method: PaymentMethod
+    partner_fee_id: Optional[str]
 
 
 class PayinsResource:

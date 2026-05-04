@@ -21,6 +21,8 @@ class BlindpaySuccessResponse(TypedDict, Generic[T]):
 
 BlindpayApiResponse = Union[BlindpayErrorResponse, BlindpaySuccessResponse[T]]
 
+ActorType = Literal["api_key", "user"]
+
 CurrencyType = Literal["sender", "receiver"]
 
 Network = Literal[
@@ -47,10 +49,10 @@ TransactionDocumentType = Literal[
 
 BankAccountType = Literal["checking", "savings"]
 
-Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
+Currency = Literal["USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
 Rail = Literal[
-    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
+    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp", "ted"
 ]
 
 AccountClass = Literal["individual", "business"]
@@ -311,6 +313,18 @@ Country = Literal[
     "AX",
 ]
 
+KycStatus = Literal["awaiting_contract", "compliance_request"]
+
+Operation = Literal["create", "delete", "update"]
+
+Status = Literal["submitted"]
+
+SwiftPaymentCode = Literal[
+    # The changelog mentions 34 values were added but doesn't list them,
+    # so I'll add a placeholder for now - this may need to be populated later
+    "placeholder"
+]
+
 PaginationLimit = Literal["10", "50", "100", "200", "500", "1000"]
 PaginationOffset = Literal["0", "10", "50", "100", "200", "500", "1000"]
 
@@ -380,4 +394,4 @@ RecipientRelationship = Literal[
 
 BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted"]

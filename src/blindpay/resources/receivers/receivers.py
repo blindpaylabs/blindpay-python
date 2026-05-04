@@ -7,6 +7,7 @@ from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
     Country,
+    KycStatus,
     PaginationMetadata,
     PaginationParams,
 )
@@ -328,7 +329,7 @@ class IndividualWithStandardKYC(TypedDict):
     id: str
     type: IndividualType
     kyc_type: StandardKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
@@ -378,7 +379,7 @@ class IndividualWithEnhancedKYC(TypedDict):
     id: str
     type: IndividualType
     kyc_type: EnhancedKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
@@ -433,7 +434,7 @@ class BusinessWithStandardKYB(TypedDict):
     id: str
     type: BusinessType
     kyc_type: StandardKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
