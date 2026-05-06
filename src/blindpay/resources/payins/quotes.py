@@ -10,7 +10,7 @@ from ...types import (
     StablecoinToken,
 )
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei"]
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "rtp", "ted"]
 
 
 class PayerRules(TypedDict, total=False):

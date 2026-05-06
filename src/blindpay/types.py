@@ -47,10 +47,19 @@ TransactionDocumentType = Literal[
 
 BankAccountType = Literal["checking", "savings"]
 
-Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
+Currency = Literal["USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
 Rail = Literal[
-    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
+    "wire",
+    "ach",
+    "pix",
+    "pix_safe",
+    "spei_bitso",
+    "transfers_bitso",
+    "ach_cop_bitso",
+    "international_swift",
+    "rtp",
+    "ted",
 ]
 
 AccountClass = Literal["individual", "business"]
@@ -380,4 +389,53 @@ RecipientRelationship = Literal[
 
 BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted"]
+
+# New enum types from changelog
+ActorType = Literal["api_key", "user"]
+
+Decision = Literal["approved", "rejected"]
+
+KycStatus = Literal["awaiting_contract", "compliance_request"]
+
+Operation = Literal["create", "delete", "update"]
+
+ReceiverType = Literal["business", "individual"]
+
+Status = Literal["submitted"]
+
+SwiftPaymentCode = Literal[
+    "SALA",
+    "CBFF",
+    "INTC",
+    "CORT",
+    "TRAD",
+    "TREA",
+    "SECU",
+    "LIMA",
+    "HOLD",
+    "COLL",
+    "COMC",
+    "CPKC",
+    "DIVI",
+    "GOVI",
+    "INST",
+    "INTB",
+    "LEND",
+    "LIQM",
+    "MGCC",
+    "NOWS",
+    "OTHR",
+    "PHOB",
+    "RINP",
+    "RLTI",
+    "SALA",
+    "SECU",
+    "SSBE",
+    "SUPP",
+    "TAXS",
+    "TRAD",
+    "TREA",
+    "VATX",
+    "WHLD",
+]

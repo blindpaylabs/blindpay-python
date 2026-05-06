@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 T = TypeVar("T")
 

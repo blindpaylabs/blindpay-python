@@ -92,6 +92,10 @@ class Payout(TypedDict):
     transfers_account: Optional[str]
     transfers_type: ArgentinaTransfers
     has_virtual_account: bool
+    partner_fee_id: Optional[str]
+    ted_bank_code: Optional[str]
+    ted_branch_code: Optional[str]
+    ted_cpf_cnpj: Optional[str]
 
 
 class ListPayoutsInput(PaginationParams, total=False):

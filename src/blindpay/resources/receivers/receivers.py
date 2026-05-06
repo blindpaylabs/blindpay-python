@@ -16,6 +16,7 @@ BusinessType = Literal["business"]
 StandardKycType = Literal["standard"]
 EnhancedKycType = Literal["enhanced"]
 KycType = Literal["light", "standard", "enhanced"]
+KycStatus = Literal["awaiting_contract", "compliance_request"]
 
 ProofOfAddressDocType = Literal[
     "UTILITY_BILL", "BANK_STATEMENT", "RENTAL_AGREEMENT", "TAX_DOCUMENT", "GOVERNMENT_CORRESPONDENCE"
@@ -328,7 +329,7 @@ class IndividualWithStandardKYC(TypedDict):
     id: str
     type: IndividualType
     kyc_type: StandardKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
@@ -378,7 +379,7 @@ class IndividualWithEnhancedKYC(TypedDict):
     id: str
     type: IndividualType
     kyc_type: EnhancedKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
@@ -433,7 +434,7 @@ class BusinessWithStandardKYB(TypedDict):
     id: str
     type: BusinessType
     kyc_type: StandardKycType
-    kyc_status: str
+    kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: str
