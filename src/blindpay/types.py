@@ -50,7 +50,16 @@ BankAccountType = Literal["checking", "savings"]
 Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
 Rail = Literal[
-    "wire", "ach", "pix", "pix_safe", "spei_bitso", "transfers_bitso", "ach_cop_bitso", "international_swift", "rtp"
+    "wire",
+    "ach",
+    "pix",
+    "pix_safe",
+    "spei_bitso",
+    "transfers_bitso",
+    "ach_cop_bitso",
+    "international_swift",
+    "rtp",
+    "ted",
 ]
 
 AccountClass = Literal["individual", "business"]
@@ -380,4 +389,6 @@ RecipientRelationship = Literal[
 
 BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift"]
+PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted"]
+
+KycStatus = Literal["awaiting_contract", "compliance_request"]

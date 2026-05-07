@@ -25,6 +25,7 @@ WireType = Literal["wire"]
 InternationalSwiftType = Literal["international_swift"]
 RtpType = Literal["rtp"]
 PixSafeType = Literal["pix_safe"]
+TedType = Literal["ted"]
 
 
 class OfframpWallet(TypedDict):
@@ -85,6 +86,9 @@ class BankAccount(TypedDict):
     tron_wallet_hash: Optional[str]
     offramp_wallets: Optional[List[OfframpWallet]]
     created_at: str
+    ted_bank_code: Optional[str]
+    ted_branch_code: Optional[str]
+    ted_cpf_cnpj: Optional[str]
 
 
 class ListBankAccountsResponse(TypedDict):
@@ -404,6 +408,28 @@ class CreatePixSafeResponse(TypedDict):
     created_at: str
 
 
+class CreateTedInput(TypedDict):
+    receiver_id: str
+    name: str
+    account_number: str
+    account_type: BankAccountType
+    ted_bank_code: str
+    ted_branch_code: str
+    ted_cpf_cnpj: str
+
+
+class CreateTedResponse(TypedDict):
+    id: str
+    type: TedType
+    name: str
+    account_number: str
+    account_type: BankAccountType
+    ted_bank_code: str
+    ted_branch_code: str
+    ted_cpf_cnpj: str
+    created_at: str
+
+
 class BankAccountsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -474,6 +500,12 @@ class BankAccountsResource:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "pix_safe"
+        return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
+    async def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "ted"
         return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
 
@@ -547,6 +579,12 @@ class BankAccountsResourceSync:
         receiver_id = data["receiver_id"]
         payload = {k: v for k, v in data.items() if k != "receiver_id"}
         payload["type"] = "pix_safe"
+        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
+
+    def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+        receiver_id = data["receiver_id"]
+        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        payload["type"] = "ted"
         return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/bank-accounts", payload)
 
 
