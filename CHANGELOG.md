@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.1.0...v2.2.0) (2026-05-07)
+
+
+### Features
+
+* sync SDK with API changes ([#41](https://github.com/blindpaylabs/blindpay-python/issues/41)) ([24c4e76](https://github.com/blindpaylabs/blindpay-python/commit/24c4e76a28874a90740ad7d06f7b2afd56a17f8f))
+
+
+### Bug Fixes
+
+* sanitize workflow inputs ([#44](https://github.com/blindpaylabs/blindpay-python/issues/44)) ([e4db01a](https://github.com/blindpaylabs/blindpay-python/commit/e4db01ac2b6094ba1bfc37e3c9fbb00b9c9bf087))
+
 ## [2.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.0.1...v2.1.0) (2026-04-18)
 
 
