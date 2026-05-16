@@ -114,7 +114,54 @@ Resource-specific Literal types and TypedDicts are defined in the same file as t
 
 ---
 
-## 3. How to add a new resource
+## 3. Decide: new resource, or method on an existing one?
+
+Before adding files, decide whether a new endpoint deserves its own
+resource directory and class pair, or whether it belongs as a method
+on an existing one. Default to the second — methods on an existing
+resource are the right choice for most new endpoints.
+
+**Look at sibling endpoints first.** Find other endpoints whose URL
+path shares a prefix with the new one (e.g. `POST /receivers/{id}/rfi`
+is a sibling of `GET /receivers/{id}/limit-increase`, which is
+modeled as `client.receivers.get_limit_increase_requests(id)`, not as
+`client.receivers.limit_increase.list()`). Match how those siblings
+are modeled.
+
+**Heuristics:**
+
+- 1–3 endpoints under an existing parent path → add as direct methods
+  on the parent's resource class. Naming: `<verb>_<subresource>` —
+  e.g. `client.receivers.get_rfi(receiver_id)` and
+  `client.receivers.submit_rfi(receiver_id=..., data=...)`. **Do not**
+  create a new `Rfi`/`RfiResource` class or a new file under
+  `src/blindpay/resources/receivers/rfi.py`.
+- 4+ endpoints with a distinct ID space, or a clearly separate
+  conceptual resource (`bank_accounts`, `blockchain_wallets`,
+  `virtual_accounts`) → its own directory + class pair, wired under
+  the parent via the namespace pattern (Section 7). Confirm there is
+  precedent in the existing codebase before doing this.
+- Never put a child of an existing resource at the **top level** of
+  `src/blindpay/resources/` (e.g. `src/blindpay/resources/rfi/`). If
+  it's nested in the API URL, it's nested in the SDK.
+
+### Worked example: RFI
+
+`GET /receivers/{id}/rfi` and `POST /receivers/{id}/rfi` are two
+endpoints nested under `receivers`. Add them as methods on
+`ReceiversResource` / `ReceiversResourceSync` in
+`src/blindpay/resources/receivers/receivers.py`, alongside
+`get_limits`, `get_limit_increase_requests`, and
+`request_limit_increase`. NOT as a new `RfiResource` class in
+`receivers/rfi.py`.
+
+---
+
+## 4. How to add a new resource
+
+(Use this section only when the heuristics above say the endpoint is
+a genuinely new top-level resource — not just a 1–3-endpoint
+extension of an existing one.)
 
 ### Step 1: Create the resource directory and files
 
