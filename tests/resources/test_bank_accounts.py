@@ -25,7 +25,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_pix(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "PIX Account",
                     "pix_key": "14947677768",
                 }
@@ -51,7 +51,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_argentina_transfers(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Argentina Transfers Account",
                     "beneficiary_name": "Individual full name or business name",
                     "transfers_type": "CVU",
@@ -80,7 +80,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_spei(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "SPEI Account",
                     "beneficiary_name": "Individual full name or business name",
                     "spei_protocol": "clabe",
@@ -114,7 +114,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_colombia_ach(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Colombia ACH Account",
                     "account_type": "checking",
                     "ach_cop_beneficiary_first_name": "Fernando",
@@ -162,7 +162,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_ach(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "ACH Account",
                     "account_class": "individual",
                     "account_number": "1001001234",
@@ -198,7 +198,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_wire(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wire Account",
                     "account_number": "1001001234",
                     "beneficiary_name": "Individual full name or business name",
@@ -256,7 +256,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_international_swift(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "International Swift Account",
                     "swift_account_holder_name": "John Doe",
                     "swift_account_number_iban": "123456789",
@@ -309,7 +309,7 @@ class TestBankAccounts:
 
             response = await self.blindpay.receivers.bank_accounts.create_rtp(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "John Doe RTP",
                     "beneficiary_name": "John Doe",
                     "routing_number": "121000358",
@@ -330,7 +330,7 @@ class TestBankAccounts:
     async def test_get_bank_account(self):
         mocked_bank_account = {
             "id": "ba_000000000000",
-            "receiver_id": "rcv_123",
+            "customer_id": "rcv_123",
             "account_holder_name": "Individual full name or business name",
             "account_number": "1001001234",
             "routing_number": "012345678",
@@ -463,7 +463,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_pix(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "PIX Account",
                     "pix_key": "14947677768",
                 }
@@ -488,7 +488,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_argentina_transfers(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Argentina Transfers Account",
                     "beneficiary_name": "Individual full name or business name",
                     "transfers_type": "CVU",
@@ -516,7 +516,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_spei(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "SPEI Account",
                     "beneficiary_name": "Individual full name or business name",
                     "spei_protocol": "clabe",
@@ -549,7 +549,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_colombia_ach(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Colombia ACH Account",
                     "account_type": "checking",
                     "ach_cop_beneficiary_first_name": "Fernando",
@@ -596,7 +596,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_ach(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "ACH Account",
                     "account_class": "individual",
                     "account_number": "1001001234",
@@ -631,7 +631,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_wire(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wire Account",
                     "account_number": "1001001234",
                     "beneficiary_name": "Individual full name or business name",
@@ -688,7 +688,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_international_swift(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "International Swift Account",
                     "swift_account_holder_name": "John Doe",
                     "swift_account_number_iban": "123456789",
@@ -740,7 +740,7 @@ class TestBankAccountsSync:
 
             response = self.blindpay.receivers.bank_accounts.create_rtp(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "John Doe RTP",
                     "beneficiary_name": "John Doe",
                     "routing_number": "121000358",
@@ -760,7 +760,7 @@ class TestBankAccountsSync:
     def test_get_bank_account(self):
         mocked_bank_account = {
             "id": "ba_000000000000",
-            "receiver_id": "rcv_123",
+            "customer_id": "rcv_123",
             "account_holder_name": "Individual full name or business name",
             "account_number": "1001001234",
             "routing_number": "012345678",

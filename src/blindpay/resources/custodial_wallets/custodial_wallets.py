@@ -8,7 +8,7 @@ from ...types import BlindpayApiResponse, Network
 
 class CustodialWallet(TypedDict):
     id: str
-    receiver_id: str
+    customer_id: str
     instance_id: str
     network: Network
     address: str
@@ -28,7 +28,7 @@ class CustodialWalletBalance(TypedDict):
 
 
 class CreateCustodialWalletInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     network: Network
 
 
@@ -37,12 +37,12 @@ ListCustodialWalletsResponse = List[CustodialWallet]
 
 
 class GetCustodialWalletInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
 
 
 class DeleteCustodialWalletInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
 
 
@@ -51,27 +51,27 @@ class CustodialWalletsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, receiver_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/wallets")
+    async def list(self, customer_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/wallets")
 
     async def get(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWallet]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
         )
 
     async def create(self, data: CreateCustodialWalletInput) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return await self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/wallets", payload)
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload)
 
     async def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}/balance"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}/balance"
         )
 
     async def delete(self, data: DeleteCustodialWalletInput) -> BlindpayApiResponse[None]:
         return await self._client.delete(
-            f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
         )
 
 
@@ -80,25 +80,25 @@ class CustodialWalletsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, receiver_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/wallets")
+    def list(self, customer_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/wallets")
 
     def get(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWallet]:
-        return self._client.get(f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}")
 
     def create(self, data: CreateCustodialWalletInput) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
-        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/wallets", payload)
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload)
 
     def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
         return self._client.get(
-            f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}/balance"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}/balance"
         )
 
     def delete(self, data: DeleteCustodialWalletInput) -> BlindpayApiResponse[None]:
         return self._client.delete(
-            f"/instances/{self._instance_id}/receivers/{data['receiver_id']}/wallets/{data['id']}"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
         )
 
 

@@ -17,7 +17,7 @@ class BlockchainWallet(TypedDict):
     address: Optional[str]
     signature_tx_hash: Optional[str]
     is_account_abstraction: bool
-    receiver_id: str
+    customer_id: str
 
 
 ListBlockchainWalletsResponse = List[BlockchainWallet]
@@ -26,26 +26,26 @@ CreateBlockchainWalletResponse = BlockchainWallet
 
 
 class CreateBlockchainWalletWithAddressInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     name: str
     network: Network
     address: str
 
 
 class CreateBlockchainWalletWithHashInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     name: str
     network: Network
     signature_tx_hash: str
 
 
 class GetBlockchainWalletInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
 
 
 class DeleteBlockchainWalletInput(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
 
 
@@ -85,44 +85,44 @@ class BlockchainWalletsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, receiver_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets")
+    async def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets")
 
     async def create_with_address(
         self, data: CreateBlockchainWalletWithAddressInput
     ) -> BlindpayApiResponse[CreateBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = True
         return await self._client.post(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets", payload
+            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload
         )
 
     async def create_with_hash(
         self, data: CreateBlockchainWalletWithHashInput
     ) -> BlindpayApiResponse[CreateBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = False
         return await self._client.post(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets", payload
+            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload
         )
 
-    async def get_wallet_message(self, receiver_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
+    async def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/sign-message"
         )
 
     async def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
+        customer_id = data["customer_id"]
         id = data["id"]
-        return await self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/{id}")
+        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}")
 
     async def delete(self, data: DeleteBlockchainWalletInput) -> BlindpayApiResponse[None]:
-        receiver_id = data["receiver_id"]
+        customer_id = data["customer_id"]
         id = data["id"]
         return await self._client.delete(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/{id}"
+            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}"
         )
 
     async def create_asset_trustline(self, address: str) -> BlindpayApiResponse[CreateAssetTrustlineResponse]:
@@ -145,39 +145,39 @@ class BlockchainWalletsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, receiver_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets")
+    def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets")
 
     def create_with_address(
         self, data: CreateBlockchainWalletWithAddressInput
     ) -> BlindpayApiResponse[CreateBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = True
-        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets", payload)
+        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload)
 
     def create_with_hash(
         self, data: CreateBlockchainWalletWithHashInput
     ) -> BlindpayApiResponse[CreateBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
-        payload = {k: v for k, v in data.items() if k != "receiver_id"}
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = False
-        return self._client.post(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets", payload)
+        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload)
 
-    def get_wallet_message(self, receiver_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
+    def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/sign-message"
         )
 
     def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
-        receiver_id = data["receiver_id"]
+        customer_id = data["customer_id"]
         id = data["id"]
-        return self._client.get(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/{id}")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}")
 
     def delete(self, data: DeleteBlockchainWalletInput) -> BlindpayApiResponse[None]:
-        receiver_id = data["receiver_id"]
+        customer_id = data["customer_id"]
         id = data["id"]
-        return self._client.delete(f"/instances/{self._instance_id}/receivers/{receiver_id}/blockchain-wallets/{id}")
+        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}")
 
     def create_asset_trustline(self, address: str) -> BlindpayApiResponse[CreateAssetTrustlineResponse]:
         return self._client.post(f"/instances/{self._instance_id}/create-asset-trustline", {"address": address})
