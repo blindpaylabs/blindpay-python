@@ -5,7 +5,7 @@ import pytest
 from blindpay import BlindPay, BlindPaySync
 
 
-class TestReceivers:
+class TestCustomers:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
@@ -143,7 +143,7 @@ class TestReceivers:
                         "proof_of_address_doc_file": "https://example.com/image.png",
                         "id": "ub_000000000000",
                         "instance_id": "in_000000000000",
-                        "receiver_id": "re_IOxAUL24LG7P",
+                        "customer_id": "re_IOxAUL24LG7P",
                     },
                 ],
                 "incorporation_doc_file": "https://example.com/image.png",
@@ -165,11 +165,11 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receivers, "error": None}
 
-            response = await self.blindpay.receivers.list()
+            response = await self.blindpay.customers.list()
 
             assert response["error"] is None
             assert response["data"] == mocked_receivers
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers")
 
     @pytest.mark.asyncio
     async def test_list_receivers_with_params(self):
@@ -181,11 +181,11 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
 
-            response = await self.blindpay.receivers.list({"status": "approved", "limit": "10"})
+            response = await self.blindpay.customers.list({"status": "approved", "limit": "10"})
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers?status=approved&limit=10")
 
     @pytest.mark.asyncio
     async def test_create_individual_with_standard_kyc(self):
@@ -196,7 +196,7 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = await self.blindpay.receivers.create_individual_with_standard_kyc(
+            response = await self.blindpay.customers.create_individual_with_standard_kyc(
                 {
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
@@ -232,7 +232,7 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = await self.blindpay.receivers.create_individual_with_enhanced_kyc(
+            response = await self.blindpay.customers.create_individual_with_enhanced_kyc(
                 {
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
@@ -273,7 +273,7 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = await self.blindpay.receivers.create_business_with_standard_kyb(
+            response = await self.blindpay.customers.create_business_with_standard_kyb(
                 {
                     "email": "contato@empresa.com.br",
                     "tax_id": "20096178000195",
@@ -313,7 +313,7 @@ class TestReceivers:
                             "proof_of_address_doc_file": "https://example.com/image.png",
                             "id": "ub_000000000000",
                             "instance_id": "in_000000000000",
-                            "receiver_id": "re_IOxAUL24LG7P",
+                            "customer_id": "re_IOxAUL24LG7P",
                         },
                     ],
                 }
@@ -377,20 +377,20 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = await self.blindpay.receivers.get("re_YuaMcI2B8zbQ")
+            response = await self.blindpay.customers.get("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_receiver
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ")
 
     @pytest.mark.asyncio
     async def test_update_receiver(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = await self.blindpay.receivers.update(
+            response = await self.blindpay.customers.update(
                 {
-                    "receiver_id": "re_YuaMcI2B8zbQ",
+                    "customer_id": "re_YuaMcI2B8zbQ",
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
                     "address_line_1": "Av. Paulista, 1000",
@@ -454,11 +454,11 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = await self.blindpay.receivers.delete("re_YuaMcI2B8zbQ")
+            response = await self.blindpay.customers.delete("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == {"data": None}
-            mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ", None)
+            mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ", None)
 
     @pytest.mark.asyncio
     async def test_get_receiver_limits(self):
@@ -478,18 +478,18 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver_limits, "error": None}
 
-            response = await self.blindpay.receivers.get_limits("re_YuaMcI2B8zbQ")
+            response = await self.blindpay.customers.get_limits("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_receiver_limits
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/receivers/re_YuaMcI2B8zbQ")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/customers/re_YuaMcI2B8zbQ")
 
     @pytest.mark.asyncio
     async def test_get_limit_increase_requests(self):
         mocked_limit_increase_requests = [
             {
                 "id": "rl_000000000000",
-                "receiver_id": "re_YuaMcI2B8zbQ",
+                "customer_id": "re_YuaMcI2B8zbQ",
                 "status": "in_review",
                 "daily": 50000,
                 "monthly": 250000,
@@ -501,7 +501,7 @@ class TestReceivers:
             },
             {
                 "id": "rl_000000000000",
-                "receiver_id": "re_YuaMcI2B8zbQ",
+                "customer_id": "re_YuaMcI2B8zbQ",
                 "status": "approved",
                 "daily": 30000,
                 "monthly": 150000,
@@ -516,12 +516,12 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_limit_increase_requests, "error": None}
 
-            response = await self.blindpay.receivers.get_limit_increase_requests("re_YuaMcI2B8zbQ")
+            response = await self.blindpay.customers.get_limit_increase_requests("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_limit_increase_requests
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ/limit-increase"
+                "GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ/limit-increase"
             )
 
     @pytest.mark.asyncio
@@ -533,9 +533,9 @@ class TestReceivers:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_response, "error": None}
 
-            response = await self.blindpay.receivers.request_limit_increase(
+            response = await self.blindpay.customers.request_limit_increase(
                 {
-                    "receiver_id": "re_YuaMcI2B8zbQ",
+                    "customer_id": "re_YuaMcI2B8zbQ",
                     "daily": 100000,
                     "monthly": 500000,
                     "per_transaction": 50000,
@@ -548,7 +548,7 @@ class TestReceivers:
             assert response["data"] == mocked_response
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ/limit-increase",
+                "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ/limit-increase",
                 {
                     "daily": 100000,
                     "monthly": 500000,
@@ -559,7 +559,7 @@ class TestReceivers:
             )
 
 
-class TestReceiversSync:
+class TestCustomersSync:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPaySync(api_key="test-key", instance_id="in_000000000000")
@@ -696,7 +696,7 @@ class TestReceiversSync:
                         "proof_of_address_doc_file": "https://example.com/image.png",
                         "id": "ub_000000000000",
                         "instance_id": "in_000000000000",
-                        "receiver_id": "re_IOxAUL24LG7P",
+                        "customer_id": "re_IOxAUL24LG7P",
                     },
                 ],
                 "incorporation_doc_file": "https://example.com/image.png",
@@ -718,11 +718,11 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receivers, "error": None}
 
-            response = self.blindpay.receivers.list()
+            response = self.blindpay.customers.list()
 
             assert response["error"] is None
             assert response["data"] == mocked_receivers
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers")
 
     def test_list_receivers_with_params(self):
         mocked_data = {
@@ -733,11 +733,11 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_data, "error": None}
 
-            response = self.blindpay.receivers.list({"status": "approved", "limit": "10"})
+            response = self.blindpay.customers.list({"status": "approved", "limit": "10"})
 
             assert response["error"] is None
             assert response["data"] == mocked_data
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers?status=approved&limit=10")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers?status=approved&limit=10")
 
     def test_create_individual_with_standard_kyc(self):
         mocked_receiver = {
@@ -747,7 +747,7 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = self.blindpay.receivers.create_individual_with_standard_kyc(
+            response = self.blindpay.customers.create_individual_with_standard_kyc(
                 {
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
@@ -782,7 +782,7 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = self.blindpay.receivers.create_individual_with_enhanced_kyc(
+            response = self.blindpay.customers.create_individual_with_enhanced_kyc(
                 {
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
@@ -822,7 +822,7 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = self.blindpay.receivers.create_business_with_standard_kyb(
+            response = self.blindpay.customers.create_business_with_standard_kyb(
                 {
                     "email": "contato@empresa.com.br",
                     "tax_id": "20096178000195",
@@ -862,7 +862,7 @@ class TestReceiversSync:
                             "proof_of_address_doc_file": "https://example.com/image.png",
                             "id": "ub_000000000000",
                             "instance_id": "in_000000000000",
-                            "receiver_id": "re_IOxAUL24LG7P",
+                            "customer_id": "re_IOxAUL24LG7P",
                         },
                     ],
                 }
@@ -925,19 +925,19 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver, "error": None}
 
-            response = self.blindpay.receivers.get("re_YuaMcI2B8zbQ")
+            response = self.blindpay.customers.get("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_receiver
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ")
 
     def test_update_receiver(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = self.blindpay.receivers.update(
+            response = self.blindpay.customers.update(
                 {
-                    "receiver_id": "re_YuaMcI2B8zbQ",
+                    "customer_id": "re_YuaMcI2B8zbQ",
                     "email": "bernardo.simonassi@gmail.com",
                     "tax_id": "12345678900",
                     "address_line_1": "Av. Paulista, 1000",
@@ -1000,11 +1000,11 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = self.blindpay.receivers.delete("re_YuaMcI2B8zbQ")
+            response = self.blindpay.customers.delete("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == {"data": None}
-            mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ", None)
+            mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ", None)
 
     def test_get_receiver_limits(self):
         mocked_receiver_limits = {
@@ -1023,17 +1023,17 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_receiver_limits, "error": None}
 
-            response = self.blindpay.receivers.get_limits("re_YuaMcI2B8zbQ")
+            response = self.blindpay.customers.get_limits("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_receiver_limits
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/receivers/re_YuaMcI2B8zbQ")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/limits/customers/re_YuaMcI2B8zbQ")
 
     def test_get_limit_increase_requests(self):
         mocked_limit_increase_requests = [
             {
                 "id": "rl_000000000000",
-                "receiver_id": "re_YuaMcI2B8zbQ",
+                "customer_id": "re_YuaMcI2B8zbQ",
                 "status": "in_review",
                 "daily": 50000,
                 "monthly": 250000,
@@ -1045,7 +1045,7 @@ class TestReceiversSync:
             },
             {
                 "id": "rl_000000000000",
-                "receiver_id": "re_YuaMcI2B8zbQ",
+                "customer_id": "re_YuaMcI2B8zbQ",
                 "status": "approved",
                 "daily": 30000,
                 "monthly": 150000,
@@ -1060,12 +1060,12 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_limit_increase_requests, "error": None}
 
-            response = self.blindpay.receivers.get_limit_increase_requests("re_YuaMcI2B8zbQ")
+            response = self.blindpay.customers.get_limit_increase_requests("re_YuaMcI2B8zbQ")
 
             assert response["error"] is None
             assert response["data"] == mocked_limit_increase_requests
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ/limit-increase"
+                "GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ/limit-increase"
             )
 
     def test_request_limit_increase(self):
@@ -1076,9 +1076,9 @@ class TestReceiversSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_response, "error": None}
 
-            response = self.blindpay.receivers.request_limit_increase(
+            response = self.blindpay.customers.request_limit_increase(
                 {
-                    "receiver_id": "re_YuaMcI2B8zbQ",
+                    "customer_id": "re_YuaMcI2B8zbQ",
                     "daily": 100000,
                     "monthly": 500000,
                     "per_transaction": 50000,
@@ -1091,7 +1091,7 @@ class TestReceiversSync:
             assert response["data"] == mocked_response
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_YuaMcI2B8zbQ/limit-increase",
+                "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ/limit-increase",
                 {
                     "daily": 100000,
                     "monthly": 500000,
