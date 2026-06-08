@@ -8,6 +8,7 @@ from ...types import (
     BankAccountType,
     BlindpayApiResponse,
     Country,
+    Network,
     Rail,
     RecipientRelationship,
     SpeiProtocol,
@@ -15,7 +16,6 @@ from ...types import (
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 AchCopDocument = Literal["CC", "CE", "NIT", "PASS", "PEP"]
-OfframpNetwork = Literal["tron"]
 PixType = Literal["pix"]
 TransfersBitsoType = Literal["transfers_bitso"]
 SpeiBitsoType = Literal["spei_bitso"]
@@ -31,7 +31,7 @@ TedType = Literal["ted"]
 class OfframpWallet(TypedDict):
     address: str
     id: str
-    network: OfframpNetwork
+    network: Network
     external_id: str
 
 
@@ -54,6 +54,7 @@ class BankAccount(TypedDict):
     spei_protocol: Optional[str]
     spei_institution_code: Optional[str]
     spei_clabe: Optional[str]
+    sepa_beneficiary_bic: Optional[str]
     transfers_type: Optional[ArgentinaTransfers]
     transfers_account: Optional[str]
     ach_cop_beneficiary_first_name: Optional[str]
@@ -105,6 +106,7 @@ class GetBankAccountResponse(TypedDict):
     bank_name: str
     swift_code: Optional[str]
     iban: Optional[str]
+    sepa_beneficiary_bic: Optional[str]
     is_primary: bool
     created_at: str
     updated_at: str
@@ -302,6 +304,7 @@ class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, tota
     swift_beneficiary_postal_code: str
     swift_beneficiary_state_province_region: str
     swift_code_bic: str
+    sepa_beneficiary_bic: Optional[str]
     swift_intermediary_bank_account_number_iban: Optional[str]
     swift_intermediary_bank_country: Optional[Country]
     swift_intermediary_bank_name: Optional[str]
@@ -340,6 +343,7 @@ class CreateInternationalSwiftResponse(TypedDict):
     swift_bank_city: str
     swift_bank_state_province_region: str
     swift_bank_postal_code: str
+    sepa_beneficiary_bic: Optional[str]
     swift_intermediary_bank_swift_code_bic: Optional[str]
     swift_intermediary_bank_account_number_iban: Optional[str]
     swift_intermediary_bank_name: Optional[str]
@@ -383,6 +387,42 @@ class CreateRtpResponse(TypedDict):
     state_province_region: str
     country: Country
     postal_code: str
+    created_at: str
+
+
+class _CreateSepaInputRequired(TypedDict):
+    customer_id: str
+    name: str
+    account_class: AccountClass
+    sepa_iban: str
+    sepa_beneficiary_bic: str
+    sepa_beneficiary_legal_name: str
+    sepa_beneficiary_address_line_1: str
+    sepa_beneficiary_city: str
+    sepa_beneficiary_postal_code: str
+    sepa_beneficiary_country: Country
+
+
+class CreateSepaInput(_CreateSepaInputRequired, total=False):
+    sepa_beneficiary_address_line_2: Optional[str]
+    sepa_beneficiary_state_province_region: Optional[str]
+
+
+class CreateSepaResponse(TypedDict):
+    id: str
+    type: Literal["sepa"]
+    name: str
+    account_class: AccountClass
+    recipient_relationship: Optional[RecipientRelationship]
+    sepa_iban: str
+    sepa_beneficiary_bic: str
+    sepa_beneficiary_legal_name: str
+    sepa_beneficiary_address_line_1: str
+    sepa_beneficiary_address_line_2: Optional[str]
+    sepa_beneficiary_city: str
+    sepa_beneficiary_state_province_region: Optional[str]
+    sepa_beneficiary_postal_code: str
+    sepa_beneficiary_country: Country
     created_at: str
 
 
@@ -508,6 +548,12 @@ class BankAccountsResource:
         payload["type"] = "ted"
         return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
 
+    async def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        payload["type"] = "sepa"
+        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+
 
 class BankAccountsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -585,6 +631,12 @@ class BankAccountsResourceSync:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
+        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+
+    def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        payload["type"] = "sepa"
         return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
 
 

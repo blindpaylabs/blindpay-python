@@ -63,6 +63,8 @@ class Payout(TypedDict):
     transaction_document_id: str
     name: str
     type: Rail
+    billing_fee_amount: Optional[float]
+    cpn_payment_id: Optional[str]
     pix_key: Optional[str]
     account_number: Optional[str]
     routing_number: Optional[str]

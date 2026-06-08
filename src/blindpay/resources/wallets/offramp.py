@@ -1,11 +1,9 @@
 from typing import List
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BlindpayApiResponse
-
-TronNetwork = Literal["tron"]
+from ...types import BlindpayApiResponse, Network
 
 
 class OfframpWallet(TypedDict):
@@ -14,7 +12,7 @@ class OfframpWallet(TypedDict):
     instance_id: str
     customer_id: str
     bank_account_id: str
-    network: TronNetwork
+    network: Network
     address: str
     created_at: str
     updated_at: str
@@ -33,13 +31,13 @@ class CreateOfframpWalletInput(TypedDict):
     customer_id: str
     bank_account_id: str
     external_id: str
-    network: TronNetwork
+    network: Network
 
 
 class CreateOfframpWalletResponse(TypedDict):
     id: str
     external_id: str
-    network: TronNetwork
+    network: Network
     address: str
 
 

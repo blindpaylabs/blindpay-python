@@ -34,6 +34,14 @@ class UpdateInstanceMemberRoleInput(TypedDict):
     role: InstanceMemberRole
 
 
+class MigrateInstanceOwnershipInput(TypedDict):
+    user_id: str
+
+
+class MigrateInstanceOwnershipResponse(TypedDict):
+    success: bool
+
+
 class InstancesResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -53,6 +61,11 @@ class InstancesResource:
 
     async def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
         return await self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
+
+    async def migrate_ownership(
+        self, data: MigrateInstanceOwnershipInput
+    ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/ownership", data)
 
 
 class InstancesResourceSync:
@@ -74,6 +87,11 @@ class InstancesResourceSync:
 
     def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
         return self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
+
+    def migrate_ownership(
+        self, data: MigrateInstanceOwnershipInput
+    ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/ownership", data)
 
 
 def create_instances_resource(instance_id: str, client: InternalApiClient) -> InstancesResource:
