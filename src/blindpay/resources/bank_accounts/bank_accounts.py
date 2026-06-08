@@ -92,8 +92,7 @@ class BankAccount(TypedDict):
     ted_cpf_cnpj: Optional[str]
 
 
-class ListBankAccountsResponse(TypedDict):
-    data: List[BankAccount]
+ListBankAccountsResponse = List[BankAccount]
 
 
 class GetBankAccountResponse(TypedDict):
