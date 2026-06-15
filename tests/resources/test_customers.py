@@ -11,7 +11,7 @@ class TestCustomers:
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
 
     @pytest.mark.asyncio
-    async def test_list_receivers(self):
+    async def test_list_customers(self):
         mocked_receivers = [
             {
                 "id": "re_Euw7HN4OdxPn",
@@ -172,7 +172,7 @@ class TestCustomers:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers")
 
     @pytest.mark.asyncio
-    async def test_list_receivers_with_params(self):
+    async def test_list_customers_with_params(self):
         mocked_data = {
             "data": [{"id": "re_Euw7HN4OdxPn"}],
             "pagination": {"has_more": False, "next_page": None, "prev_page": None},
@@ -323,7 +323,7 @@ class TestCustomers:
             assert response["data"] == {"id": "re_IOxAUL24LG7P"}
 
     @pytest.mark.asyncio
-    async def test_get_receiver(self):
+    async def test_get_customer(self):
         mocked_receiver = {
             "id": "re_YuaMcI2B8zbQ",
             "type": "individual",
@@ -384,7 +384,7 @@ class TestCustomers:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ")
 
     @pytest.mark.asyncio
-    async def test_update_receiver(self):
+    async def test_update_customer(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
@@ -450,7 +450,7 @@ class TestCustomers:
             assert response["data"] == {"data": None}
 
     @pytest.mark.asyncio
-    async def test_delete_receiver(self):
+    async def test_delete_customer(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
@@ -461,7 +461,7 @@ class TestCustomers:
             mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ", None)
 
     @pytest.mark.asyncio
-    async def test_get_receiver_limits(self):
+    async def test_get_customer_limits(self):
         mocked_receiver_limits = {
             "limits": {
                 "payin": {
@@ -564,7 +564,7 @@ class TestCustomersSync:
     def setup(self):
         self.blindpay = BlindPaySync(api_key="test-key", instance_id="in_000000000000")
 
-    def test_list_receivers(self):
+    def test_list_customers(self):
         mocked_receivers = [
             {
                 "id": "re_Euw7HN4OdxPn",
@@ -724,7 +724,7 @@ class TestCustomersSync:
             assert response["data"] == mocked_receivers
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers")
 
-    def test_list_receivers_with_params(self):
+    def test_list_customers_with_params(self):
         mocked_data = {
             "data": [{"id": "re_Euw7HN4OdxPn"}],
             "pagination": {"has_more": False, "next_page": None, "prev_page": None},
@@ -871,7 +871,7 @@ class TestCustomersSync:
             assert response["error"] is None
             assert response["data"] == {"id": "re_IOxAUL24LG7P"}
 
-    def test_get_receiver(self):
+    def test_get_customer(self):
         mocked_receiver = {
             "id": "re_YuaMcI2B8zbQ",
             "type": "individual",
@@ -931,7 +931,7 @@ class TestCustomersSync:
             assert response["data"] == mocked_receiver
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ")
 
-    def test_update_receiver(self):
+    def test_update_customer(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
@@ -996,7 +996,7 @@ class TestCustomersSync:
             assert response["error"] is None
             assert response["data"] == {"data": None}
 
-    def test_delete_receiver(self):
+    def test_delete_customer(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
@@ -1006,7 +1006,7 @@ class TestCustomersSync:
             assert response["data"] == {"data": None}
             mock_request.assert_called_once_with("DELETE", "/instances/in_000000000000/customers/re_YuaMcI2B8zbQ", None)
 
-    def test_get_receiver_limits(self):
+    def test_get_customer_limits(self):
         mocked_receiver_limits = {
             "limits": {
                 "payin": {
