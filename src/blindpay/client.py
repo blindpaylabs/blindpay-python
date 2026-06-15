@@ -17,8 +17,11 @@ if TYPE_CHECKING:
         CustodialWalletsResource,
         CustodialWalletsResourceSync,
     )
+    from blindpay.resources.customers.customers import CustomersResource, CustomersResourceSync
     from blindpay.resources.fees.fees import FeesResource, FeesResourceSync
     from blindpay.resources.instances.instances import InstancesResource, InstancesResourceSync
+    from blindpay.resources.limits.limits import LimitsResource, LimitsResourceSync
+    from blindpay.resources.ownership.ownership import OwnershipResource, OwnershipResourceSync
     from blindpay.resources.partner_fees.partner_fees import PartnerFeesResource, PartnerFeesResourceSync
     from blindpay.resources.payins.payins import PayinsResource, PayinsResourceSync
     from blindpay.resources.payins.quotes import PayinQuotesResource, PayinQuotesResourceSync
@@ -39,7 +42,7 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 
 T = TypeVar("T")
 
@@ -284,6 +287,12 @@ class BlindPay:
         return _InstancesNamespace(self._instance_id, self._api)
 
     @cached_property
+    def ownership(self) -> "OwnershipResource":
+        from blindpay.resources.ownership import create_ownership_resource
+
+        return create_ownership_resource(self._instance_id, self._api)
+
+    @cached_property
     def partner_fees(self) -> "PartnerFeesResource":
         from blindpay.resources.partner_fees import create_partner_fees_resource
 
@@ -326,10 +335,22 @@ class BlindPay:
         return create_transfers_resource(self._instance_id, self._api)
 
     @cached_property
+    def customers(self) -> "CustomersResource":
+        from blindpay.resources.customers import create_customers_resource
+
+        return create_customers_resource(self._instance_id, self._api)
+
+    @cached_property
     def fees(self) -> "FeesResource":
         from blindpay.resources.fees import create_fees_resource
 
         return create_fees_resource(self._instance_id, self._api)
+
+    @cached_property
+    def limits(self) -> "LimitsResource":
+        from blindpay.resources.limits import create_limits_resource
+
+        return create_limits_resource(self._instance_id, self._api)
 
     @cached_property
     def upload(self) -> "UploadResource":
@@ -514,6 +535,12 @@ class BlindPaySync:
         return _InstancesNamespaceSync(self._instance_id, self._api)
 
     @cached_property
+    def ownership(self) -> "OwnershipResourceSync":
+        from blindpay.resources.ownership import create_ownership_resource_sync
+
+        return create_ownership_resource_sync(self._instance_id, self._api)
+
+    @cached_property
     def partner_fees(self) -> "PartnerFeesResourceSync":
         from blindpay.resources.partner_fees import create_partner_fees_resource_sync
 
@@ -556,10 +583,22 @@ class BlindPaySync:
         return create_transfers_resource_sync(self._instance_id, self._api)
 
     @cached_property
+    def customers(self) -> "CustomersResourceSync":
+        from blindpay.resources.customers import create_customers_resource_sync
+
+        return create_customers_resource_sync(self._instance_id, self._api)
+
+    @cached_property
     def fees(self) -> "FeesResourceSync":
         from blindpay.resources.fees import create_fees_resource_sync
 
         return create_fees_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def limits(self) -> "LimitsResourceSync":
+        from blindpay.resources.limits import create_limits_resource_sync
+
+        return create_limits_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def upload(self) -> "UploadResourceSync":

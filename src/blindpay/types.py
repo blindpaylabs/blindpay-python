@@ -392,3 +392,19 @@ BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan"]
 PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted"]
 
 KycStatus = Literal["awaiting_contract", "compliance_request"]
+
+AipriseDocumentType = Literal[
+    "ADDRESS_PROOF_DOCUMENT",
+    "BANK_STATEMENT_DOCUMENT",
+    "OTHER",
+    "SOURCE_OF_FUNDS_DOCUMENT",
+    "TAX_CERTIFICATE",
+    "USER_SELFIE",
+    "VISA_DOCUMENT",
+]
+
+ApprovalRate = Literal["high", "low", "medium"]
+
+ManualExecutionStatus = Literal["failed"]
+
+WebhookEvent = Literal["receiver.delete"]

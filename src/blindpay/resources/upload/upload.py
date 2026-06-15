@@ -1,7 +1,7 @@
 from typing_extensions import Literal, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ...types import BlindpayApiResponse
+from ...types import ApprovalRate, BlindpayApiResponse
 
 UploadBucket = Literal["avatar", "onboarding", "limit_increase"]
 
@@ -15,12 +15,24 @@ class UploadResponse(TypedDict):
     url: str
 
 
+class UploadAnalyzeInput(TypedDict):
+    file: str
+
+
+class UploadAnalyzeOutput(TypedDict):
+    approval_rate: ApprovalRate
+    description: str
+
+
 class UploadResource:
     def __init__(self, client: InternalApiClient):
         self._client = client
 
     async def create(self, data: UploadInput) -> BlindpayApiResponse[UploadResponse]:
         return await self._client.post("/upload", data)
+
+    async def analyze(self, data: UploadAnalyzeInput) -> BlindpayApiResponse[UploadAnalyzeOutput]:
+        return await self._client.post("/upload/analyze", data)
 
 
 class UploadResourceSync:
@@ -29,6 +41,9 @@ class UploadResourceSync:
 
     def create(self, data: UploadInput) -> BlindpayApiResponse[UploadResponse]:
         return self._client.post("/upload", data)
+
+    def analyze(self, data: UploadAnalyzeInput) -> BlindpayApiResponse[UploadAnalyzeOutput]:
+        return self._client.post("/upload/analyze", data)
 
 
 def create_upload_resource(client: InternalApiClient) -> UploadResource:

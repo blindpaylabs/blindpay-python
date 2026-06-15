@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
+    ManualExecutionStatus,
     Network,
     PaginationMetadata,
     PaginationParams,
@@ -96,6 +97,7 @@ class Payin(TypedDict):
     pse_payment_link: Optional[str]
     pse_tax_id: Optional[str]
     partner_fee_id: Optional[str]
+    manual_execution_status: Optional[ManualExecutionStatus]
 
 
 class ListPayinsInput(PaginationParams):
