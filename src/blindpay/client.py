@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from blindpay.resources.payins.quotes import PayinQuotesResource, PayinQuotesResourceSync
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
-    from blindpay.resources.customers.customers import CustomersResource, CustomersResourceSync
     from blindpay.resources.receivers.receivers import ReceiversResource, ReceiversResourceSync
     from blindpay.resources.terms_of_service.terms_of_service import (
         TermsOfServiceResource,
