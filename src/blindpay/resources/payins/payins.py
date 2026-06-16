@@ -6,7 +6,6 @@ from ...types import (
     BlindpayApiResponse,
     ManualExecutionStatus,
     Network,
-    PaginationMetadata,
     PaginationParams,
     StablecoinToken,
     TrackingComplete,
@@ -105,9 +104,7 @@ class ListPayinsInput(PaginationParams):
     receiver_id: Optional[str]
 
 
-class ListPayinsResponse(TypedDict):
-    data: List[Payin]
-    pagination: PaginationMetadata
+ListPayinsResponse = List[Payin]
 
 
 class CreatePayinInput(TypedDict):

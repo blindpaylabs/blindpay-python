@@ -11,7 +11,6 @@ from ...types import (
     Country,
     Currency,
     Network,
-    PaginationMetadata,
     PaginationParams,
     Rail,
     SpeiProtocol,
@@ -105,9 +104,7 @@ class ListPayoutsInput(PaginationParams, total=False):
     receiver_id: str
 
 
-class ListPayoutsResponse(TypedDict):
-    data: List[Payout]
-    pagination: PaginationMetadata
+ListPayoutsResponse = List[Payout]
 
 
 class ExportPayoutsInput(TypedDict, total=False):

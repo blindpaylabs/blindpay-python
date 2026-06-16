@@ -12,9 +12,8 @@ class TestPayins:
 
     @pytest.mark.asyncio
     async def test_list_payins(self):
-        mocked_payins = {
-            "data": [
-                {
+        mocked_payins = [
+            {
                     "receiver_id": "re_000000000000",
                     "id": "re_000000000000",
                     "pix_code": (
@@ -101,13 +100,7 @@ class TestPayins:
                         },
                     },
                 },
-            ],
-            "pagination": {
-                "has_more": True,
-                "next_page": 3,
-                "prev_page": 1,
-            },
-        }
+        ]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_payins, "error": None}
@@ -409,9 +402,8 @@ class TestPayinsSync:
         self.blindpay = BlindPaySync(api_key="test-key", instance_id="in_000000000000")
 
     def test_list_payins(self):
-        mocked_payins = {
-            "data": [
-                {
+        mocked_payins = [
+            {
                     "receiver_id": "re_000000000000",
                     "id": "re_000000000000",
                     "pix_code": (
@@ -498,13 +490,7 @@ class TestPayinsSync:
                         },
                     },
                 },
-            ],
-            "pagination": {
-                "has_more": True,
-                "next_page": 3,
-                "prev_page": 1,
-            },
-        }
+        ]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_payins, "error": None}
