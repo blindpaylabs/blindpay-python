@@ -1,7 +1,6 @@
 import base64
 import hashlib
 import hmac
-import warnings
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 
@@ -28,7 +27,6 @@ if TYPE_CHECKING:
     from blindpay.resources.payins.quotes import PayinQuotesResource, PayinQuotesResourceSync
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
-    from blindpay.resources.receivers.receivers import ReceiversResource, ReceiversResourceSync
     from blindpay.resources.terms_of_service.terms_of_service import (
         TermsOfServiceResource,
         TermsOfServiceResourceSync,
@@ -43,12 +41,7 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
-__version__ = "2.3.0"
-
-_RECEIVERS_DEPRECATION_MESSAGE = (
-    "Use 'customers' instead. 'receivers' is deprecated and will be removed in "
-    "v3.0.0. See https://www.blindpay.com/changelog/2026-06-04-customers-rename"
-)
+__version__ = "3.0.0"
 
 T = TypeVar("T")
 
@@ -233,27 +226,6 @@ class _CustomersNamespace:
         return getattr(self._base, name)
 
 
-class _ReceiversNamespace:
-    def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
-        self._instance_id = instance_id
-        self._api = api_client
-
-    @cached_property
-    def _base(self) -> "ReceiversResource":
-        from blindpay.resources.receivers.receivers import create_receivers_resource
-
-        return create_receivers_resource(self._instance_id, self._api)
-
-    @cached_property
-    def bank_accounts(self) -> "BankAccountsResource":
-        from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource
-
-        return create_bank_accounts_resource(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
-
-
 class _WalletsNamespace:
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
         self._instance_id = instance_id
@@ -344,11 +316,6 @@ class BlindPay:
     @cached_property
     def customers(self) -> _CustomersNamespace:
         return _CustomersNamespace(self._instance_id, self._api)
-
-    @cached_property
-    def receivers(self) -> _ReceiversNamespace:
-        warnings.warn(_RECEIVERS_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
-        return _ReceiversNamespace(self._instance_id, self._api)
 
     @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResource":
@@ -501,27 +468,6 @@ class _CustomersNamespaceSync:
         return getattr(self._base, name)
 
 
-class _ReceiversNamespaceSync:
-    def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
-        self._instance_id = instance_id
-        self._api = api_client
-
-    @cached_property
-    def _base(self) -> "ReceiversResourceSync":
-        from blindpay.resources.receivers.receivers import create_receivers_resource_sync
-
-        return create_receivers_resource_sync(self._instance_id, self._api)
-
-    @cached_property
-    def bank_accounts(self) -> "BankAccountsResourceSync":
-        from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource_sync
-
-        return create_bank_accounts_resource_sync(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
-
-
 class _WalletsNamespaceSync:
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
         self._instance_id = instance_id
@@ -612,11 +558,6 @@ class BlindPaySync:
     @cached_property
     def customers(self) -> _CustomersNamespaceSync:
         return _CustomersNamespaceSync(self._instance_id, self._api)
-
-    @cached_property
-    def receivers(self) -> _ReceiversNamespaceSync:
-        warnings.warn(_RECEIVERS_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
-        return _ReceiversNamespaceSync(self._instance_id, self._api)
 
     @cached_property
     def virtual_accounts(self) -> "VirtualAccountsResourceSync":

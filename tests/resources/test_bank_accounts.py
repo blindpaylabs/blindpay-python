@@ -23,7 +23,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_pix_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_pix(
+            response = await self.blindpay.customers.bank_accounts.create_pix(
                 {
                     "customer_id": "re_000000000000",
                     "name": "PIX Account",
@@ -49,7 +49,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_argentina_transfers_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_argentina_transfers(
+            response = await self.blindpay.customers.bank_accounts.create_argentina_transfers(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Argentina Transfers Account",
@@ -78,7 +78,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_spei_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_spei(
+            response = await self.blindpay.customers.bank_accounts.create_spei(
                 {
                     "customer_id": "re_000000000000",
                     "name": "SPEI Account",
@@ -112,7 +112,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_colombia_ach_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_colombia_ach(
+            response = await self.blindpay.customers.bank_accounts.create_colombia_ach(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Colombia ACH Account",
@@ -160,7 +160,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_ach_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_ach(
+            response = await self.blindpay.customers.bank_accounts.create_ach(
                 {
                     "customer_id": "re_000000000000",
                     "name": "ACH Account",
@@ -196,7 +196,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_wire_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_wire(
+            response = await self.blindpay.customers.bank_accounts.create_wire(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Wire Account",
@@ -254,7 +254,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_international_swift_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_international_swift(
+            response = await self.blindpay.customers.bank_accounts.create_international_swift(
                 {
                     "customer_id": "re_000000000000",
                     "name": "International Swift Account",
@@ -307,7 +307,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_rtp_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.create_rtp(
+            response = await self.blindpay.customers.bank_accounts.create_rtp(
                 {
                     "customer_id": "re_000000000000",
                     "name": "John Doe RTP",
@@ -346,7 +346,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_account, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.get("re_000000000000", "ba_000000000000")
+            response = await self.blindpay.customers.bank_accounts.get("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
             assert response["data"] == mocked_bank_account
@@ -424,7 +424,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_accounts, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.list("re_000000000000")
+            response = await self.blindpay.customers.bank_accounts.list("re_000000000000")
 
             assert response["error"] is None
             assert response["data"] == mocked_bank_accounts
@@ -434,7 +434,7 @@ class TestBankAccounts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = await self.blindpay.receivers.bank_accounts.delete("re_000000000000", "ba_000000000000")
+            response = await self.blindpay.customers.bank_accounts.delete("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
             assert response["data"] == {"data": None}
@@ -457,7 +457,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_pix_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_pix(
+            response = self.blindpay.customers.bank_accounts.create_pix(
                 {
                     "customer_id": "re_000000000000",
                     "name": "PIX Account",
@@ -482,7 +482,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_argentina_transfers_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_argentina_transfers(
+            response = self.blindpay.customers.bank_accounts.create_argentina_transfers(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Argentina Transfers Account",
@@ -510,7 +510,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_spei_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_spei(
+            response = self.blindpay.customers.bank_accounts.create_spei(
                 {
                     "customer_id": "re_000000000000",
                     "name": "SPEI Account",
@@ -543,7 +543,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_colombia_ach_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_colombia_ach(
+            response = self.blindpay.customers.bank_accounts.create_colombia_ach(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Colombia ACH Account",
@@ -590,7 +590,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_ach_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_ach(
+            response = self.blindpay.customers.bank_accounts.create_ach(
                 {
                     "customer_id": "re_000000000000",
                     "name": "ACH Account",
@@ -625,7 +625,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_wire_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_wire(
+            response = self.blindpay.customers.bank_accounts.create_wire(
                 {
                     "customer_id": "re_000000000000",
                     "name": "Wire Account",
@@ -682,7 +682,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_international_swift_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_international_swift(
+            response = self.blindpay.customers.bank_accounts.create_international_swift(
                 {
                     "customer_id": "re_000000000000",
                     "name": "International Swift Account",
@@ -734,7 +734,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_rtp_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.create_rtp(
+            response = self.blindpay.customers.bank_accounts.create_rtp(
                 {
                     "customer_id": "re_000000000000",
                     "name": "John Doe RTP",
@@ -772,7 +772,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_account, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.get("re_000000000000", "ba_000000000000")
+            response = self.blindpay.customers.bank_accounts.get("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
             assert response["data"] == mocked_bank_account
@@ -849,7 +849,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_accounts, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.list("re_000000000000")
+            response = self.blindpay.customers.bank_accounts.list("re_000000000000")
 
             assert response["error"] is None
             assert response["data"] == mocked_bank_accounts
@@ -858,7 +858,7 @@ class TestBankAccountsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": {"data": None}, "error": None}
 
-            response = self.blindpay.receivers.bank_accounts.delete("re_000000000000", "ba_000000000000")
+            response = self.blindpay.customers.bank_accounts.delete("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
             assert response["data"] == {"data": None}
