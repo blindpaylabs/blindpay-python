@@ -17,7 +17,7 @@ class TestOfframpWallets:
                 "id": "ow_000000000000",
                 "external_id": "your_external_id",
                 "instance_id": "in_000000000000",
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "bank_account_id": "ba_000000000000",
                 "network": "tron",
                 "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -31,7 +31,7 @@ class TestOfframpWallets:
 
             response = await self.blindpay.wallets.offramp.list(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "bank_account_id": "ba_000000000000",
                 }
             )
@@ -40,7 +40,7 @@ class TestOfframpWallets:
             assert response["data"] == mocked_offramp_wallets
             mock_request.assert_called_once_with(
                 "GET",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
             )
 
     @pytest.mark.asyncio
@@ -59,7 +59,7 @@ class TestOfframpWallets:
                 {
                     "external_id": "your_external_id",
                     "network": "tron",
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "bank_account_id": "ba_000000000000",
                 }
             )
@@ -68,7 +68,7 @@ class TestOfframpWallets:
             assert response["data"] == mocked_offramp_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
                 {
                     "external_id": "your_external_id",
                     "network": "tron",
@@ -81,7 +81,7 @@ class TestOfframpWallets:
             "id": "ow_000000000000",
             "external_id": "your_external_id",
             "instance_id": "in_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "bank_account_id": "ba_000000000000",
             "network": "tron",
             "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -96,7 +96,7 @@ class TestOfframpWallets:
                 {
                     "id": "ow_000000000000",
                     "bank_account_id": "ba_000000000000",
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                 }
             )
 
@@ -104,7 +104,7 @@ class TestOfframpWallets:
             assert response["data"] == mocked_offramp_wallet
             mock_request.assert_called_once_with(
                 "GET",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets/ow_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets/ow_000000000000",
             )
 
 
@@ -119,7 +119,7 @@ class TestOfframpWalletsSync:
                 "id": "ow_000000000000",
                 "external_id": "your_external_id",
                 "instance_id": "in_000000000000",
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "bank_account_id": "ba_000000000000",
                 "network": "tron",
                 "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -133,7 +133,7 @@ class TestOfframpWalletsSync:
 
             response = self.blindpay.wallets.offramp.list(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "bank_account_id": "ba_000000000000",
                 }
             )
@@ -142,7 +142,7 @@ class TestOfframpWalletsSync:
             assert response["data"] == mocked_offramp_wallets
             mock_request.assert_called_once_with(
                 "GET",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
             )
 
     def test_create_offramp_wallet(self):
@@ -160,7 +160,7 @@ class TestOfframpWalletsSync:
                 {
                     "external_id": "your_external_id",
                     "network": "tron",
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "bank_account_id": "ba_000000000000",
                 }
             )
@@ -169,7 +169,7 @@ class TestOfframpWalletsSync:
             assert response["data"] == mocked_offramp_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
                 {
                     "external_id": "your_external_id",
                     "network": "tron",
@@ -181,7 +181,7 @@ class TestOfframpWalletsSync:
             "id": "ow_000000000000",
             "external_id": "your_external_id",
             "instance_id": "in_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "bank_account_id": "ba_000000000000",
             "network": "tron",
             "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -196,7 +196,7 @@ class TestOfframpWalletsSync:
                 {
                     "id": "ow_000000000000",
                     "bank_account_id": "ba_000000000000",
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                 }
             )
 
@@ -204,5 +204,5 @@ class TestOfframpWalletsSync:
             assert response["data"] == mocked_offramp_wallet
             mock_request.assert_called_once_with(
                 "GET",
-                "/instances/in_000000000000/receivers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets/ow_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets/ow_000000000000",
             )

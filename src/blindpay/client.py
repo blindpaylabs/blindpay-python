@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import warnings
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 
@@ -43,6 +44,11 @@ if TYPE_CHECKING:
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
 __version__ = "2.3.0"
+
+_RECEIVERS_DEPRECATION_MESSAGE = (
+    "Use 'customers' instead. 'receivers' is deprecated and will be removed in "
+    "v3.0.0. See https://www.blindpay.com/changelog/2026-06-04-customers-rename"
+)
 
 T = TypeVar("T")
 
@@ -206,6 +212,27 @@ class _PayinsNamespace:
         return getattr(self._base, name)
 
 
+class _CustomersNamespace:
+    def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
+        self._instance_id = instance_id
+        self._api = api_client
+
+    @cached_property
+    def _base(self) -> "CustomersResource":
+        from blindpay.resources.customers.customers import create_customers_resource
+
+        return create_customers_resource(self._instance_id, self._api)
+
+    @cached_property
+    def bank_accounts(self) -> "BankAccountsResource":
+        from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource
+
+        return create_bank_accounts_resource(self._instance_id, self._api)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._base, name)
+
+
 class _ReceiversNamespace:
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
         self._instance_id = instance_id
@@ -315,7 +342,12 @@ class BlindPay:
         return create_payouts_resource(self._instance_id, self._api)
 
     @cached_property
+    def customers(self) -> _CustomersNamespace:
+        return _CustomersNamespace(self._instance_id, self._api)
+
+    @cached_property
     def receivers(self) -> _ReceiversNamespace:
+        warnings.warn(_RECEIVERS_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
         return _ReceiversNamespace(self._instance_id, self._api)
 
     @cached_property
@@ -333,12 +365,6 @@ class BlindPay:
         from blindpay.resources.transfers import create_transfers_resource
 
         return create_transfers_resource(self._instance_id, self._api)
-
-    @cached_property
-    def customers(self) -> "CustomersResource":
-        from blindpay.resources.customers import create_customers_resource
-
-        return create_customers_resource(self._instance_id, self._api)
 
     @cached_property
     def fees(self) -> "FeesResource":
@@ -454,6 +480,27 @@ class _PayinsNamespaceSync:
         return getattr(self._base, name)
 
 
+class _CustomersNamespaceSync:
+    def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
+        self._instance_id = instance_id
+        self._api = api_client
+
+    @cached_property
+    def _base(self) -> "CustomersResourceSync":
+        from blindpay.resources.customers.customers import create_customers_resource_sync
+
+        return create_customers_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def bank_accounts(self) -> "BankAccountsResourceSync":
+        from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource_sync
+
+        return create_bank_accounts_resource_sync(self._instance_id, self._api)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._base, name)
+
+
 class _ReceiversNamespaceSync:
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
         self._instance_id = instance_id
@@ -563,7 +610,12 @@ class BlindPaySync:
         return create_payouts_resource_sync(self._instance_id, self._api)
 
     @cached_property
+    def customers(self) -> _CustomersNamespaceSync:
+        return _CustomersNamespaceSync(self._instance_id, self._api)
+
+    @cached_property
     def receivers(self) -> _ReceiversNamespaceSync:
+        warnings.warn(_RECEIVERS_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
         return _ReceiversNamespaceSync(self._instance_id, self._api)
 
     @cached_property
@@ -581,12 +633,6 @@ class BlindPaySync:
         from blindpay.resources.transfers import create_transfers_resource_sync
 
         return create_transfers_resource_sync(self._instance_id, self._api)
-
-    @cached_property
-    def customers(self) -> "CustomersResourceSync":
-        from blindpay.resources.customers import create_customers_resource_sync
-
-        return create_customers_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def fees(self) -> "FeesResourceSync":

@@ -14,7 +14,7 @@ class TestCustodialWallets:
     async def test_create_custodial_wallet(self):
         mocked_wallet = {
             "id": "cw_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "instance_id": "in_000000000000",
             "network": "solana",
             "address": "So1ana1234567890",
@@ -26,7 +26,7 @@ class TestCustodialWallets:
 
             response = await self.blindpay.wallets.custodial.create(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "network": "solana",
                 }
             )
@@ -38,7 +38,7 @@ class TestCustodialWallets:
             assert response["data"]["address"] == "So1ana1234567890"
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/wallets",
+                "/instances/in_000000000000/customers/re_000000000000/wallets",
                 {"network": "solana"},
             )
 
@@ -47,7 +47,7 @@ class TestCustodialWallets:
         mocked_wallets = [
             {
                 "id": "cw_000000000000",
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "instance_id": "in_000000000000",
                 "network": "solana",
                 "address": "So1ana1234567890",
@@ -64,13 +64,13 @@ class TestCustodialWallets:
             assert response["data"] is not None
             assert len(response["data"]) == 1
             assert response["data"][0]["id"] == "cw_000000000000"
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_000000000000/wallets")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_000000000000/wallets")
 
     @pytest.mark.asyncio
     async def test_get_custodial_wallet(self):
         mocked_wallet = {
             "id": "cw_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "instance_id": "in_000000000000",
             "network": "solana",
             "address": "So1ana1234567890",
@@ -81,14 +81,14 @@ class TestCustodialWallets:
             mock_request.return_value = {"data": mocked_wallet, "error": None}
 
             response = await self.blindpay.wallets.custodial.get(
-                {"receiver_id": "re_000000000000", "id": "cw_000000000000"}
+                {"customer_id": "re_000000000000", "id": "cw_000000000000"}
             )
 
             assert response["error"] is None
             assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000"
             )
 
     @pytest.mark.asyncio
@@ -111,7 +111,7 @@ class TestCustodialWallets:
             mock_request.return_value = {"data": mocked_balance, "error": None}
 
             response = await self.blindpay.wallets.custodial.get_balance(
-                {"receiver_id": "re_000000000000", "id": "cw_000000000000"}
+                {"customer_id": "re_000000000000", "id": "cw_000000000000"}
             )
 
             assert response["error"] is None
@@ -122,7 +122,7 @@ class TestCustodialWallets:
             assert response["data"]["usdt"]["amount"] == 0.0
             assert response["data"]["usdb"] is None
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000/balance"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000/balance"
             )
 
     @pytest.mark.asyncio
@@ -131,12 +131,12 @@ class TestCustodialWallets:
             mock_request.return_value = {"data": None, "error": None}
 
             response = await self.blindpay.wallets.custodial.delete(
-                {"receiver_id": "re_000000000000", "id": "cw_000000000000"}
+                {"customer_id": "re_000000000000", "id": "cw_000000000000"}
             )
 
             assert response["error"] is None
             mock_request.assert_called_once_with(
-                "DELETE", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000", None
+                "DELETE", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000", None
             )
 
 
@@ -148,7 +148,7 @@ class TestCustodialWalletsSync:
     def test_create_custodial_wallet(self):
         mocked_wallet = {
             "id": "cw_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "instance_id": "in_000000000000",
             "network": "solana",
             "address": "So1ana1234567890",
@@ -160,7 +160,7 @@ class TestCustodialWalletsSync:
 
             response = self.blindpay.wallets.custodial.create(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "network": "solana",
                 }
             )
@@ -170,7 +170,7 @@ class TestCustodialWalletsSync:
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/wallets",
+                "/instances/in_000000000000/customers/re_000000000000/wallets",
                 {"network": "solana"},
             )
 
@@ -178,7 +178,7 @@ class TestCustodialWalletsSync:
         mocked_wallets = [
             {
                 "id": "cw_000000000000",
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "instance_id": "in_000000000000",
                 "network": "solana",
                 "address": "So1ana1234567890",
@@ -194,12 +194,12 @@ class TestCustodialWalletsSync:
             assert response["error"] is None
             assert response["data"] is not None
             assert len(response["data"]) == 1
-            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/receivers/re_000000000000/wallets")
+            mock_request.assert_called_once_with("GET", "/instances/in_000000000000/customers/re_000000000000/wallets")
 
     def test_get_custodial_wallet(self):
         mocked_wallet = {
             "id": "cw_000000000000",
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "instance_id": "in_000000000000",
             "network": "solana",
             "address": "So1ana1234567890",
@@ -209,13 +209,13 @@ class TestCustodialWalletsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_wallet, "error": None}
 
-            response = self.blindpay.wallets.custodial.get({"receiver_id": "re_000000000000", "id": "cw_000000000000"})
+            response = self.blindpay.wallets.custodial.get({"customer_id": "re_000000000000", "id": "cw_000000000000"})
 
             assert response["error"] is None
             assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000"
             )
 
     def test_get_custodial_wallet_balance(self):
@@ -237,7 +237,7 @@ class TestCustodialWalletsSync:
             mock_request.return_value = {"data": mocked_balance, "error": None}
 
             response = self.blindpay.wallets.custodial.get_balance(
-                {"receiver_id": "re_000000000000", "id": "cw_000000000000"}
+                {"customer_id": "re_000000000000", "id": "cw_000000000000"}
             )
 
             assert response["error"] is None
@@ -245,7 +245,7 @@ class TestCustodialWalletsSync:
             assert response["data"]["usdc"] is not None
             assert response["data"]["usdc"]["amount"] == 150.50
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000/balance"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000/balance"
             )
 
     def test_delete_custodial_wallet(self):
@@ -253,10 +253,10 @@ class TestCustodialWalletsSync:
             mock_request.return_value = {"data": None, "error": None}
 
             response = self.blindpay.wallets.custodial.delete(
-                {"receiver_id": "re_000000000000", "id": "cw_000000000000"}
+                {"customer_id": "re_000000000000", "id": "cw_000000000000"}
             )
 
             assert response["error"] is None
             mock_request.assert_called_once_with(
-                "DELETE", "/instances/in_000000000000/receivers/re_000000000000/wallets/cw_000000000000", None
+                "DELETE", "/instances/in_000000000000/customers/re_000000000000/wallets/cw_000000000000", None
             )

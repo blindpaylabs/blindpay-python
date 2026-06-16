@@ -60,6 +60,7 @@ Rail = Literal[
     "international_swift",
     "rtp",
     "ted",
+    "sepa",
 ]
 
 AccountClass = Literal["individual", "business"]
@@ -406,5 +407,6 @@ AipriseDocumentType = Literal[
 ApprovalRate = Literal["high", "low", "medium"]
 
 ManualExecutionStatus = Literal["failed"]
+
 
 WebhookEvent = Literal["receiver.delete"]

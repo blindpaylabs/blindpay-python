@@ -22,7 +22,7 @@ class TestBlockchainWallets:
             assert response["error"] is None
             assert response["data"] == mocked_message
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/sign-message"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/sign-message"
             )
 
     @pytest.mark.asyncio
@@ -35,7 +35,7 @@ class TestBlockchainWallets:
                 "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
                 "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
                 "is_account_abstraction": False,
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
             }
         ]
 
@@ -47,7 +47,7 @@ class TestBlockchainWallets:
             assert response["error"] is None
             assert response["data"] == mocked_wallets
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets"
             )
 
     @pytest.mark.asyncio
@@ -59,7 +59,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": None,
             "is_account_abstraction": True,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -67,7 +67,7 @@ class TestBlockchainWallets:
 
             response = await self.blindpay.wallets.blockchain.create_with_address(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wallet Display Name",
                     "network": "polygon",
                     "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
@@ -78,7 +78,7 @@ class TestBlockchainWallets:
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets",
                 {
                     "name": "Wallet Display Name",
                     "network": "polygon",
@@ -96,7 +96,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -104,7 +104,7 @@ class TestBlockchainWallets:
 
             response = await self.blindpay.wallets.blockchain.create_with_hash(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wallet Display Name",
                     "network": "polygon",
                     "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
@@ -115,7 +115,7 @@ class TestBlockchainWallets:
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets",
                 {
                     "name": "Wallet Display Name",
                     "network": "polygon",
@@ -133,7 +133,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -141,7 +141,7 @@ class TestBlockchainWallets:
 
             response = await self.blindpay.wallets.blockchain.get(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "bw_000000000000",
                 }
             )
@@ -149,7 +149,7 @@ class TestBlockchainWallets:
             assert response["error"] is None
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/bw_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000"
             )
 
     @pytest.mark.asyncio
@@ -159,7 +159,7 @@ class TestBlockchainWallets:
 
             response = await self.blindpay.wallets.blockchain.delete(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "bw_000000000000",
                 }
             )
@@ -168,7 +168,7 @@ class TestBlockchainWallets:
             assert response["data"] == {"data": None}
             mock_request.assert_called_once_with(
                 "DELETE",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/bw_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000",
                 None,
             )
 
@@ -303,7 +303,7 @@ class TestBlockchainWalletsSync:
             assert response["error"] is None
             assert response["data"] == mocked_message
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/sign-message"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/sign-message"
             )
 
     def test_list_blockchain_wallets(self):
@@ -315,7 +315,7 @@ class TestBlockchainWalletsSync:
                 "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
                 "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
                 "is_account_abstraction": False,
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
             }
         ]
 
@@ -327,7 +327,7 @@ class TestBlockchainWalletsSync:
             assert response["error"] is None
             assert response["data"] == mocked_wallets
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets"
             )
 
     def test_create_blockchain_wallet_with_address(self):
@@ -338,7 +338,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": None,
             "is_account_abstraction": True,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -346,7 +346,7 @@ class TestBlockchainWalletsSync:
 
             response = self.blindpay.wallets.blockchain.create_with_address(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wallet Display Name",
                     "network": "polygon",
                     "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
@@ -357,7 +357,7 @@ class TestBlockchainWalletsSync:
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets",
                 {
                     "name": "Wallet Display Name",
                     "network": "polygon",
@@ -374,7 +374,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -382,7 +382,7 @@ class TestBlockchainWalletsSync:
 
             response = self.blindpay.wallets.blockchain.create_with_hash(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "name": "Wallet Display Name",
                     "network": "polygon",
                     "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
@@ -393,7 +393,7 @@ class TestBlockchainWalletsSync:
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets",
                 {
                     "name": "Wallet Display Name",
                     "network": "polygon",
@@ -410,7 +410,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -418,7 +418,7 @@ class TestBlockchainWalletsSync:
 
             response = self.blindpay.wallets.blockchain.get(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "bw_000000000000",
                 }
             )
@@ -426,7 +426,7 @@ class TestBlockchainWalletsSync:
             assert response["error"] is None
             assert response["data"] == mocked_wallet
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/bw_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000"
             )
 
     def test_delete_blockchain_wallet(self):
@@ -435,7 +435,7 @@ class TestBlockchainWalletsSync:
 
             response = self.blindpay.wallets.blockchain.delete(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "bw_000000000000",
                 }
             )
@@ -444,7 +444,7 @@ class TestBlockchainWalletsSync:
             assert response["data"] == {"data": None}
             mock_request.assert_called_once_with(
                 "DELETE",
-                "/instances/in_000000000000/receivers/re_000000000000/blockchain-wallets/bw_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000",
                 None,
             )
 

@@ -28,7 +28,7 @@ class TestVirtualAccounts:
             assert response["data"] == {"data": None}
             mock_request.assert_called_once_with(
                 "PUT",
-                "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts/va_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000",
                 {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
             )
 
@@ -71,7 +71,7 @@ class TestVirtualAccounts:
 
             response = await self.blindpay.virtual_accounts.create(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "blockchain_wallet_id": "bw_000000000000",
                     "token": "USDC",
                 }
@@ -81,7 +81,7 @@ class TestVirtualAccounts:
             assert response["data"] == mocked_virtual_account
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts",
+                "/instances/in_000000000000/customers/re_000000000000/virtual-accounts",
                 {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
             )
 
@@ -127,7 +127,7 @@ class TestVirtualAccounts:
             assert response["error"] is None
             assert response["data"] == mocked_virtual_account
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts/va_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000"
             )
 
 
@@ -153,7 +153,7 @@ class TestVirtualAccountsSync:
             assert response["data"] == {"data": None}
             mock_request.assert_called_once_with(
                 "PUT",
-                "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts/va_000000000000",
+                "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000",
                 {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
             )
 
@@ -195,7 +195,7 @@ class TestVirtualAccountsSync:
 
             response = self.blindpay.virtual_accounts.create(
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "blockchain_wallet_id": "bw_000000000000",
                     "token": "USDC",
                 }
@@ -205,7 +205,7 @@ class TestVirtualAccountsSync:
             assert response["data"] == mocked_virtual_account
             mock_request.assert_called_once_with(
                 "POST",
-                "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts",
+                "/instances/in_000000000000/customers/re_000000000000/virtual-accounts",
                 {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
             )
 
@@ -250,5 +250,5 @@ class TestVirtualAccountsSync:
             assert response["error"] is None
             assert response["data"] == mocked_virtual_account
             mock_request.assert_called_once_with(
-                "GET", "/instances/in_000000000000/receivers/re_000000000000/virtual-accounts/va_000000000000"
+                "GET", "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000"
             )

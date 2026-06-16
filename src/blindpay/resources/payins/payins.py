@@ -63,6 +63,7 @@ class Payin(TypedDict):
     memo_code: Optional[str]
     clabe: Optional[str]
     status: TransactionStatus
+    manual_execution_status: Optional[ManualExecutionStatus]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: Optional[TrackingTransaction]
@@ -97,7 +98,6 @@ class Payin(TypedDict):
     pse_payment_link: Optional[str]
     pse_tax_id: Optional[str]
     partner_fee_id: Optional[str]
-    manual_execution_status: Optional[ManualExecutionStatus]
 
 
 class ListPayinsInput(PaginationParams):
@@ -141,6 +141,7 @@ class GetPayinTrackResponse(TypedDict):
     memo_code: str
     clabe: str
     status: str
+    manual_execution_status: Optional[ManualExecutionStatus]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
