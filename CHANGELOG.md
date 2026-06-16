@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.3.0...v2.4.0) (2026-06-16)
+
+
+### Features
+
+* add customers resource, deprecate receivers (v2.3.0) ([#48](https://github.com/blindpaylabs/blindpay-python/issues/48)) ([28b8197](https://github.com/blindpaylabs/blindpay-python/commit/28b81975ded85fb572551e2e52eb3e19a13ce9da))
+
 ## [2.3.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.2.0...v2.3.0) (2026-06-16)
 
 
