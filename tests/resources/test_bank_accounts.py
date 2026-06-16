@@ -353,9 +353,8 @@ class TestBankAccounts:
 
     @pytest.mark.asyncio
     async def test_list_bank_accounts(self):
-        mocked_bank_accounts = {
-            "data": [
-                {
+        mocked_bank_accounts = [
+            {
                     "id": "ba_000000000000",
                     "type": "wire",
                     "name": "Bank Account Name",
@@ -422,8 +421,7 @@ class TestBankAccounts:
                     ],
                     "created_at": "2021-01-01T00:00:00Z",
                 },
-            ],
-        }
+        ]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_accounts, "error": None}
@@ -782,9 +780,8 @@ class TestBankAccountsSync:
             assert response["data"] == mocked_bank_account
 
     def test_list_bank_accounts(self):
-        mocked_bank_accounts = {
-            "data": [
-                {
+        mocked_bank_accounts = [
+            {
                     "id": "ba_000000000000",
                     "type": "wire",
                     "name": "Bank Account Name",
@@ -851,8 +848,7 @@ class TestBankAccountsSync:
                     ],
                     "created_at": "2021-01-01T00:00:00Z",
                 },
-            ],
-        }
+        ]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_accounts, "error": None}
