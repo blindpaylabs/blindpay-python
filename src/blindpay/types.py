@@ -60,6 +60,7 @@ Rail = Literal[
     "international_swift",
     "rtp",
     "ted",
+    "sepa",
 ]
 
 AccountClass = Literal["individual", "business"]

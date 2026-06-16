@@ -1,8 +1,6 @@
 from typing import List, Optional, TypedDict
 from urllib.parse import urlencode
 
-from typing_extensions import Literal
-
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
@@ -17,8 +15,6 @@ from ...types import (
     TrackingTransaction,
     TransactionStatus,
 )
-
-ManualExecutionStatus = Literal["failed"]
 
 
 class AchDetails(TypedDict):
@@ -102,7 +98,6 @@ class Payin(TypedDict):
     pse_payment_link: Optional[str]
     pse_tax_id: Optional[str]
     partner_fee_id: Optional[str]
-    manual_execution_status: Optional[ManualExecutionStatus]
 
 
 class ListPayinsInput(PaginationParams):

@@ -367,12 +367,6 @@ class BlindPay:
         return create_transfers_resource(self._instance_id, self._api)
 
     @cached_property
-    def customers(self) -> "CustomersResource":
-        from blindpay.resources.customers import create_customers_resource
-
-        return create_customers_resource(self._instance_id, self._api)
-
-    @cached_property
     def fees(self) -> "FeesResource":
         from blindpay.resources.fees import create_fees_resource
 
@@ -639,12 +633,6 @@ class BlindPaySync:
         from blindpay.resources.transfers import create_transfers_resource_sync
 
         return create_transfers_resource_sync(self._instance_id, self._api)
-
-    @cached_property
-    def customers(self) -> "CustomersResourceSync":
-        from blindpay.resources.customers import create_customers_resource_sync
-
-        return create_customers_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def fees(self) -> "FeesResourceSync":
