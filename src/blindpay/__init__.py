@@ -1,9 +1,11 @@
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 
 from ._internal.exceptions import BlindPayError
 from .client import BlindPay, BlindPaySync
 from .types import (
     AccountClass,
+    AipriseDocumentType,
+    ApprovalRate,
     BankAccountType,
     BankingPartner,
     BlindpayApiResponse,
@@ -13,6 +15,7 @@ from .types import (
     Currency,
     CurrencyType,
     ErrorResponse,
+    ManualExecutionStatus,
     Network,
     PaginationMetadata,
     PaginationParams,
@@ -27,6 +30,7 @@ from .types import (
     TrackingTransaction,
     TransactionDocumentType,
     TransactionStatus,
+    WebhookEvent,
 )
 
 __all__ = [
@@ -34,11 +38,14 @@ __all__ = [
     "BlindPaySync",
     "BlindPayError",
     "AccountClass",
+    "AipriseDocumentType",
+    "ApprovalRate",
     "BankAccountType",
     "BankingPartner",
     "Country",
     "Currency",
     "CurrencyType",
+    "ManualExecutionStatus",
     "Network",
     "PaymentMethod",
     "Rail",
@@ -46,6 +53,7 @@ __all__ = [
     "StablecoinToken",
     "TransactionDocumentType",
     "TransactionStatus",
+    "WebhookEvent",
     "BlindpayApiResponse",
     "BlindpayErrorResponse",
     "BlindpaySuccessResponse",

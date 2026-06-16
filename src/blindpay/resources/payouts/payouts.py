@@ -96,6 +96,9 @@ class Payout(TypedDict):
     ted_bank_code: Optional[str]
     ted_branch_code: Optional[str]
     ted_cpf_cnpj: Optional[str]
+    billing_fee_amount: Optional[float]
+    cpn_payment_id: Optional[str]
+    sender_legal_name: Optional[str]
 
 
 class ListPayoutsInput(PaginationParams, total=False):
