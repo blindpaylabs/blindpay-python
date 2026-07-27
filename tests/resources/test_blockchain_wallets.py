@@ -35,7 +35,7 @@ class TestBlockchainWallets:
                 "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
                 "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
                 "is_account_abstraction": False,
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
             }
         ]
 
@@ -47,7 +47,7 @@ class TestBlockchainWallets:
             assert response["error"] is None
             assert response["data"] == mocked_wallets
             assert response["data"] is not None
-            assert response["data"][0]["receiver_id"] == "re_000000000000"
+            assert response["data"][0]["customer_id"] == "re_000000000000"
             mock_request.assert_called_once_with(
                 "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets"
             )
@@ -61,7 +61,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": None,
             "is_account_abstraction": True,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -98,7 +98,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -135,7 +135,7 @@ class TestBlockchainWallets:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -317,7 +317,7 @@ class TestBlockchainWalletsSync:
                 "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
                 "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
                 "is_account_abstraction": False,
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
             }
         ]
 
@@ -329,7 +329,7 @@ class TestBlockchainWalletsSync:
             assert response["error"] is None
             assert response["data"] == mocked_wallets
             assert response["data"] is not None
-            assert response["data"][0]["receiver_id"] == "re_000000000000"
+            assert response["data"][0]["customer_id"] == "re_000000000000"
             mock_request.assert_called_once_with(
                 "GET", "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets"
             )
@@ -342,7 +342,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": None,
             "is_account_abstraction": True,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -378,7 +378,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -414,7 +414,7 @@ class TestBlockchainWalletsSync:
             "address": "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
             "signature_tx_hash": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "is_account_abstraction": False,
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:

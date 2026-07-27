@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 from urllib.parse import urlencode
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -302,7 +302,10 @@ class TransactionLimit(TypedDict):
 class Owner(TypedDict):
     id: str
     instance_id: str
-    receiver_id: str
+    # Not yet added by the response middleware for nested owners; both keys are
+    # optional until the API sends customer_id here directly (post-#1799).
+    receiver_id: NotRequired[str]
+    customer_id: NotRequired[str]
     role: OwnerRole
     first_name: str
     last_name: str
@@ -704,7 +707,7 @@ class GetCustomerLimitsResponse(TypedDict):
 
 class LimitIncreaseRequest(TypedDict):
     id: str
-    receiver_id: str
+    customer_id: str
     status: LimitIncreaseRequestStatus
     daily: float
     monthly: float
