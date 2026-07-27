@@ -407,6 +407,3 @@ AipriseDocumentType = Literal[
 ApprovalRate = Literal["high", "low", "medium"]
 
 ManualExecutionStatus = Literal["failed"]
-
-
-WebhookEvent = Literal["receiver.delete"]

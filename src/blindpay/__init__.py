@@ -30,7 +30,6 @@ from .types import (
     TrackingTransaction,
     TransactionDocumentType,
     TransactionStatus,
-    WebhookEvent,
 )
 
 __all__ = [
@@ -53,7 +52,6 @@ __all__ = [
     "StablecoinToken",
     "TransactionDocumentType",
     "TransactionStatus",
-    "WebhookEvent",
     "BlindpayApiResponse",
     "BlindpayErrorResponse",
     "BlindpaySuccessResponse",

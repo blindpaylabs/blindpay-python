@@ -103,6 +103,7 @@ class Payin(TypedDict):
 class ListPayinsInput(PaginationParams):
     status: Optional[TransactionStatus]
     receiver_id: Optional[str]
+    customer_id: Optional[str]
 
 
 class ListPayinsResponse(TypedDict):

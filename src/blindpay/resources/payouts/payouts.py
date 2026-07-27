@@ -103,6 +103,7 @@ class Payout(TypedDict):
 
 class ListPayoutsInput(PaginationParams, total=False):
     receiver_id: str
+    customer_id: str
 
 
 class ListPayoutsResponse(TypedDict):
