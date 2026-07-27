@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.4.0...v2.5.0) (2026-07-27)
+
+
+### Features
+
+* **customers:** add customer.* webhook events and customer_id list filters ([#52](https://github.com/blindpaylabs/blindpay-python/issues/52)) ([562f219](https://github.com/blindpaylabs/blindpay-python/commit/562f2190dc53ecc6fc39a41a3d759b8ecb65cb39))
+
 ## [2.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.3.0...v2.4.0) (2026-06-16)
 
 
