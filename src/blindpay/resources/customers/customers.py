@@ -302,7 +302,7 @@ class TransactionLimit(TypedDict):
 class Owner(TypedDict):
     id: str
     instance_id: str
-    customer_id: str
+    receiver_id: str
     role: OwnerRole
     first_name: str
     last_name: str
@@ -704,7 +704,7 @@ class GetCustomerLimitsResponse(TypedDict):
 
 class LimitIncreaseRequest(TypedDict):
     id: str
-    customer_id: str
+    receiver_id: str
     status: LimitIncreaseRequestStatus
     daily: float
     monthly: float

@@ -10,7 +10,7 @@ class OfframpWallet(TypedDict):
     id: str
     external_id: str
     instance_id: str
-    customer_id: str
+    receiver_id: str
     bank_account_id: str
     network: Network
     address: str

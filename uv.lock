@@ -27,7 +27,7 @@ wheels = [
 
 [[package]]
 name = "blindpay"
-version = "2.1.0"
+version = "2.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

@@ -17,7 +17,7 @@ class TestOfframpWallets:
                 "id": "ow_000000000000",
                 "external_id": "your_external_id",
                 "instance_id": "in_000000000000",
-                "customer_id": "re_000000000000",
+                "receiver_id": "re_000000000000",
                 "bank_account_id": "ba_000000000000",
                 "network": "tron",
                 "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -38,6 +38,7 @@ class TestOfframpWallets:
 
             assert response["error"] is None
             assert response["data"] == mocked_offramp_wallets
+            assert response["data"][0]["receiver_id"] == "re_000000000000"
             mock_request.assert_called_once_with(
                 "GET",
                 "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",
@@ -81,7 +82,7 @@ class TestOfframpWallets:
             "id": "ow_000000000000",
             "external_id": "your_external_id",
             "instance_id": "in_000000000000",
-            "customer_id": "re_000000000000",
+            "receiver_id": "re_000000000000",
             "bank_account_id": "ba_000000000000",
             "network": "tron",
             "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -119,7 +120,7 @@ class TestOfframpWalletsSync:
                 "id": "ow_000000000000",
                 "external_id": "your_external_id",
                 "instance_id": "in_000000000000",
-                "customer_id": "re_000000000000",
+                "receiver_id": "re_000000000000",
                 "bank_account_id": "ba_000000000000",
                 "network": "tron",
                 "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -181,7 +182,7 @@ class TestOfframpWalletsSync:
             "id": "ow_000000000000",
             "external_id": "your_external_id",
             "instance_id": "in_000000000000",
-            "customer_id": "re_000000000000",
+            "receiver_id": "re_000000000000",
             "bank_account_id": "ba_000000000000",
             "network": "tron",
             "address": "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",

@@ -17,7 +17,7 @@ class BlockchainWallet(TypedDict):
     address: Optional[str]
     signature_tx_hash: Optional[str]
     is_account_abstraction: bool
-    customer_id: str
+    receiver_id: str
 
 
 ListBlockchainWalletsResponse = List[BlockchainWallet]
