@@ -6,8 +6,18 @@ from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse
 
 WebhookEvents = Literal[
+    # deprecated: use "customer.new" instead. See
+    # https://www.blindpay.com/changelog/2026-06-04-customers-rename
     "receiver.new",
+    # deprecated: use "customer.update" instead. See
+    # https://www.blindpay.com/changelog/2026-06-04-customers-rename
     "receiver.update",
+    # deprecated: use "customer.delete" instead. See
+    # https://www.blindpay.com/changelog/2026-06-04-customers-rename
+    "receiver.delete",
+    "customer.new",
+    "customer.update",
+    "customer.delete",
     "bankAccount.new",
     "payout.new",
     "payout.update",

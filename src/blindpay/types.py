@@ -408,5 +408,7 @@ ApprovalRate = Literal["high", "low", "medium"]
 
 ManualExecutionStatus = Literal["failed"]
 
-
+# Deprecated: use WebhookEvents from blindpay.resources.webhooks, which lists every
+# event. Kept exported so this stays an additive release; scheduled for removal in the
+# next major.
 WebhookEvent = Literal["receiver.delete"]

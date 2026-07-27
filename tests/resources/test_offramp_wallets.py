@@ -38,6 +38,8 @@ class TestOfframpWallets:
 
             assert response["error"] is None
             assert response["data"] == mocked_offramp_wallets
+            assert response["data"] is not None
+            assert response["data"][0]["customer_id"] == "re_000000000000"
             mock_request.assert_called_once_with(
                 "GET",
                 "/instances/in_000000000000/customers/re_000000000000/bank-accounts/ba_000000000000/offramp-wallets",

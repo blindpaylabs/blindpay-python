@@ -27,14 +27,14 @@ All API methods return a response dictionary with either `data` or `error`:
         instance_id="your_instance_id_here"
     )
 
-    response = await blindpay.receivers.get("receiver-id")
+    response = await blindpay.customers.get("customer-id")
 
     if response['error']:
         print(f"Error: {response['error']['message']}")
         return
 
-    receiver = response['data']
-    print(f"Receiver: {receiver}")
+    customer = response['data']
+    print(f"Customer: {customer}")
 ```
 
 ## Types
