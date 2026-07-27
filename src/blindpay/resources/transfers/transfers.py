@@ -24,9 +24,9 @@ class TransferTrackingStep(TypedDict):
 class CreateTransferQuoteInput(TypedDict, total=False):
     wallet_id: str
     sender_token: StablecoinToken
-    receiver_wallet_address: str
-    receiver_token: StablecoinToken
-    receiver_network: Network
+    customer_wallet_address: str
+    customer_token: StablecoinToken
+    customer_network: Network
     request_amount: int
     amount_reference: AmountReference
     cover_fees: Optional[bool]
@@ -57,10 +57,10 @@ class Transfer(TypedDict):
     sender_token: StablecoinToken
     sender_amount: float
     receiver_amount: float
-    receiver_token: StablecoinToken
-    receiver_network: Network
-    receiver_wallet_address: str
-    receiver_id: str
+    customer_token: StablecoinToken
+    customer_network: Network
+    customer_wallet_address: str
+    customer_id: str
     address: str
     network: str
     tracking_transaction_monitoring: TransferTrackingStep

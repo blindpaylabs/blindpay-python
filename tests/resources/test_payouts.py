@@ -15,7 +15,7 @@ class TestPayouts:
         mocked_payouts = {
             "data": [
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "pa_000000000000",
                     "status": "processing",
                     "sender_wallet_address": "0x123...890",
@@ -69,7 +69,7 @@ class TestPayouts:
                     "commercial_quotation": 495,
                     "blindpay_quotation": 485,
                     "total_fee_amount": 1.5,
-                    "receiver_local_amount": 1000,
+                    "customer_local_amount": 1000,
                     "currency": "BRL",
                     "transaction_document_file": "https://example.com/image.png",
                     "transaction_document_type": "invoice",
@@ -126,7 +126,7 @@ class TestPayouts:
     @pytest.mark.asyncio
     async def test_get_payout(self):
         mocked_payout = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "pa_000000000000",
             "status": "processing",
             "sender_wallet_address": "0x123...890",
@@ -180,7 +180,7 @@ class TestPayouts:
             "commercial_quotation": 495,
             "blindpay_quotation": 485,
             "total_fee_amount": 1.5,
-            "receiver_local_amount": 1000,
+            "customer_local_amount": 1000,
             "currency": "BRL",
             "transaction_document_file": "https://example.com/image.png",
             "transaction_document_type": "invoice",
@@ -231,7 +231,7 @@ class TestPayouts:
     async def test_export_payouts(self):
         mocked_export_payouts = [
             {
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "id": "pa_000000000000",
                 "status": "processing",
                 "sender_wallet_address": "0x123...890",
@@ -285,7 +285,7 @@ class TestPayouts:
                 "commercial_quotation": 495,
                 "blindpay_quotation": 485,
                 "total_fee_amount": 1.5,
-                "receiver_local_amount": 1000,
+                "customer_local_amount": 1000,
                 "currency": "BRL",
                 "transaction_document_file": "https://example.com/image.png",
                 "transaction_document_type": "invoice",
@@ -336,7 +336,7 @@ class TestPayouts:
     @pytest.mark.asyncio
     async def test_get_payout_track(self):
         mocked_payout_track = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "pa_000000000000",
             "status": "processing",
             "sender_wallet_address": "0x123...890",
@@ -390,7 +390,7 @@ class TestPayouts:
             "commercial_quotation": 495,
             "blindpay_quotation": 485,
             "total_fee_amount": 1.5,
-            "receiver_local_amount": 1000,
+            "customer_local_amount": 1000,
             "currency": "BRL",
             "transaction_document_file": "https://example.com/image.png",
             "transaction_document_type": "invoice",
@@ -502,7 +502,7 @@ class TestPayouts:
                 "estimated_time_of_arrival": "1_business_day",
                 "completed_at": "2011-10-05T14:48:00.000Z",
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -566,7 +566,7 @@ class TestPayouts:
                 "estimated_time_of_arrival": "1_business_day",
                 "completed_at": "2011-10-05T14:48:00.000Z",
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -600,7 +600,7 @@ class TestPayoutsSync:
         mocked_payouts = {
             "data": [
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "pa_000000000000",
                     "status": "processing",
                     "sender_wallet_address": "0x123...890",
@@ -654,7 +654,7 @@ class TestPayoutsSync:
                     "commercial_quotation": 495,
                     "blindpay_quotation": 485,
                     "total_fee_amount": 1.5,
-                    "receiver_local_amount": 1000,
+                    "customer_local_amount": 1000,
                     "currency": "BRL",
                     "transaction_document_file": "https://example.com/image.png",
                     "transaction_document_type": "invoice",
@@ -710,7 +710,7 @@ class TestPayoutsSync:
 
     def test_get_payout(self):
         mocked_payout = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "pa_000000000000",
             "status": "processing",
             "sender_wallet_address": "0x123...890",
@@ -764,7 +764,7 @@ class TestPayoutsSync:
             "commercial_quotation": 495,
             "blindpay_quotation": 485,
             "total_fee_amount": 1.5,
-            "receiver_local_amount": 1000,
+            "customer_local_amount": 1000,
             "currency": "BRL",
             "transaction_document_file": "https://example.com/image.png",
             "transaction_document_type": "invoice",
@@ -814,7 +814,7 @@ class TestPayoutsSync:
     def test_export_payouts(self):
         mocked_export_payouts = [
             {
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "id": "pa_000000000000",
                 "status": "processing",
                 "sender_wallet_address": "0x123...890",
@@ -868,7 +868,7 @@ class TestPayoutsSync:
                 "commercial_quotation": 495,
                 "blindpay_quotation": 485,
                 "total_fee_amount": 1.5,
-                "receiver_local_amount": 1000,
+                "customer_local_amount": 1000,
                 "currency": "BRL",
                 "transaction_document_file": "https://example.com/image.png",
                 "transaction_document_type": "invoice",
@@ -918,7 +918,7 @@ class TestPayoutsSync:
 
     def test_get_payout_track(self):
         mocked_payout_track = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "pa_000000000000",
             "status": "processing",
             "sender_wallet_address": "0x123...890",
@@ -972,7 +972,7 @@ class TestPayoutsSync:
             "commercial_quotation": 495,
             "blindpay_quotation": 485,
             "total_fee_amount": 1.5,
-            "receiver_local_amount": 1000,
+            "customer_local_amount": 1000,
             "currency": "BRL",
             "transaction_document_file": "https://example.com/image.png",
             "transaction_document_type": "invoice",
@@ -1082,7 +1082,7 @@ class TestPayoutsSync:
                 "estimated_time_of_arrival": "1_business_day",
                 "completed_at": "2011-10-05T14:48:00.000Z",
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
@@ -1145,7 +1145,7 @@ class TestPayoutsSync:
                 "estimated_time_of_arrival": "1_business_day",
                 "completed_at": "2011-10-05T14:48:00.000Z",
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
         }
 
         with patch.object(self.blindpay._api, "_request") as mock_request:

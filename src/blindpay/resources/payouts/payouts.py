@@ -29,7 +29,7 @@ ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 
 
 class Payout(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
     status: TransactionStatus
     sender_wallet_address: str
@@ -56,7 +56,7 @@ class Payout(TypedDict):
     commercial_quotation: float
     blindpay_quotation: float
     total_fee_amount: float
-    receiver_local_amount: float
+    customer_local_amount: float
     currency: Currency  # Excluding "USDT" | "USDB"
     transaction_document_file: str
     transaction_document_type: TransactionDocumentType
@@ -102,7 +102,6 @@ class Payout(TypedDict):
 
 
 class ListPayoutsInput(PaginationParams, total=False):
-    receiver_id: str
     customer_id: str
 
 
@@ -143,7 +142,7 @@ class CreateStellarPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    receiver_id: str
+    customer_id: str
 
 
 class CreateEvmPayoutInput(TypedDict):
@@ -160,7 +159,7 @@ class CreateEvmPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    receiver_id: str
+    customer_id: str
 
 
 class CreateSolanaPayoutInput(TypedDict):
@@ -177,7 +176,7 @@ class CreateSolanaPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    receiver_id: str
+    customer_id: str
 
 
 class SubmitPayoutDocumentsInput(TypedDict):

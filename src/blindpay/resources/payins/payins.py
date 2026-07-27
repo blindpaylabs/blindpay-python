@@ -57,7 +57,7 @@ class BankDetails(TypedDict):
 
 
 class Payin(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
     pix_code: Optional[str]
     memo_code: Optional[str]
@@ -102,7 +102,6 @@ class Payin(TypedDict):
 
 class ListPayinsInput(PaginationParams):
     status: Optional[TransactionStatus]
-    receiver_id: Optional[str]
     customer_id: Optional[str]
 
 
@@ -136,7 +135,7 @@ class GetPayinTrackingTransaction(TypedDict):
 
 
 class GetPayinTrackResponse(TypedDict):
-    receiver_id: str
+    customer_id: str
     id: str
     pix_code: str
     memo_code: str
@@ -193,7 +192,7 @@ class CreateEvmPayinResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     blindpay_bank_details: BankDetails
-    receiver_id: str
+    customer_id: str
     receiver_amount: float
 
 

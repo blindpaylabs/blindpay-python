@@ -51,7 +51,7 @@ class CreateQuoteResponse(TypedDict):
     partner_fee_amount: float
     flat_fee: float
     contract: Contract
-    receiver_local_amount: float
+    customer_local_amount: float
     description: str
 
 

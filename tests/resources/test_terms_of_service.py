@@ -22,7 +22,7 @@ class TestTermsOfService:
             response = await self.blindpay.instances.terms_of_service.initiate(
                 {
                     "idempotency_key": "123e4567-e89b-12d3-a456-426614174000",
-                    "receiver_id": None,
+                    "customer_id": None,
                     "redirect_url": None,
                 }
             )
@@ -34,7 +34,7 @@ class TestTermsOfService:
                 "/e/instances/in_000000000000/tos",
                 {
                     "idempotency_key": "123e4567-e89b-12d3-a456-426614174000",
-                    "receiver_id": None,
+                    "customer_id": None,
                     "redirect_url": None,
                 },
             )
@@ -56,7 +56,7 @@ class TestTermsOfServiceSync:
             response = self.blindpay.instances.terms_of_service.initiate(
                 {
                     "idempotency_key": "123e4567-e89b-12d3-a456-426614174000",
-                    "receiver_id": None,
+                    "customer_id": None,
                     "redirect_url": None,
                 }
             )
@@ -68,7 +68,7 @@ class TestTermsOfServiceSync:
                 "/e/instances/in_000000000000/tos",
                 {
                     "idempotency_key": "123e4567-e89b-12d3-a456-426614174000",
-                    "receiver_id": None,
+                    "customer_id": None,
                     "redirect_url": None,
                 },
             )

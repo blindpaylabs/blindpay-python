@@ -1,0 +1,19 @@
+name: Contract Check
+
+on:
+  workflow_call:
+
+jobs:
+  contract:
+    name: Run wire-contract check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check SDK fields and enums against the API spec snapshot
+        run: python3 .api-sync/check_contract.py

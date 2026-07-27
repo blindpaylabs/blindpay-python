@@ -13,7 +13,7 @@ class TestBlindPayClient:
         secret = "whsec_" + base64.b64encode(secret_key).decode()
         webhook_id = "msg_123456"
         timestamp = "1614556800"
-        payload = '{"event":"receiver.new","data":{"id":"rec_000000000000"}}'
+        payload = '{"event":"customer.new","data":{"id":"cus_000000000000"}}'
 
         signed_content = f"{webhook_id}.{timestamp}.{payload}"
         expected_signature = base64.b64encode(
@@ -32,7 +32,7 @@ class TestBlindPayClient:
         secret = "whsec_" + base64.b64encode(b"test_secret_key_1234").decode()
         webhook_id = "msg_123456"
         timestamp = "1614556800"
-        payload = '{"event":"receiver.new","data":{"id":"rec_000000000000"}}'
+        payload = '{"event":"customer.new","data":{"id":"cus_000000000000"}}'
         invalid_signature = "invalid_signature_value"
 
         is_valid = client.verify_webhook_signature(
@@ -51,7 +51,7 @@ class TestBlindPaySyncClient:
         secret = "whsec_" + base64.b64encode(secret_key).decode()
         webhook_id = "msg_123456"
         timestamp = "1614556800"
-        payload = '{"event":"receiver.new","data":{"id":"rec_000000000000"}}'
+        payload = '{"event":"customer.new","data":{"id":"cus_000000000000"}}'
 
         signed_content = f"{webhook_id}.{timestamp}.{payload}"
         expected_signature = base64.b64encode(
@@ -71,7 +71,7 @@ class TestBlindPaySyncClient:
         secret = "whsec_" + base64.b64encode(b"test_secret_key_1234").decode()
         webhook_id = "msg_123456"
         timestamp = "1614556800"
-        payload = '{"event":"receiver.new","data":{"id":"rec_000000000000"}}'
+        payload = '{"event":"customer.new","data":{"id":"cus_000000000000"}}'
         invalid_signature = "invalid_signature_value"
 
         is_valid = client.verify_webhook_signature(
