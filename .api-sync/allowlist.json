@@ -1,0 +1,224 @@
+[
+  {
+    "schema": "GetBankAccountResponse",
+    "field": "account_holder_name",
+    "reason": "bank_accounts.get() models an older bank-account shape; the current spec returns rail-specific fields instead (e.g. swift_account_holder_name). Pre-existing, unrelated to the customers rename. Needs its own bank-accounts sync PR.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetBankAccountResponse",
+    "field": "is_primary",
+    "reason": "Same pre-existing bank_accounts.get() divergence as account_holder_name above; the spec's BankAccountOut has no is_primary property.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetBankAccountResponse",
+    "field": "swift_code",
+    "reason": "Same pre-existing bank_accounts.get() divergence; the spec uses swift_code_bic, not swift_code.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "Payin",
+    "field": "billing_fee",
+    "reason": "Pre-existing: the spec's PayinOut only has billing_fee_amount, not billing_fee. Payin already separately declares billing_fee_amount. Unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetPayinTrackResponse",
+    "field": "billing_fee",
+    "reason": "Same pre-existing divergence as Payin.billing_fee above; get_track() mirrors Payin's shape.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "Payin",
+    "field": "tracking_partner_fee",
+    "reason": "Pre-existing: PayinOut in the spec has no tracking_partner_fee sub-object. Unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetPayinTrackResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same pre-existing divergence as Payin.tracking_partner_fee.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateEvmPayinResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same pre-existing divergence as Payin.tracking_partner_fee.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "Transfer",
+    "field": "tracking_partner_fee",
+    "reason": "Pre-existing: TransferOut in the spec has no tracking_partner_fee sub-object. Unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "Payout",
+    "field": "tracking_partner_fee",
+    "reason": "Pre-existing: PayoutOut in the spec has no tracking_partner_fee sub-object. Unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateStellarPayoutResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same pre-existing divergence as Payout.tracking_partner_fee.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateEvmPayoutResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same pre-existing divergence as Payout.tracking_partner_fee.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateSolanaPayoutResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same pre-existing divergence as Payout.tracking_partner_fee.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "PartnerFee",
+    "field": "evm_wallet_address",
+    "reason": "partner_fees CRUD isn't modeled in the public spec at all (only the payin/payout partner-fee webhook payloads are). Pre-existing, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePartnerFeeInput",
+    "field": "evm_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePartnerFeeResponse",
+    "field": "evm_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetPartnerFeeResponse",
+    "field": "evm_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "PartnerFee",
+    "field": "stellar_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address; partner_fees CRUD isn't in the public spec.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePartnerFeeInput",
+    "field": "stellar_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePartnerFeeResponse",
+    "field": "stellar_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetPartnerFeeResponse",
+    "field": "stellar_wallet_address",
+    "reason": "Same pre-existing divergence as PartnerFee.evm_wallet_address.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetFxRateInput",
+    "field": "from_currency",
+    "reason": "'from' is a reserved keyword in Python; the client remaps from_currency back to 'from' before sending. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetPayinFxRateInput",
+    "field": "from_currency",
+    "reason": "Same reserved-keyword remap as GetFxRateInput.from_currency.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "IndividualWithEnhancedKYC",
+    "field": "individual_holding_doc_front_file",
+    "reason": "Pre-existing: the spec's CustomerOut has no individual_holding_doc_front_file property for enhanced-KYC individuals. Unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateIndividualWithEnhancedKYCInput",
+    "field": "individual_holding_doc_front_file",
+    "reason": "Same pre-existing divergence as IndividualWithEnhancedKYC.individual_holding_doc_front_file.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UpdateCustomerInput",
+    "field": "individual_holding_doc_front_file",
+    "reason": "Same pre-existing divergence as IndividualWithEnhancedKYC.individual_holding_doc_front_file.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UpdateInstanceMemberRoleInput",
+    "field": "member_id",
+    "reason": "Dead code: update_member_role() takes member_id/role as separate function arguments, never as this TypedDict. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePayinInput",
+    "field": "receiver_address",
+    "reason": "Dead code: CreatePayinInput is never passed to any client method (create_evm() takes a bare payin_quote_id). Pre-existing, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "usdb",
+    "reason": "Pre-existing: the spec's WalletBalanceOut uses uppercase USDB/USDC/USDT. Case-only divergence, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "usdc",
+    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "usdt",
+    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetBankAccountResponse",
+    "field": "iban",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "IndividualWithStandardKYC",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "IndividualWithEnhancedKYC",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "BusinessWithStandardKYB",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePayinInput",
+    "field": "sender_address",
+    "reason": "Absent from the public payin creation body (only /payins/evm is public and has no sender_address). Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "SubmitPayoutDocumentsInput",
+    "field": "payout_id",
+    "reason": "Path parameter (the spec names it id) modeled on the request input type for URL building; never a wire body property. Pre-existing modeling choice, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
+  }
+]

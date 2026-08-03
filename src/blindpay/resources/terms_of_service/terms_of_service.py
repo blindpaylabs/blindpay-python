@@ -6,7 +6,7 @@ from ...types import BlindpayApiResponse
 
 class InitiateInput(TypedDict):
     idempotency_key: str
-    receiver_id: Optional[str]
+    customer_id: Optional[str]
     redirect_url: Optional[str]
 
 

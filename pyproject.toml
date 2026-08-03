@@ -84,6 +84,7 @@ known-first-party = ["blindpay"]
 
 [tool.ruff.lint.per-file-ignores]
 "examples/*.py" = ["T201"]
+".api-sync/*.py" = ["T201"]
 
 [tool.mypy]
 pretty = true
@@ -103,6 +104,7 @@ disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 exclude = [
     "^examples/",
+    "^\\.api-sync/",
 ]
 
 [[tool.mypy.overrides]]

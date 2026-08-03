@@ -22,7 +22,7 @@ class TestWebhookEndpoints:
             response = await self.blindpay.instances.webhook_endpoints.create(
                 {
                     "url": "https://example.com/webhook",
-                    "events": ["receiver.new"],
+                    "events": ["customer.new"],
                 }
             )
 
@@ -31,7 +31,7 @@ class TestWebhookEndpoints:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/webhook-endpoints",
-                {"url": "https://example.com/webhook", "events": ["receiver.new"]},
+                {"url": "https://example.com/webhook", "events": ["customer.new"]},
             )
 
     @pytest.mark.asyncio
@@ -40,7 +40,7 @@ class TestWebhookEndpoints:
             {
                 "id": "we_000000000000",
                 "url": "https://example.com/webhook",
-                "events": ["receiver.new"],
+                "events": ["customer.new"],
                 "last_event_at": "2024-01-01T00:00:00.000Z",
                 "instance_id": "in_000000000000",
                 "created_at": "2021-01-01T00:00:00Z",
@@ -117,7 +117,7 @@ class TestWebhookEndpointsSync:
             response = self.blindpay.instances.webhook_endpoints.create(
                 {
                     "url": "https://example.com/webhook",
-                    "events": ["receiver.new"],
+                    "events": ["customer.new"],
                 }
             )
 
@@ -126,7 +126,7 @@ class TestWebhookEndpointsSync:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/webhook-endpoints",
-                {"url": "https://example.com/webhook", "events": ["receiver.new"]},
+                {"url": "https://example.com/webhook", "events": ["customer.new"]},
             )
 
     def test_list_webhook_endpoints(self):
@@ -134,7 +134,7 @@ class TestWebhookEndpointsSync:
             {
                 "id": "we_000000000000",
                 "url": "https://example.com/webhook",
-                "events": ["receiver.new"],
+                "events": ["customer.new"],
                 "last_event_at": "2024-01-01T00:00:00.000Z",
                 "instance_id": "in_000000000000",
                 "created_at": "2021-01-01T00:00:00Z",

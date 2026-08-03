@@ -15,7 +15,7 @@ class TestPayins:
         mocked_payins = {
             "data": [
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "re_000000000000",
                     "pix_code": (
                         "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -121,7 +121,7 @@ class TestPayins:
     @pytest.mark.asyncio
     async def test_get_payin(self):
         mocked_payin = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "re_000000000000",
             "pix_code": (
                 "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -221,7 +221,7 @@ class TestPayins:
     async def test_export_payins(self):
         mocked_export_payins = [
             {
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "id": "re_000000000000",
                 "pix_code": (
                     "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -387,7 +387,7 @@ class TestPayins:
                     "address_line_2": "San Francisco, CA 94129",
                 },
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "receiver_amount": 1010,
         }
 
@@ -412,7 +412,7 @@ class TestPayinsSync:
         mocked_payins = {
             "data": [
                 {
-                    "receiver_id": "re_000000000000",
+                    "customer_id": "re_000000000000",
                     "id": "re_000000000000",
                     "pix_code": (
                         "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -517,7 +517,7 @@ class TestPayinsSync:
 
     def test_get_payin(self):
         mocked_payin = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "re_000000000000",
             "pix_code": (
                 "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -615,7 +615,7 @@ class TestPayinsSync:
 
     def test_get_payin_track(self):
         mocked_payin_track = {
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "id": "re_000000000000",
             "pix_code": (
                 "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -717,7 +717,7 @@ class TestPayinsSync:
     def test_export_payins(self):
         mocked_export_payins = [
             {
-                "receiver_id": "re_000000000000",
+                "customer_id": "re_000000000000",
                 "id": "re_000000000000",
                 "pix_code": (
                     "00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/"
@@ -882,7 +882,7 @@ class TestPayinsSync:
                     "address_line_2": "San Francisco, CA 94129",
                 },
             },
-            "receiver_id": "re_000000000000",
+            "customer_id": "re_000000000000",
             "receiver_amount": 1010,
         }
 
