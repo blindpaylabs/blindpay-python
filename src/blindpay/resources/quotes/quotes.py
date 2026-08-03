@@ -39,6 +39,7 @@ class CreateQuoteInput(TypedDict):
     transaction_document_file: Optional[str]
     transaction_document_id: Optional[str]
     transaction_document_type: TransactionDocumentType
+    refund_wallet_address: Optional[str]
 
 
 class CreateQuoteResponse(TypedDict):
