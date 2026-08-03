@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.5.0...v3.0.0) (2026-08-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* complete the customers rename, remove receivers/api_keys ([#55](https://github.com/blindpaylabs/blindpay-python/issues/55))
+
+### Features
+
+* complete the customers rename, remove receivers/api_keys ([#55](https://github.com/blindpaylabs/blindpay-python/issues/55)) ([94ea954](https://github.com/blindpaylabs/blindpay-python/commit/94ea954cd720141d872e37c07ac5af5f4cefe085))
+
 ## [2.5.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.4.0...v2.5.0) (2026-07-27)
 
 
