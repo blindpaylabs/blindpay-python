@@ -184,5 +184,41 @@
     "field": "usdt",
     "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "GetBankAccountResponse",
+    "field": "iban",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "IndividualWithStandardKYC",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "IndividualWithEnhancedKYC",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "BusinessWithStandardKYB",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreatePayinInput",
+    "field": "sender_address",
+    "reason": "Absent from the public payin creation body (only /payins/evm is public and has no sender_address). Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "SubmitPayoutDocumentsInput",
+    "field": "payout_id",
+    "reason": "Path parameter (the spec names it id) modeled on the request input type for URL building; never a wire body property. Pre-existing modeling choice, unrelated to the customers rename.",
+    "owner": "eric@blindpay.com"
   }
 ]
