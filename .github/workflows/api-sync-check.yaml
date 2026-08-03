@@ -41,3 +41,7 @@ jobs:
       - name: Coverage report (non-blocking)
         continue-on-error: true
         run: python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json
+
+      - name: Type audit (non-blocking)
+        continue-on-error: true
+        run: python3 .api-sync/sync.py --audit-types --spec .api-sync/spec-snapshot.json

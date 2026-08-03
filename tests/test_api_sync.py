@@ -992,3 +992,106 @@ class TestReachability:
         )
         reachable = sync.compute_reachable_schemas(spec)
         assert reachable == {"Reachable", "Child"}
+
+
+# --------------------------------------------------------------------------- #
+# --audit-types: full state comparison of every mapped property's spec type
+# against the SDK's CURRENT annotation, independent of any old-vs-new diff.
+# --------------------------------------------------------------------------- #
+
+
+class TestAuditPropertyType:
+    def test_nullable_spec_without_optional_sdk_is_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        note = sync.audit_property_type({"type": ["string", "null"]}, "str")
+        assert note is not None and "Optional" in note
+
+    def test_nullable_spec_with_optional_sdk_is_not_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"type": ["string", "null"]}, "Optional[str]") is None
+
+    def test_non_nullable_spec_with_optional_sdk_is_not_flagged(self):
+        """SDK wider than necessary (Optional where spec never sends null) is a
+        legitimate, common, harmless modeling choice -- not reported."""
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"type": "string"}, "Optional[str]") is None
+
+    def test_enum_property_with_bare_scalar_sdk_is_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        note = sync.audit_property_type({"type": "string", "enum": ["a", "b"]}, "str")
+        assert note is not None and "enum-constrained" in note
+
+    def test_enum_property_with_literal_reference_is_not_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"type": "string", "enum": ["a", "b"]}, "MyLiteral") is None
+
+    def test_scalar_type_mismatch_is_flagged(self):
+        """The one real finding this audit turned up in this repo:
+        PayinOut.billing_fee_amount is `number` on the wire but `Optional[str]`
+        in the SDK."""
+        sync = load_sync(Path("/nonexistent"))
+        note = sync.audit_property_type({"type": "number"}, "Optional[str]")
+        assert note is not None and "`number`" in note and "`str`" in note
+
+    def test_integer_widened_to_float_is_deliberately_compatible(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"type": "integer"}, "float") is None
+
+    def test_ambiguous_spec_type_is_not_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"example": "abc"}, "str") is None
+
+    def test_array_type_mismatch_is_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        note = sync.audit_property_type({"type": "array"}, "str")
+        assert note is not None and "array" in note
+
+    def test_array_type_match_is_not_flagged(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.audit_property_type({"type": "array"}, "List[str]") is None
+
+
+class TestAuditTypes:
+    def test_finds_scalar_mismatch_end_to_end(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        # Plain.name: Optional[str] in the SDK; make the spec say it's really a number
+        spec = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": "string"}, "name": {"type": "number"}}}},
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        findings = sync.audit_types(spec, map_data)
+        assert any(f["field"] == "name" and "number" in f["note"] for f in findings)
+
+    def test_shared_locators_are_merged_into_one_finding(self, repo: Path):
+        """The exact duplication bug this audit's own development caught: a
+        map entry with several spec locators asserted to share one shape must
+        not multiply the same real finding once per locator."""
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [
+                {
+                    "spec": ["ParentOut", "SiblingOut"],
+                    "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}],
+                }
+            ],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        shape = {"id": {"type": "number"}, "name": {"type": ["string", "null"]}}
+        spec = base_schema(
+            {"ParentOut": {"properties": shape}, "SiblingOut": {"properties": shape}},
+            {"/x": {"get": op(ref_out="ParentOut")}, "/y": {"get": op(ref_out="SiblingOut")}},
+        )
+        findings = sync.audit_types(spec, map_data)
+        id_findings = [f for f in findings if f["field"] == "id"]
+        assert len(id_findings) == 1
+        assert "ParentOut" in id_findings[0]["schema"]

@@ -6,6 +6,7 @@ Run locally with:
     python3 .api-sync/sync.py --apply [--spec PATH] [--report PATH]
     python3 .api-sync/sync.py --validate-map
     python3 .api-sync/sync.py --coverage [--spec PATH]
+    python3 .api-sync/sync.py --audit-types [--spec PATH]
 
 No third-party dependencies. Mirrors check_contract.py's style: ast for reading,
 precise text splicing for writing.
@@ -1037,6 +1038,165 @@ def cmd_coverage(spec_path: Path) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- #
+# Type audit (non-blocking, informational): does the SDK's CURRENT annotation
+# for every mapped property still match the spec's CURRENT declared type,
+# independent of any old-vs-new diff? diff_removals_and_changes only ever
+# catches drift going forward from a synced baseline; it cannot see a
+# pre-existing latent mismatch that was already there when a field was first
+# modeled. This reuses the same primitives (coarse_type, SCALAR_TYPE_MAP) in a
+# state comparison instead of a diff, mirroring how reconcile_* replaced
+# event-diffing with state reconciliation for presence.
+# --------------------------------------------------------------------------- #
+
+
+def collect_annotations(
+    symbol: str, file_rel: str, index: SdkIndex, seen: Optional[set[str]] = None
+) -> dict[str, tuple[ast.expr, str]]:
+    """field name -> (annotation node, source text) across the class and any
+    locally-defined base (the `_XRequired` two-part pattern)."""
+    seen = seen or set()
+    key = f"{file_rel}::{symbol}"
+    if key in seen:
+        return {}
+    seen.add(key)
+    info = index.find_class(symbol, file_rel)
+    if info is None:
+        return {}
+    result: dict[str, tuple[ast.expr, str]] = {}
+    for base in info.bases:
+        result.update(collect_annotations(base, str(info.file.relative_to(ROOT)), index, seen))
+    for name, node in info.own_fields.items():
+        result[name] = (node.annotation, info.source)
+    return result
+
+
+def _strip_wrappers(ann_text: str) -> tuple[str, bool]:
+    """Returns (innermost type text, was_optional)."""
+    text = ann_text.strip()
+    if text.startswith("NotRequired[") and text.endswith("]"):
+        text = text[len("NotRequired[") : -1].strip()
+    is_optional = False
+    if text.startswith("Optional[") and text.endswith("]"):
+        is_optional = True
+        text = text[len("Optional[") : -1].strip()
+    return text, is_optional
+
+
+def audit_property_type(prop_schema: dict, ann_text: str) -> Optional[str]:
+    """A property with no direct SDK counterpart is not this function's
+    concern (that's reconcile_types'). Only flags cases where the SDK
+    annotation is NARROWER or otherwise structurally wrong versus the spec --
+    a SDK type that is deliberately wider than necessary (e.g. Optional[str]
+    for a non-nullable property, or float for a spec integer) is a legitimate,
+    common modeling choice, not a bug, and is not reported."""
+    inner, is_optional = _strip_wrappers(ann_text)
+    base_type, nullable = coarse_type(prop_schema)
+
+    if nullable and not is_optional:
+        return f"spec is nullable but SDK annotation `{ann_text}` has no Optional[...]"
+
+    if "enum" in prop_schema:
+        if inner in SCALAR_TYPE_MAP.values():
+            return f"spec property is enum-constrained but SDK annotation is a bare `{inner}` (no Literal)"
+        return None  # trust some Literal/mapped-symbol reference; membership is reconcile_enums's job
+
+    if base_type is None:
+        return None  # ambiguous on the spec side (multi-type, or no "type" key) -- nothing to compare
+    if base_type == "array":
+        return None if inner.startswith(("List[", "list[")) else f"spec type is array but SDK annotation is `{inner}`"
+    if base_type == "object":
+        if inner in SCALAR_TYPE_MAP.values():
+            return f"spec type is object but SDK annotation is a bare scalar `{inner}`"
+        return None  # assume a nested TypedDict reference; not verifying its own shape here
+
+    expected = SCALAR_TYPE_MAP.get(base_type)
+    if expected is None or inner == expected:
+        return None
+    if base_type == "integer" and inner == "float":
+        return None  # deliberately compatible widening
+    return f"spec type `{base_type}` (expected `{expected}`) but SDK annotation is `{inner}`"
+
+
+def audit_types(spec: dict, map_data: dict) -> list[dict[str, str]]:
+    """One map entry can list several spec locators that are asserted to share
+    the same shape (e.g. tracking_payment duplicated inline across 6 payout
+    schemas) -- audit against a single representative locator, not once per
+    duplicate, or the same real finding is reported N times over."""
+    index = build_sdk_index(SRC_ROOT)
+    reachable = compute_reachable_schemas(spec)
+    findings: list[dict[str, str]] = []
+
+    for e in map_data.get("types", []):
+        spec_names = e["spec"] if isinstance(e["spec"], list) else [e["spec"]]
+        path = e.get("specPath")
+        reachable_names = sorted(n for n in spec_names if n in reachable)
+        if not reachable_names:
+            continue
+        representative = reachable_names[0]
+        schema_obj = get_schema(spec, representative)
+        if schema_obj is None:
+            continue
+        schema_label = (
+            representative
+            if len(reachable_names) == 1
+            else f"{representative} (+{len(reachable_names) - 1} shared locator(s))"
+        )
+        props = get_properties(resolve_path(schema_obj, path))
+        for site in e["sdk"]:
+            annotations = collect_annotations(site["symbol"], site["file"], index)
+            for field_name in sorted(props.keys()):
+                if field_name not in annotations:
+                    continue
+                ann_node, source = annotations[field_name]
+                ann_text = ast.get_source_segment(source, ann_node) or ""
+                note = audit_property_type(props[field_name], ann_text)
+                if note:
+                    findings.append(
+                        {
+                            "schema": schema_label,
+                            "path": path or "",
+                            "field": field_name,
+                            "sdk_file": site["file"],
+                            "sdk_symbol": site["symbol"],
+                            "sdk_annotation": ann_text,
+                            "note": note,
+                        }
+                    )
+
+    # a single SDK field (same file+symbol+field+annotation) can legitimately
+    # get evaluated from more than one map entry -- e.g. TrackingPayment is
+    # the target of both a payout-side and a payin-side entry. Collapse those
+    # into one finding that names every schema it was seen from, rather than
+    # reporting what is really the same annotation issue multiple times.
+    merged: dict[tuple[str, str, str, str], dict[str, str]] = {}
+    for f in findings:
+        key = (f["sdk_file"], f["sdk_symbol"], f["field"], f["note"])
+        if key in merged:
+            if f["schema"] not in merged[key]["schema"]:
+                merged[key]["schema"] += f", {f['schema']}"
+        else:
+            merged[key] = dict(f)
+    result = list(merged.values())
+    result.sort(key=lambda f: (f["sdk_file"], f["sdk_symbol"], f["field"]))
+    return result
+
+
+def cmd_audit_types(spec_path: Path) -> int:
+    map_data = load_map()
+    spec = load_json(spec_path) if spec_path.exists() else load_json(SNAPSHOT_PATH)
+    findings = audit_types(spec, map_data)
+    if not findings:
+        print("Type audit: no mismatches found.")
+        return 0
+    print(f"Type audit ({len(findings)} finding(s), non-blocking, informational only):")
+    for f in findings:
+        ctx = f["schema"] + (f"/{f['path']}" if f["path"] else "")
+        site = f"{f['sdk_symbol']} in {f['sdk_file']}"
+        print(f"  {ctx}.{f['field']} ({site}): {f['note']} [annotation: {f['sdk_annotation']}]")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -1044,6 +1204,7 @@ def main() -> int:
     mode.add_argument("--apply", action="store_true")
     mode.add_argument("--validate-map", action="store_true")
     mode.add_argument("--coverage", action="store_true")
+    mode.add_argument("--audit-types", action="store_true")
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC_PATH)
     parser.add_argument("--report", type=Path, default=None)
     args = parser.parse_args()
@@ -1056,6 +1217,8 @@ def main() -> int:
         return cmd_apply(args.spec, args.report)
     if args.coverage:
         return cmd_coverage(args.spec)
+    if args.audit_types:
+        return cmd_audit_types(args.spec)
     return 1
 
 
