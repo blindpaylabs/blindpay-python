@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 import httpx
 
 from ._internal.exceptions import BlindPayError
+from ._version import __version__
 from .types import BlindpayApiResponse
 
 if TYPE_CHECKING:
@@ -39,8 +40,6 @@ if TYPE_CHECKING:
     from blindpay.resources.wallets.blockchain import BlockchainWalletsResource, BlockchainWalletsResourceSync
     from blindpay.resources.wallets.offramp import OfframpWalletsResource, OfframpWalletsResourceSync
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
-
-__version__ = "2.3.0"
 
 T = TypeVar("T")
 
