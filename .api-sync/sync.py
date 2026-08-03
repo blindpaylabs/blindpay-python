@@ -579,15 +579,32 @@ def diff_removals_and_changes(old_spec: dict, new_spec: dict, map_data: dict, in
                         )
                     )
                     continue
-                old_type, _ = coarse_type(old_props[f])
-                new_type, _ = coarse_type(new_props[f])
-                if old_type is not None and new_type is not None and old_type != new_type:
-                    problems.append(
-                        NeedsHuman(
-                            "type_change",
-                            f"{name}{'/' + path if path else ''}.{f} type changed ({old_type} -> {new_type})",
+                old_type, old_nullable = coarse_type(old_props[f])
+                new_type, new_nullable = coarse_type(new_props[f])
+                # Ambiguous on either side (multi-type, or no "type" key at all --
+                # e.g. a property that only ever had "example"/"description") is
+                # deliberately treated as compatible, not needs-human: this is the
+                # real, observed, benign shape of this spec's own evolution
+                # (created_at/updated_at gaining an explicit
+                # {"type": ["string","null"], "format": "date-time"} where they
+                # previously had no "type" key at all). There is nothing to
+                # meaningfully compare when one side never declared a concrete type.
+                if old_type is not None and new_type is not None:
+                    if old_type != new_type:
+                        problems.append(
+                            NeedsHuman(
+                                "type_change",
+                                f"{name}{'/' + path if path else ''}.{f} type changed ({old_type} -> {new_type})",
+                            )
                         )
-                    )
+                    elif old_nullable != new_nullable:
+                        problems.append(
+                            NeedsHuman(
+                                "type_change",
+                                f"{name}{'/' + path if path else ''}.{f} nullability changed "
+                                f"(nullable={old_nullable} -> nullable={new_nullable})",
+                            )
+                        )
 
     # new operations (paths present in new, absent from old)
     old_paths = set(old_spec.get("paths", {}).keys())
@@ -692,21 +709,27 @@ def infer_annotation(prop_schema: dict) -> Optional[str]:
     return SCALAR_TYPE_MAP.get(t0)
 
 
-def class_uses_notrequired(info: ClassInfo) -> bool:
-    for item in info.own_fields.values():
-        seg = ast.get_source_segment(info.source, item.annotation) or ""
-        if seg.startswith("NotRequired["):
-            return True
-    return False
-
-
 def choose_field_annotation(info: ClassInfo, python_type: str, nullable: bool) -> str:
+    """A newly ADDED optional spec property must never turn into a required
+    dict key. Whether that needs an explicit NotRequired[...] wrapper depends
+    entirely on the target class's totality, not on sibling style:
+    - total=False (a class declared `total=False`, or the non-required half
+      of the `_XRequired` two-part pattern -- `info` is always the class we
+      insert into, which for that pattern already IS the total=False side):
+      every key is already optional, so a bare `T` / `Optional[T]` is correct
+      and sufficient.
+    - total=True (the default, e.g. `class CreateQuoteInput(TypedDict):`):
+      every key is structurally REQUIRED regardless of whether its value type
+      happens to be Optional[...]. Adding a bare `Optional[T]` field here
+      would make every existing caller that omits the new key fail pyright
+      and mypy -- a breaking change to an already-published TypedDict. This
+      always needs `NotRequired[...]`, independent of whether any sibling
+      field already uses that convention.
+    """
+    inner = f"Optional[{python_type}]" if nullable else python_type
     if info.total_false:
-        return f"Optional[{python_type}]" if nullable else python_type
-    if class_uses_notrequired(info):
-        inner = f"Optional[{python_type}]" if nullable else python_type
-        return f"NotRequired[{inner}]"
-    return f"Optional[{python_type}]"
+        return inner
+    return f"NotRequired[{inner}]"
 
 
 def splice_typeddict_add_field(source: str, class_node: ast.ClassDef, field_name: str, annotation_text: str) -> str:
@@ -717,6 +740,36 @@ def splice_typeddict_add_field(source: str, class_node: ast.ClassDef, field_name
     indent = last_line[: len(last_line) - len(last_line.lstrip())]
     new_line = f"{indent}{field_name}: {annotation_text}\n"
     lines.insert(last_line_no, new_line)
+    return "".join(lines)
+
+
+def ensure_name_imported(
+    source: str, name: str, candidate_modules: tuple[str, ...] = ("typing", "typing_extensions")
+) -> str:
+    """Add `name` to whichever of `candidate_modules` this file already imports
+    TypedDict from (matching that file's own typing vs typing_extensions
+    convention), if it is not already imported from either. A no-op if `name`
+    is already present. Assumes a single-line, non-aliased import statement,
+    which is what every TypedDict-bearing file in this repo currently uses."""
+    tree = ast.parse(source)
+    target: Optional[ast.ImportFrom] = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module in candidate_modules:
+            names = [a.name for a in node.names]
+            if name in names:
+                return source
+            if "TypedDict" in names:
+                target = node
+    if target is None:
+        return source
+
+    names = sorted({a.name for a in target.names} | {name})
+    new_line = f"from {target.module} import {', '.join(names)}"
+    lines = source.splitlines(keepends=True)
+    start, end = target.lineno, target.end_lineno
+    assert end is not None
+    trailing = "\n" if lines[end - 1].endswith("\n") else ""
+    lines[start - 1 : end] = [new_line + trailing]
     return "".join(lines)
 
 
@@ -757,7 +810,15 @@ def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[Appli
             continue
         _, nullable = coarse_type(prop_schema)
         annotation = choose_field_annotation(info, python_type, nullable)
-        new_source = splice_typeddict_add_field(info.source, info.node, name, annotation)
+        source = info.source
+        for required_name in ("NotRequired", "Optional"):
+            if f"{required_name}[" in annotation:
+                updated = ensure_name_imported(source, required_name)
+                if updated != source:
+                    source = updated
+                    info.file.write_text(source)
+                    info.node = _reparse_class(info.file, symbol)
+        new_source = splice_typeddict_add_field(source, info.node, name, annotation)
         info.file.write_text(new_source)
         # re-read so subsequent insertions into the same class see updated positions
         info.source = new_source

@@ -53,7 +53,6 @@ class TestQuotes:
                     "transaction_document_file": None,
                     "transaction_document_id": None,
                     "transaction_document_type": "invoice",
-                    "refund_wallet_address": None,
                 }
             )
 
@@ -74,7 +73,6 @@ class TestQuotes:
                     "transaction_document_file": None,
                     "transaction_document_id": None,
                     "transaction_document_type": "invoice",
-                    "refund_wallet_address": None,
                 },
             )
 
@@ -160,7 +158,6 @@ class TestQuotesSync:
                     "transaction_document_file": None,
                     "transaction_document_id": None,
                     "transaction_document_type": "invoice",
-                    "refund_wallet_address": None,
                 }
             )
 
@@ -181,7 +178,6 @@ class TestQuotesSync:
                     "transaction_document_file": None,
                     "transaction_document_id": None,
                     "transaction_document_type": "invoice",
-                    "refund_wallet_address": None,
                 },
             )
 

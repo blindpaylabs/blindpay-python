@@ -136,19 +136,27 @@ class TestTypedDictFieldInsertion:
             own_fields=own_fields,
         )
 
-    def test_plain_total_true_class_uses_optional(self):
+    def test_total_true_class_always_wraps_new_field_in_notrequired(self):
+        """A total=True class (the default -- no `total=False` anywhere) makes
+        every declared key structurally required. A newly added field must be
+        NotRequired regardless of whether any sibling field already uses that
+        convention or just uses a bare Optional[...] for its value type --
+        otherwise every existing caller that omits the new key breaks pyright
+        and mypy. This is the exact bug a real PR review caught: `class
+        CreateQuoteInput(TypedDict):` has siblings typed as plain
+        `Optional[str]`, but those were part of the original, already-required
+        shape -- that convention does not extend to fields added later."""
         sync = load_sync(Path("/nonexistent"))
         source = "class Plain(TypedDict):\n    x: str\n    y: Optional[str]\n"
         info = self._class_info(sync, source, "Plain")
-        assert sync.class_uses_notrequired(info) is False
-        assert sync.choose_field_annotation(info, "str", nullable=True) == "Optional[str]"
-        assert sync.choose_field_annotation(info, "str", nullable=False) == "Optional[str]"
+        assert info.total_false is False
+        assert sync.choose_field_annotation(info, "str", nullable=True) == "NotRequired[Optional[str]]"
+        assert sync.choose_field_annotation(info, "str", nullable=False) == "NotRequired[str]"
 
-    def test_notrequired_precedent_wraps_new_field_in_notrequired(self):
+    def test_total_true_class_with_existing_notrequired_sibling_still_wraps(self):
         sync = load_sync(Path("/nonexistent"))
         source = "class WithNR(TypedDict):\n    x: str\n    y: NotRequired[str]\n"
         info = self._class_info(sync, source, "WithNR")
-        assert sync.class_uses_notrequired(info) is True
         assert sync.choose_field_annotation(info, "str", nullable=True) == "NotRequired[Optional[str]]"
         assert sync.choose_field_annotation(info, "str", nullable=False) == "NotRequired[str]"
 
@@ -168,6 +176,83 @@ class TestTypedDictFieldInsertion:
         result = sync.splice_typeddict_add_field(source, node, "z", "Optional[str]")
         expected = "class Plain(TypedDict):\n    x: str\n    y: Optional[str]\n    z: Optional[str]\n"
         assert result == expected
+        ast.parse(result)
+
+
+# --------------------------------------------------------------------------- #
+# Import management: NotRequired/Optional must be added when a class needs
+# them for the first time (this is the exact real-world case: quotes.py
+# already imports Optional from typing but not NotRequired from anywhere)
+# --------------------------------------------------------------------------- #
+
+
+class TestImportManagement:
+    def test_adds_notrequired_to_existing_typing_extensions_import(self):
+        sync = load_sync(Path("/nonexistent"))
+        source = "from typing_extensions import TypedDict\n\n\nclass Plain(TypedDict):\n    x: str\n"
+        result = sync.ensure_name_imported(source, "NotRequired")
+        assert result.startswith("from typing_extensions import NotRequired, TypedDict\n")
+        ast.parse(result)
+
+    def test_adds_notrequired_to_existing_typing_import_when_that_is_where_typeddict_lives(self):
+        """Matches payins.py's own style: `from typing import ... TypedDict`,
+        no typing_extensions import at all."""
+        sync = load_sync(Path("/nonexistent"))
+        source = "from typing import List, Optional, TypedDict\n\n\nclass Plain(TypedDict):\n    x: str\n"
+        result = sync.ensure_name_imported(source, "NotRequired")
+        assert result.startswith("from typing import List, NotRequired, Optional, TypedDict\n")
+        ast.parse(result)
+
+    def test_noop_when_already_imported(self):
+        sync = load_sync(Path("/nonexistent"))
+        source = "from typing_extensions import NotRequired, TypedDict\n\n\nclass Plain(TypedDict):\n    x: str\n"
+        result = sync.ensure_name_imported(source, "NotRequired")
+        assert result == source
+
+    def test_end_to_end_apply_adds_import_and_wraps_field_for_total_true_class_lacking_notrequired(self, repo: Path):
+        """The exact real-world scenario a PR review caught: a total=True
+        class in a file that imports Optional from `typing` but has never
+        needed NotRequired before. Both the import and the field annotation
+        must come out right in the same apply."""
+        write(repo, "src/blindpay/__init__.py", "")
+        write(
+            repo,
+            "src/blindpay/resources/quotes_like.py",
+            "from typing import Optional\n\nfrom typing_extensions import TypedDict\n\n\n"
+            "class CreateThingInput(TypedDict):\n    bank_account_id: str\n    description: Optional[str]\n",
+        )
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [
+                {
+                    "spec": "ThingIn",
+                    "sdk": [{"file": "src/blindpay/resources/quotes_like.py", "symbol": "CreateThingInput"}],
+                }
+            ],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        old_spec = base_schema(
+            {
+                "ThingIn": {
+                    "properties": {"bank_account_id": {"type": "string"}, "description": {"type": ["string", "null"]}}
+                }
+            },
+            {"/t": {"post": op(ref_in="ThingIn")}},
+        )
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(old_spec))
+        new_spec = json.loads(json.dumps(old_spec))
+        new_spec["components"]["schemas"]["ThingIn"]["properties"]["refund_wallet_address"] = {
+            "type": ["string", "null"]
+        }
+        write(repo, ".api-sync/spec-current.json", json.dumps(new_spec))
+
+        sync = load_sync(repo)
+        assert sync.cmd_apply(sync.DEFAULT_SPEC_PATH, None) == 0
+
+        result = (repo / "src/blindpay/resources/quotes_like.py").read_text()
+        assert "from typing_extensions import NotRequired, TypedDict" in result
+        assert "refund_wallet_address: NotRequired[Optional[str]]" in result
         ast.parse(result)
 
 
@@ -498,6 +583,7 @@ class TestNeedsHuman:
         assert any(p.kind == "required_change" for p in problems)
 
     def test_type_change_is_needs_human(self, repo: Path):
+        """string -> integer on a plain field."""
         _write_fixture_repo(repo)
         sync = load_sync(repo)
         index = sync.build_sdk_index(sync.SRC_ROOT)
@@ -509,6 +595,78 @@ class TestNeedsHuman:
         )
         problems = sync.diff_removals_and_changes(old, new, self._map(), index)
         assert any(p.kind == "type_change" for p in problems)
+
+    def test_nullable_to_non_nullable_is_needs_human(self, repo: Path):
+        """Same base JSON type, nullability narrows -- the SDK's existing
+        Optional[...] (or lack of it) would silently stop matching the wire."""
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        old = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": ["string", "null"]}}}},
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        new = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": "string"}}}}, {"/x": {"get": op(ref_out="PlainOut")}}
+        )
+        problems = sync.diff_removals_and_changes(old, new, self._map(), index)
+        assert any(p.kind == "type_change" and "nullability" in p.detail for p in problems)
+
+    def test_non_nullable_to_nullable_is_also_needs_human(self, repo: Path):
+        """The reverse direction is flagged too -- symmetric with required_change,
+        which does not privilege either direction either."""
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        old = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": "string"}}}}, {"/x": {"get": op(ref_out="PlainOut")}}
+        )
+        new = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": ["string", "null"]}}}},
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        problems = sync.diff_removals_and_changes(old, new, self._map(), index)
+        assert any(p.kind == "type_change" and "nullability" in p.detail for p in problems)
+
+    def test_enum_property_degrading_to_bare_string_is_needs_human(self, repo: Path):
+        """A mapped enum losing its `enum` array entirely (API stops constraining
+        the field) must not silently pass: every value the SDK currently models
+        shows up as no longer present in the (now enum-less) new spec, and the
+        existing enum_member_removed path already hard-fails on that."""
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        old = base_schema(
+            {"ColorOut": {"properties": {"color": {"type": "string", "enum": ["red", "blue"]}}}},
+            {"/x": {"get": op(ref_out="ColorOut")}},
+        )
+        new = base_schema(
+            {"ColorOut": {"properties": {"color": {"type": "string"}}}},  # enum removed entirely
+            {"/x": {"get": op(ref_out="ColorOut")}},
+        )
+        problems = sync.diff_removals_and_changes(old, new, self._map(), index)
+        assert any(p.kind == "enum_member_removed" for p in problems)
+
+    def test_ambiguous_type_metadata_only_change_is_deliberately_compatible(self, repo: Path):
+        """The one case treated as compatible on purpose: a property that had no
+        "type" key at all (only "example"/"description") gaining an explicit
+        type is not a type change to react to -- there is nothing on the old
+        side to compare against. This is the exact, real, benign shape this
+        spec's own created_at/updated_at fields went through (gaining
+        {"type": ["string","null"], "format": "date-time"} where they
+        previously had none)."""
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        old = base_schema(
+            {"PlainOut": {"properties": {"id": {"example": "abc"}}}}, {"/x": {"get": op(ref_out="PlainOut")}}
+        )
+        new = base_schema(
+            {"PlainOut": {"properties": {"id": {"type": ["string", "null"], "format": "date-time", "example": "abc"}}}},
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        problems = sync.diff_removals_and_changes(old, new, self._map(), index)
+        assert problems == []
 
     def test_new_operation_is_needs_human(self, repo: Path):
         _write_fixture_repo(repo)
@@ -677,12 +835,11 @@ class TestApplyFlow:
         report = json.loads(report_path.read_text())
         assert report["bump"] == "patch"
 
+        # Plain is total=True, so the newly added field must be NotRequired --
+        # a bare "extra: str" would make it a required key and break every
+        # existing caller that omits it.
         sample_src = (repo / "src/blindpay/resources/sample.py").read_text()
-        assert (
-            "extra: NotRequired[str]" in sample_src
-            or "extra: Optional[str]" in sample_src
-            or "extra: str" in sample_src
-        )
+        assert "extra: NotRequired[str]" in sample_src
 
     def test_apply_twice_is_idempotent(self, repo: Path):
         self._setup(repo)
