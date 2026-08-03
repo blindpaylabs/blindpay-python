@@ -950,7 +950,11 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
         return 1
 
     if applied:
-        SNAPSHOT_PATH.write_text(json.dumps(new_spec, indent=2, sort_keys=True) + "\n")
+        # Copy the delivered spec's exact bytes rather than round-tripping through
+        # json.dumps: re-serializing would reformat/reorder the *entire* file on
+        # every apply (noise unrelated to the actual drift) and is not needed for
+        # determinism -- the upstream filter already produces stable formatting.
+        SNAPSHOT_PATH.write_bytes(spec_path.read_bytes())
         print(f"Applied {len(applied)} change(s); bump={bump}")
         for a in applied:
             print(f"  [{a.kind}] {a.file}: {a.detail}")
