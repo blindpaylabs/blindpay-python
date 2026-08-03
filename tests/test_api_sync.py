@@ -639,6 +639,31 @@ class TestApplyFlow:
         color_src = (repo / "src/blindpay/types.py").read_text()
         assert "green" in color_src
 
+    def test_snapshot_refresh_copies_raw_bytes_not_a_reformatted_json_dump(self, repo: Path):
+        """Regression test: the patcher must never json.load then json.dump the
+        delivered spec to refresh the snapshot. Even when the parsed content is
+        semantically identical, re-serializing changes indentation, separators,
+        key order and unicode escaping -- which would make every future sync PR
+        carry a diff of the entire multi-thousand-line file instead of just the
+        lines that changed, and would make the committed snapshot stop matching
+        the exact bytes blindpay-v2 ships as spec-current.json."""
+        self._setup(repo)
+        new_spec = json.loads((repo / ".api-sync/spec-snapshot.json").read_text())
+        new_spec["components"]["schemas"]["ColorOut"]["properties"]["color"]["enum"].append("green")
+        new_spec["components"]["schemas"]["ColorOut"]["description"] = "café"  # non-ascii, must not get \u-escaped
+        # deliberately unusual (but still valid) formatting -- compact separators,
+        # no trailing newline -- that a naive json.dumps of the parsed object
+        # would normalize away
+        weird_bytes = json.dumps(new_spec, indent=None, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        spec_path = repo / ".api-sync/spec-current.json"
+        spec_path.write_bytes(weird_bytes)
+
+        sync = load_sync(repo)
+        assert sync.cmd_apply(sync.DEFAULT_SPEC_PATH, None) == 0
+
+        snapshot_bytes = (repo / ".api-sync/spec-snapshot.json").read_bytes()
+        assert snapshot_bytes == weird_bytes
+
     def test_property_only_change_bumps_patch(self, repo: Path):
         self._setup(repo)
         new_spec = json.loads((repo / ".api-sync/spec-snapshot.json").read_text())
