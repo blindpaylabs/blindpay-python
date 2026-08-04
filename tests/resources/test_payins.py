@@ -104,8 +104,8 @@ class TestPayins:
             ],
             "pagination": {
                 "has_more": True,
-                "next_page": 3,
-                "prev_page": 1,
+                "next_page": "pi_123",
+                "prev_page": "pi_123",
             },
         }
 
@@ -501,8 +501,8 @@ class TestPayinsSync:
             ],
             "pagination": {
                 "has_more": True,
-                "next_page": 3,
-                "prev_page": 1,
+                "next_page": "pi_123",
+                "prev_page": "pi_123",
             },
         }
 

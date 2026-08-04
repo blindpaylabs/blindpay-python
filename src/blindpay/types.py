@@ -1,4 +1,4 @@
-from typing import Generic, Literal, TypeVar, Union
+from typing import Generic, Literal, Optional, TypeVar, Union
 
 from typing_extensions import TypedDict
 
@@ -45,7 +45,7 @@ TransactionDocumentType = Literal[
     "invoice", "purchase_order", "delivery_slip", "contract", "customs_declaration", "bill_of_lading", "others"
 ]
 
-BankAccountType = Literal["checking", "savings"]
+BankAccountType = Literal["checking", "saving"]
 
 Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
 
@@ -334,8 +334,8 @@ class PaginationParams(TypedDict, total=False):
 
 class PaginationMetadata(TypedDict):
     has_more: bool
-    next_page: int
-    prev_page: int
+    next_page: Optional[str]
+    prev_page: Optional[str]
 
 
 class TrackingTransaction(TypedDict):
