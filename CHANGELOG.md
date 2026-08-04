@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.0.0...v3.1.0) (2026-08-04)
+
+
+### Features
+
+* **api-sync:** deterministic spec-sync patcher (Phase A) ([#58](https://github.com/blindpaylabs/blindpay-python/issues/58)) ([3f157fe](https://github.com/blindpaylabs/blindpay-python/commit/3f157fe9386386bb57d47a0b072ea825bae2da99))
+
 ## [3.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v2.5.0...v3.0.0) (2026-08-03)
 
 
