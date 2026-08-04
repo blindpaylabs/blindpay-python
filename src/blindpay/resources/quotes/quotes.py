@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -39,6 +39,7 @@ class CreateQuoteInput(TypedDict):
     transaction_document_file: Optional[str]
     transaction_document_id: Optional[str]
     transaction_document_type: TransactionDocumentType
+    refund_wallet_address: NotRequired[Optional[str]]
 
 
 class CreateQuoteResponse(TypedDict):

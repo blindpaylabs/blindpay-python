@@ -1,6 +1,5 @@
-__version__ = "3.0.0"
-
 from ._internal.exceptions import BlindPayError
+from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
 from .types import (
     AccountClass,

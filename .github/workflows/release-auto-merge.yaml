@@ -1,0 +1,40 @@
+name: Release Auto-Merge
+
+# Makes the release itself zero-touch: once a merged api-sync (or any other)
+# PR lands a conventional-commit change on main, release-please-action (in
+# publish.yaml) opens/updates its own "chore(main): release X.Y.Z" PR. That PR
+# still has to be merged by a human today. This workflow enables GitHub's
+# native auto-merge on it instead, so it merges itself as soon as the
+# existing required checks (lint, typecheck, tests, contract-check,
+# api-sync-check, snyk) pass -- nothing here bypasses those checks.
+#
+# Gating is intentionally strict and narrow: only a PR opened by the
+# release-please bot itself (github-actions[bot]), carrying release-please's
+# own "autorelease: pending" label. Both conditions must hold, so this never
+# touches a human-authored PR or a release-please PR that already failed
+# something (release-please clears the label / the PR gets closed in that
+# case). Enabling auto-merge does not merge anything immediately; GitHub
+# still waits for every required check to succeed first.
+
+on:
+  pull_request:
+    types: [opened, labeled, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge-release-pr:
+    name: Enable auto-merge on the release-please PR
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.user.login == 'github-actions[bot]' &&
+      contains(github.event.pull_request.labels.*.name, 'autorelease: pending')
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ github.event.pull_request.number }}" --auto --squash --repo "${{ github.repository }}"

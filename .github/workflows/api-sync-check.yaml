@@ -1,0 +1,47 @@
+name: API Sync Check
+
+on:
+  workflow_call:
+
+jobs:
+  api-sync-check:
+    name: Run deterministic spec-sync patcher checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Map validity (every spec-map.json entry resolves)
+        run: python3 .api-sync/sync.py --validate-map
+
+      - name: State reconciliation (--check)
+        run: python3 .api-sync/sync.py --check
+
+      - name: Determinism proof
+        run: |
+          set -e
+          rm -rf /tmp/api-sync-proof-a /tmp/api-sync-proof-b
+          cp -r . /tmp/api-sync-proof-a
+          cp -r . /tmp/api-sync-proof-b
+          # Re-applying the already-committed snapshot against itself must be
+          # a deterministic no-op in any generic CI context (no externally
+          # delivered spec-current.json is available here). The stronger
+          # proof -- that applying genuinely NEW drift twice from the same
+          # starting state produces byte-identical results -- is covered by
+          # tests/test_api_sync.py::TestDeterminism.
+          (cd /tmp/api-sync-proof-a && python3 .api-sync/sync.py --apply --spec .api-sync/spec-snapshot.json)
+          (cd /tmp/api-sync-proof-b && python3 .api-sync/sync.py --apply --spec .api-sync/spec-snapshot.json)
+          diff -rq /tmp/api-sync-proof-a /tmp/api-sync-proof-b
+          diff -rq . /tmp/api-sync-proof-a
+
+      - name: Coverage report (non-blocking)
+        continue-on-error: true
+        run: python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json
+
+      - name: Type audit (non-blocking)
+        continue-on-error: true
+        run: python3 .api-sync/sync.py --audit-types --spec .api-sync/spec-snapshot.json
