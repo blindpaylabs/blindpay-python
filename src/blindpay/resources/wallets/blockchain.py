@@ -12,11 +12,11 @@ class GetBlockchainWalletMessageResponse(TypedDict):
 
 class BlockchainWallet(TypedDict):
     id: str
-    name: str
-    network: Network
+    name: Optional[str]
+    network: Optional[Network]
     address: Optional[str]
     signature_tx_hash: Optional[str]
-    is_account_abstraction: bool
+    is_account_abstraction: Optional[bool]
     customer_id: str
 
 
@@ -29,14 +29,14 @@ class CreateBlockchainWalletWithAddressInput(TypedDict):
     customer_id: str
     name: str
     network: Network
-    address: str
+    address: Optional[str]
 
 
 class CreateBlockchainWalletWithHashInput(TypedDict):
     customer_id: str
     name: str
     network: Network
-    signature_tx_hash: str
+    signature_tx_hash: Optional[str]
 
 
 class GetBlockchainWalletInput(TypedDict):

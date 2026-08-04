@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from typing_extensions import TypedDict
 
@@ -8,14 +8,14 @@ from ...types import BlindpayApiResponse, Network
 
 class OfframpWallet(TypedDict):
     id: str
-    external_id: str
+    external_id: Optional[str]
     instance_id: str
     customer_id: str
     bank_account_id: str
     network: Network
     address: str
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
 
 
 ListOfframpWalletsResponse = List[OfframpWallet]

@@ -33,34 +33,34 @@ class Payout(TypedDict):
     id: str
     status: TransactionStatus
     sender_wallet_address: str
-    signed_transaction: str
+    signed_transaction: Optional[str]
     quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
     tracking_payment: TrackingPayment
-    tracking_liquidity: TrackingLiquidity
+    tracking_liquidity: Optional[TrackingLiquidity]
     tracking_complete: TrackingComplete
     tracking_partner_fee: TrackingPartnerFee
-    created_at: str
-    updated_at: str
-    image_url: str
-    first_name: str
-    last_name: str
-    legal_name: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
+    image_url: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    legal_name: Optional[str]
     network: Network
     token: StablecoinToken
-    description: str
-    sender_amount: float
-    receiver_amount: float
-    partner_fee_amount: float
-    commercial_quotation: float
-    blindpay_quotation: float
-    total_fee_amount: float
-    customer_local_amount: float
+    description: Optional[str]
+    sender_amount: Optional[float]
+    receiver_amount: Optional[float]
+    partner_fee_amount: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    total_fee_amount: Optional[float]
+    customer_local_amount: Optional[float]
     currency: Currency  # Excluding "USDT" | "USDB"
-    transaction_document_file: str
-    transaction_document_type: TransactionDocumentType
-    transaction_document_id: str
+    transaction_document_file: Optional[str]
+    transaction_document_type: Optional[TransactionDocumentType]
+    transaction_document_id: Optional[str]
     name: str
     type: Rail
     pix_key: Optional[str]
@@ -90,8 +90,8 @@ class Payout(TypedDict):
     swift_account_holder_name: Optional[str]
     swift_account_number_iban: Optional[str]
     transfers_account: Optional[str]
-    transfers_type: ArgentinaTransfers
-    has_virtual_account: bool
+    transfers_type: Optional[ArgentinaTransfers]
+    has_virtual_account: Optional[bool]
     partner_fee_id: Optional[str]
     ted_bank_code: Optional[str]
     ted_branch_code: Optional[str]
@@ -142,7 +142,7 @@ class CreateStellarPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: str
+    customer_id: Optional[str]
 
 
 class CreateEvmPayoutInput(TypedDict):
@@ -159,7 +159,7 @@ class CreateEvmPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: str
+    customer_id: Optional[str]
 
 
 class CreateSolanaPayoutInput(TypedDict):
@@ -176,7 +176,7 @@ class CreateSolanaPayoutResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: str
+    customer_id: Optional[str]
 
 
 class SubmitPayoutDocumentsInput(TypedDict):

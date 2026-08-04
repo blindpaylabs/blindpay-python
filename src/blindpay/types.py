@@ -340,33 +340,33 @@ class PaginationMetadata(TypedDict):
 
 class TrackingTransaction(TypedDict):
     step: str
-    status: str
-    transaction_hash: str
-    completed_at: str
+    status: Optional[str]
+    transaction_hash: Optional[str]
+    completed_at: Optional[str]
 
 
 class TrackingPayment(TypedDict):
     step: str
-    provider_name: str
-    provider_transaction_id: str
-    provider_status: str
-    estimated_time_of_arrival: str
-    completed_at: str
+    provider_name: Optional[str]
+    provider_transaction_id: Optional[str]
+    provider_status: Optional[str]
+    estimated_time_of_arrival: Optional[str]
+    completed_at: Optional[str]
 
 
 class TrackingLiquidity(TypedDict):
     step: str
-    provider_transaction_id: str
-    provider_status: str
-    estimated_time_of_arrival: str
-    completed_at: str
+    provider_transaction_id: Optional[str]
+    provider_status: Optional[str]
+    estimated_time_of_arrival: Optional[str]
+    completed_at: Optional[str]
 
 
 class TrackingComplete(TypedDict):
     step: str
-    status: str
-    transaction_hash: str
-    completed_at: str
+    status: Optional[str]
+    transaction_hash: Optional[str]
+    completed_at: Optional[str]
 
 
 class TrackingPartnerFee(TypedDict):

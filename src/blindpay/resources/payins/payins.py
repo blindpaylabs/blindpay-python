@@ -70,27 +70,27 @@ class Payin(TypedDict):
     tracking_payment: Optional[TrackingPayment]
     tracking_complete: Optional[TrackingComplete]
     tracking_partner_fee: Optional[TrackingPartnerFee]
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     image_url: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     legal_name: Optional[str]
     type: str
     payment_method: str
-    sender_amount: float
-    receiver_amount: float
+    sender_amount: Optional[float]
+    receiver_amount: Optional[float]
     token: StablecoinToken
-    partner_fee_amount: float
-    total_fee_amount: float
-    commercial_quotation: float
-    blindpay_quotation: float
+    partner_fee_amount: Optional[float]
+    total_fee_amount: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
     currency: str
     billing_fee: float
     name: str
-    address: str
+    address: Optional[str]
     network: Network
-    blindpay_bank_details: BankDetails
+    blindpay_bank_details: Optional[BankDetails]
     is_otc: Optional[bool]
     billing_fee_amount: Optional[float]
     pse_document_type: Optional[str]
@@ -137,9 +137,9 @@ class GetPayinTrackingTransaction(TypedDict):
 class GetPayinTrackResponse(TypedDict):
     customer_id: str
     id: str
-    pix_code: str
-    memo_code: str
-    clabe: str
+    pix_code: Optional[str]
+    memo_code: Optional[str]
+    clabe: Optional[str]
     status: str
     manual_execution_status: Optional[ManualExecutionStatus]
     payin_quote_id: str
@@ -148,27 +148,27 @@ class GetPayinTrackResponse(TypedDict):
     tracking_payment: TrackingPayment
     tracking_complete: TrackingComplete
     tracking_partner_fee: TrackingPartnerFee
-    created_at: str
-    updated_at: str
-    image_url: str
-    first_name: str
-    last_name: str
-    legal_name: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
+    image_url: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    legal_name: Optional[str]
     type: str
     payment_method: str
-    sender_amount: float
-    receiver_amount: float
+    sender_amount: Optional[float]
+    receiver_amount: Optional[float]
     token: StablecoinToken
-    partner_fee_amount: float
-    total_fee_amount: float
-    commercial_quotation: float
-    blindpay_quotation: float
+    partner_fee_amount: Optional[float]
+    total_fee_amount: Optional[float]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
     currency: str
     billing_fee: float
     name: str
-    address: str
+    address: Optional[str]
     network: Network
-    blindpay_bank_details: BankDetails
+    blindpay_bank_details: Optional[BankDetails]
     partner_fee_id: Optional[str]
     billing_fee_amount: NotRequired[Optional[float]]
 
@@ -193,8 +193,8 @@ class CreateEvmPayinResponse(TypedDict):
     tracking_transaction: Optional[TrackingTransaction]
     tracking_partner_fee: Optional[TrackingPartnerFee]
     blindpay_bank_details: BankDetails
-    customer_id: str
-    receiver_amount: float
+    customer_id: Optional[str]
+    receiver_amount: Optional[float]
     billing_fee_amount: NotRequired[Optional[float]]
 
 

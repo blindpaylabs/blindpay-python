@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from typing_extensions import Literal, TypedDict
 
@@ -47,8 +47,8 @@ class WebhookEndpoint(TypedDict):
     events: List[WebhookEvents]
     last_event_at: str
     instance_id: str
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
 
 
 ListWebhookEndpointsResponse = List[WebhookEndpoint]

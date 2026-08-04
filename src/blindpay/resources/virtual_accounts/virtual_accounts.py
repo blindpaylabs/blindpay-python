@@ -37,7 +37,7 @@ class VirtualAccount(TypedDict):
     id: str
     us: USBankDetails
     token: StablecoinToken
-    blockchain_wallet_id: str
+    blockchain_wallet_id: Optional[str]
     banking_partner: Optional[BankingPartner]
     kyc_status: Optional[str]
     blockchain_wallet: Optional[str]
@@ -51,8 +51,8 @@ class CreateVirtualAccountInput(_CreateVirtualAccountInputRequired, total=False)
     blockchain_wallet_id: str
     token: StablecoinToken
     banking_partner: BankingPartner
-    sole_proprietor_doc_type: str
-    sole_proprietor_doc_file: str
+    sole_proprietor_doc_type: Optional[str]
+    sole_proprietor_doc_file: Optional[str]
 
 
 CreateVirtualAccountResponse = VirtualAccount
