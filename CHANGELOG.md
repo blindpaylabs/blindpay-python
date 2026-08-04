@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.1.1...v3.2.0) (2026-08-04)
+
+
+### Features
+
+* **types:** fix pagination cursor, billing fee, account type and wallet-create types ([#64](https://github.com/blindpaylabs/blindpay-python/issues/64)) ([767dd62](https://github.com/blindpaylabs/blindpay-python/commit/767dd62c65ada5c2812507af6cbd92a6d39d2869))
+
 ## [3.1.1](https://github.com/blindpaylabs/blindpay-python/compare/v3.1.0...v3.1.1) (2026-08-04)
 
 
