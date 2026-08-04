@@ -1009,5 +1009,980 @@
     ],
     "reason": "CustomerOut.kyc_status carries the full 8-value customer state machine on the wire; the SDK's KycStatus Literal used for that exact field only has 2 members (awaiting_contract, compliance_request). Needs a human decision on whether KycStatus should simply gain the 6 missing members, or whether this field was wired to the wrong Literal from the start (customers.py also declares an unrelated 5-value CustomerStatus used only for a list-filter param).",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum",
+    "enum": "BusinessIndustry",
+    "missing_values": [
+      "446120"
+    ],
+    "reason": "Found by the new enum-coverage check when CreateCustomerIn/CustomerOut/UpdateCustomerIn.business_industry was first wired into spec-map.json's `enums` list. The wire enum has one more NAICS-style code than the SDK's BusinessIndustry Literal. Needs a human to confirm '446120' and add it.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum",
+    "enum": "LimitIncreaseRequestSupportingDocumentType",
+    "missing_values": [
+      "business_accounts_receivable",
+      "business_contract",
+      "business_merchant_processor_statement",
+      "business_shareholder_loan",
+      "individual_blockchain_wallet_statement",
+      "individual_crypto_exchange_statement",
+      "individual_employment_letter",
+      "individual_investment_statement",
+      "individual_pay_stub"
+    ],
+    "reason": "Found by the new enum-coverage check when CustomerLimitIncreaseIn/GetCustomerLimitIncreaseOut.supporting_document_type was first wired into spec-map.json's `enums` list. The wire enum has grown to cover business-side supporting documents; the SDK's Literal only has the original individual-side subset. Needs a human pass to add the missing members.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum",
+    "enum": "Currency",
+    "missing_values": [
+      "EUR"
+    ],
+    "reason": "Found by the new enum-coverage check when PayoutOut.currency was first wired into spec-map.json's `enums` list. The wire enum now includes EUR; the SDK's Currency Literal does not. Needs a human to add it.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum",
+    "enum": "ManualExecutionStatus",
+    "missing_values": [
+      "concluded",
+      "pending"
+    ],
+    "reason": "Found by the new enum-coverage check when PayinOut.manual_execution_status was first wired into spec-map.json's `enums` list. The SDK's ManualExecutionStatus Literal is missing two wire values. Needs a human to add them.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CustomerOut",
+    "property": "kyc_type",
+    "reason": "CustomerOut is a union of IndividualWithStandardKYC/IndividualWithEnhancedKYC/BusinessWithStandardKYB, and each variant pins kyc_type to its OWN singleton Literal (StandardKycType='standard', EnhancedKycType='enhanced') rather than sharing one Literal across all three -- correct per-variant, but this check maps one enum locator per (schema, property), so it cannot express 'verified per discriminated-union variant, not as a single shared enum'. A human should decide whether to add per-variant specPath-scoped enum entries or fold this into the existing 3-member KycType Literal instead.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "BankAccountOut",
+    "property": "spei_protocol",
+    "reason": "BankAccountOut.spei_protocol is typed as a bare str even though the SDK already has a SpeiProtocol Literal (now mapped for PayoutOut.spei_protocol via this same PR). Needs a human to retype this field to SpeiProtocol and verify member parity.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreateBankAccountIn",
+    "property": "business_industry",
+    "reason": "CreateBankAccountIn.business_industry is typed as a bare str even though the SDK already has a BusinessIndustry Literal (used by customers.py). Needs a human to retype this field and verify member parity between the bank-account and customer domains.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreateBankAccountIn",
+    "property": "swift_payment_code",
+    "reason": "CreateBankAccountIn.swift_payment_code is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreatePayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreatePayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreatePayinOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreatePayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CreateVirtualAccountIn",
+    "property": "sole_proprietor_doc_type",
+    "reason": "CreateVirtualAccountIn.sole_proprietor_doc_type is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "CustomerOut",
+    "property": "source_of_funds_doc_type",
+    "reason": "CustomerOut.source_of_funds_doc_type is typed as a bare str on the IndividualWithEnhancedKYC variant even though the SDK already has a SourceOfFundsDocType Literal used for the equivalent CreateCustomerIn/UpdateCustomerIn field. Needs a human to retype this field.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinCompleteWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinNewWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "currency",
+    "reason": "PayinOut.currency is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "pse_document_type",
+    "reason": "PayinOut.pse_document_type is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "type",
+    "reason": "PayinOut.type is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinPartnerFeeWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinUpdateWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayinUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutCompleteWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutNewWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOnEvmOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "ach_cop_document_type",
+    "reason": "PayoutOut.ach_cop_document_type is typed as a bare str even though the SDK already has an AchCopDocument Literal (used by bank_accounts.py). Needs a human to retype this field and verify member parity.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutPartnerFeeWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_complete"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_liquidity"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "estimated_time_of_arrival",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "provider_name",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "provider_status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_payment"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "status",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "PayoutUpdateWebhookOut",
+    "property": "step",
+    "reason": "TrackingComplete/TrackingPayment/TrackingTransaction/TrackingLiquidity in types.py type this field as a bare str; the wire constrains it to an enum. These sub-objects are shared verbatim across every Payin/Payout GET response and webhook envelope schema, so this same gap repeats once per host schema. Needs a human to design the right domain Literal(s) for the tracking sub-object family -- not a mechanical single-field patch, and not safe to guess at from one call site alone.",
+    "owner": "eric@blindpay.com",
+    "path": "tracking_transaction"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "TransferOut",
+    "property": "network",
+    "reason": "TransferOut.network is typed as a bare str even though the SDK already has a Network Literal (used elsewhere on the same schema for customer_network/sender token contexts). Needs a human to retype this field.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "VirtualAccountOut",
+    "property": "kyc_status",
+    "reason": "VirtualAccountOut.kyc_status is typed as a bare str; the wire constrains it to an enum with no existing SDK Literal counterpart. Needs a human to design the right domain Literal.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "BankAccountOut",
+    "path": "offramp_wallets.items",
+    "reason": "Found by the new nested-object coverage check: BankAccountOut#offramp_wallets.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the OfframpWallet TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreateCustomerIn",
+    "path": "owners.items",
+    "reason": "Found by the new nested-object coverage check: CreateCustomerIn#owners.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the Owner TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreatePayinOut",
+    "path": "blindpay_bank_details",
+    "reason": "Found by the new nested-object coverage check: CreatePayinOut#blindpay_bank_details is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the BankDetails TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreateTransferOut",
+    "path": "tracking_bridge_swap",
+    "reason": "Found by the new nested-object coverage check: CreateTransferOut#tracking_bridge_swap is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreateTransferOut",
+    "path": "tracking_complete",
+    "reason": "Found by the new nested-object coverage check: CreateTransferOut#tracking_complete is an inline object/array-item shape reachable under a mapped schema. It is already modeled inline on the Transfer/CreateTransferOut TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreateTransferOut",
+    "path": "tracking_paymaster",
+    "reason": "Found by the new nested-object coverage check: CreateTransferOut#tracking_paymaster is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CreateTransferOut",
+    "path": "tracking_transaction_monitoring",
+    "reason": "Found by the new nested-object coverage check: CreateTransferOut#tracking_transaction_monitoring is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CustomerOut",
+    "path": "fraud_warnings.items",
+    "reason": "Found by the new nested-object coverage check: CustomerOut#fraud_warnings.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the FraudWarning TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CustomerOut",
+    "path": "kyc_warnings.items",
+    "reason": "Found by the new nested-object coverage check: CustomerOut#kyc_warnings.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the KycWarning TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CustomerOut",
+    "path": "limit",
+    "reason": "Found by the new nested-object coverage check: CustomerOut#limit is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransactionLimit TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "CustomerOut",
+    "path": "owners.items",
+    "reason": "Found by the new nested-object coverage check: CustomerOut#owners.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the Owner TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "GetCustomerLimitsOut",
+    "path": "limits",
+    "reason": "Found by the new nested-object coverage check: GetCustomerLimitsOut#limits is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the Limits/CustomerLimits TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "TransferOut",
+    "path": "tracking_bridge_swap",
+    "reason": "Found by the new nested-object coverage check: TransferOut#tracking_bridge_swap is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "TransferOut",
+    "path": "tracking_complete",
+    "reason": "Found by the new nested-object coverage check: TransferOut#tracking_complete is an inline object/array-item shape reachable under a mapped schema. It is already modeled inline on the Transfer TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "TransferOut",
+    "path": "tracking_paymaster",
+    "reason": "Found by the new nested-object coverage check: TransferOut#tracking_paymaster is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "TransferOut",
+    "path": "tracking_transaction_monitoring",
+    "reason": "Found by the new nested-object coverage check: TransferOut#tracking_transaction_monitoring is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the TransferTrackingStep TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "UpdateCustomerIn",
+    "path": "owners.items",
+    "reason": "Found by the new nested-object coverage check: UpdateCustomerIn#owners.items is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the OwnerUpdate TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "nested_object",
+    "schema": "VirtualAccountOut",
+    "path": "us",
+    "reason": "Found by the new nested-object coverage check: VirtualAccountOut#us is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the USBankDetails TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
+    "owner": "eric@blindpay.com"
   }
 ]

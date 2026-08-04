@@ -85,8 +85,15 @@ def load_unmodeled() -> list[dict]:
             required = {"schema", "field", "reason", "owner"}
         elif kind == "enum":
             required = {"enum", "missing_values", "reason", "owner"}
+        elif kind == "enum_coverage":
+            required = {"schema", "property", "reason", "owner"}
+        elif kind == "nested_object":
+            required = {"schema", "path", "reason", "owner"}
         else:
-            raise SystemExit(f"{UNMODELED_PATH}[{i}]: unknown or missing 'kind' (expected 'property' or 'enum')")
+            raise SystemExit(
+                f"{UNMODELED_PATH}[{i}]: unknown or missing 'kind' "
+                f"(expected 'property', 'enum', 'enum_coverage', or 'nested_object')"
+            )
         missing = required - e.keys()
         if missing:
             raise SystemExit(f"{UNMODELED_PATH}[{i}]: missing required key(s) {sorted(missing)}")
@@ -176,6 +183,50 @@ def get_enum_values(spec: dict, locator: dict) -> Optional[set[str]]:
     if enum is None:
         return None
     return set(enum)
+
+
+def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
+    """Detects an enum constraint in any of the shapes the public spec uses:
+    a bare `enum`, an array's `items.enum`, or either wrapped in `anyOf`/`oneOf`
+    (the usual nullable-enum pattern). Returns (is_items_form, enum_values) or
+    None if the property carries no enum constraint at all."""
+    if not isinstance(prop_schema, dict):
+        return None
+    if "enum" in prop_schema:
+        return False, prop_schema["enum"]
+    items = prop_schema.get("items")
+    if isinstance(items, dict) and "enum" in items:
+        return True, items["enum"]
+    for key in ("anyOf", "oneOf"):
+        variants = prop_schema.get(key)
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            if not isinstance(variant, dict):
+                continue
+            if "enum" in variant:
+                return False, variant["enum"]
+            v_items = variant.get("items")
+            if isinstance(v_items, dict) and "enum" in v_items:
+                return True, v_items["enum"]
+    return None
+
+
+def inline_object_shapes(prop_schema: dict) -> list[tuple[str, dict]]:
+    """Returns (path_suffix, shape) for every inline (non-$ref) object shape
+    implied directly by this property: the property itself if it is an inline
+    object, and/or its array items if those are an inline object. A $ref'd
+    object is a named schema and out of scope here -- it is reachable (or not)
+    and mappable (or ignored) on its own terms via the normal schema machinery."""
+    shapes: list[tuple[str, dict]] = []
+    if not isinstance(prop_schema, dict):
+        return shapes
+    if prop_schema.get("type") == "object" and "$ref" not in prop_schema and "properties" in prop_schema:
+        shapes.append(("", prop_schema))
+    items = prop_schema.get("items")
+    if isinstance(items, dict) and "$ref" not in items and items.get("type") == "object" and "properties" in items:
+        shapes.append((".items", items))
+    return shapes
 
 
 def coarse_type(prop_schema: dict) -> tuple[Optional[str], bool]:
@@ -497,6 +548,131 @@ def reconcile_types(spec: dict, map_data: dict, unmodeled: list[dict], index: Sd
                     missing={n: spec_props[n] for n in unaccounted},
                 )
             )
+    return gaps
+
+
+def unmodeled_enum_coverage_allowed(unmodeled: list[dict], schema: str, path: Optional[str], prop: str) -> bool:
+    return any(
+        e.get("kind") == "enum_coverage" and e["schema"] == schema and e.get("path") == path and e["property"] == prop
+        for e in unmodeled
+    )
+
+
+def unmodeled_nested_object_allowed(unmodeled: list[dict], schema: str, path: str) -> bool:
+    return any(e.get("kind") == "nested_object" and e["schema"] == schema and e["path"] == path for e in unmodeled)
+
+
+@dataclass
+class EnumCoverageGap:
+    schema: str
+    path: Optional[str]
+    property: str
+
+
+def reconcile_enum_coverage(
+    spec: dict, map_data: dict, unmodeled: list[dict], index: SdkIndex
+) -> list[EnumCoverageGap]:
+    """Every enum-constrained property on a schema this SDK actually models
+    the field for must resolve to a mapped Literal (via spec-map.json's
+    `enums` list) or a recorded (kind=enum_coverage) exclusion. Unlike
+    reconcile_enums, which only checks the *members* of enums someone already
+    chose to map, this walks every mapped schema and flags enum-constrained
+    properties nobody mapped at all."""
+    reachable = compute_reachable_schemas(spec)
+    covered = {
+        (e["spec"]["schema"], e["spec"].get("path"), e["spec"]["property"], bool(e["spec"].get("items")))
+        for e in map_data.get("enums", [])
+    }
+
+    gaps: list[EnumCoverageGap] = []
+    seen: set[tuple[str, Optional[str], str]] = set()
+    for e in map_data.get("types", []):
+        spec_names = e["spec"] if isinstance(e["spec"], list) else [e["spec"]]
+        path = e.get("specPath")
+        sdk_fields: set[str] = set()
+        for site in e["sdk"]:
+            sdk_fields |= resolve_typeddict_fields(site["symbol"], site["file"], index)
+
+        for name in spec_names:
+            if name not in reachable:
+                continue
+            schema_obj = get_schema(spec, name)
+            if schema_obj is None:
+                continue
+            node = resolve_path(schema_obj, path)
+            for prop_name, prop_schema in get_properties(node).items():
+                if prop_name not in sdk_fields:
+                    continue  # unmapped field entirely -- reconcile_types's concern, not this check's
+                locator = find_enum_locator(prop_schema)
+                if locator is None:
+                    continue
+                is_items, _values = locator
+                key = (name, path, prop_name)
+                if key in seen:
+                    continue
+                if (name, path, prop_name, is_items) in covered:
+                    continue
+                if unmodeled_enum_coverage_allowed(unmodeled, name, path, prop_name):
+                    continue
+                seen.add(key)
+                gaps.append(EnumCoverageGap(schema=name, path=path, property=prop_name))
+
+    gaps.sort(key=lambda g: (g.schema, g.path or "", g.property))
+    return gaps
+
+
+@dataclass
+class NestedObjectGap:
+    schema: str
+    path: str
+
+
+def reconcile_nested_coverage(spec: dict, map_data: dict, unmodeled: list[dict]) -> list[NestedObjectGap]:
+    """Recursively enumerates inline object and array-item-object shapes
+    reachable under every mapped schema's mapped path. Each such shape must
+    itself have a map entry (specPath pointing at it) or a recorded
+    (kind=nested_object) omission -- otherwise its own properties (which may
+    include further enums, or fields drifting out from under it) are
+    invisible to every other check in this file."""
+    reachable = compute_reachable_schemas(spec)
+    mapped_paths: set[tuple[str, Optional[str]]] = set()
+    for e in map_data.get("types", []):
+        spec_names = e["spec"] if isinstance(e["spec"], list) else [e["spec"]]
+        path = e.get("specPath")
+        for name in spec_names:
+            mapped_paths.add((name, path))
+
+    gaps: list[NestedObjectGap] = []
+    seen: set[tuple[str, str]] = set()
+
+    def walk(schema_name: str, base_path: Optional[str], node: Optional[dict]) -> None:
+        for prop_name, prop_schema in get_properties(node).items():
+            child_path = f"{base_path}.{prop_name}" if base_path else prop_name
+            for suffix, shape in inline_object_shapes(prop_schema):
+                full_path = child_path + suffix
+                key = (schema_name, full_path)
+                if key in seen:
+                    continue
+                if (schema_name, full_path) in mapped_paths:
+                    walk(schema_name, full_path, shape)
+                    continue
+                if unmodeled_nested_object_allowed(unmodeled, schema_name, full_path):
+                    continue
+                seen.add(key)
+                gaps.append(NestedObjectGap(schema=schema_name, path=full_path))
+                # do not recurse into an unresolved shape -- its own nested
+                # shapes are not in scope until this one is mapped or excused
+
+    for name, path in sorted(mapped_paths, key=lambda t: (t[0], t[1] or "")):
+        if name not in reachable:
+            continue
+        schema_obj = get_schema(spec, name)
+        if schema_obj is None:
+            continue
+        node = resolve_path(schema_obj, path)
+        walk(name, path, node)
+
+    gaps.sort(key=lambda g: (g.schema, g.path))
     return gaps
 
 
@@ -920,6 +1096,8 @@ def cmd_check(report_path: Optional[Path]) -> int:
     spec = load_json(SNAPSHOT_PATH)
     enum_gaps = reconcile_enums(spec, map_data, unmodeled, index) if not map_errors else []
     prop_gaps = reconcile_types(spec, map_data, unmodeled, index) if not map_errors else []
+    enum_coverage_gaps = reconcile_enum_coverage(spec, map_data, unmodeled, index) if not map_errors else []
+    nested_gaps = reconcile_nested_coverage(spec, map_data, unmodeled) if not map_errors else []
 
     report = {
         "mode": "check",
@@ -928,11 +1106,15 @@ def cmd_check(report_path: Optional[Path]) -> int:
         "property_gaps": [
             {"schema": g.schema_names, "path": g.path, "missing": sorted(g.missing.keys())} for g in prop_gaps
         ],
+        "enum_coverage_gaps": [
+            {"schema": g.schema, "path": g.path, "property": g.property} for g in enum_coverage_gaps
+        ],
+        "nested_object_gaps": [{"schema": g.schema, "path": g.path} for g in nested_gaps],
     }
     if report_path:
         report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
 
-    if not (map_errors or enum_gaps or prop_gaps):
+    if not (map_errors or enum_gaps or prop_gaps or enum_coverage_gaps or nested_gaps):
         return 0
 
     if map_errors:
@@ -950,6 +1132,19 @@ def cmd_check(report_path: Optional[Path]) -> int:
             f"PENDING DRIFT (property): {ctx} is missing {sorted(g.missing.keys())} on "
             f"{[s['symbol'] for s in g.sdk_sites]}; add the field(s) or record in "
             f".api-sync/unmodeled.json (kind=property) with a reason and owner."
+        )
+    for g in enum_coverage_gaps:
+        ctx = g.schema + (f"#{g.path}" if g.path else "")
+        print(
+            f"ENUM COVERAGE GAP: {ctx}.{g.property} is enum-constrained in the spec but is not mapped "
+            f"to an SDK Literal via spec-map.json's `enums` list; map it or record it in "
+            f".api-sync/unmodeled.json (kind=enum_coverage) with a reason and owner."
+        )
+    for g in nested_gaps:
+        print(
+            f"NESTED OBJECT COVERAGE GAP: {g.schema}#{g.path} is an inline object/array-item shape with no "
+            f"map entry; add a specPath map entry for it or record it in .api-sync/unmodeled.json "
+            f"(kind=nested_object) with a reason and owner."
         )
     return 1
 
