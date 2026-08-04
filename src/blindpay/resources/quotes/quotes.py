@@ -44,16 +44,16 @@ class CreateQuoteInput(TypedDict):
 
 class CreateQuoteResponse(TypedDict):
     id: str
-    expires_at: int
-    commercial_quotation: float
-    blindpay_quotation: float
-    receiver_amount: float
-    sender_amount: float
-    partner_fee_amount: float
-    flat_fee: float
-    contract: Contract
-    customer_local_amount: float
-    description: str
+    expires_at: Optional[int]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: Optional[float]
+    sender_amount: Optional[float]
+    partner_fee_amount: Optional[float]
+    flat_fee: Optional[float]
+    contract: Optional[Contract]
+    customer_local_amount: Optional[float]
+    description: Optional[str]
 
 
 class GetFxRateInput(TypedDict):

@@ -18,25 +18,25 @@ class PayerRules(TypedDict, total=False):
 
 
 class CreatePayinQuoteInput(TypedDict, total=False):
-    blockchain_wallet_id: str
+    blockchain_wallet_id: Optional[str]
     currency_type: CurrencyType
     payment_method: PaymentMethod
     request_amount: float
     token: StablecoinToken
-    cover_fees: bool
+    cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
-    payer_rules: PayerRules
-    is_otc: bool
-    wallet_id: str
+    payer_rules: Optional[PayerRules]
+    is_otc: Optional[bool]
+    wallet_id: Optional[str]
 
 
 class CreatePayinQuoteResponse(TypedDict):
     id: str
-    expires_at: int
-    commercial_quotation: float
-    blindpay_quotation: float
-    receiver_amount: float
-    sender_amount: float
+    expires_at: Optional[int]
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
+    receiver_amount: Optional[float]
+    sender_amount: Optional[float]
     partner_fee_amount: Optional[float]
     flat_fee: Optional[float]
 

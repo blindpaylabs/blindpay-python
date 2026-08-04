@@ -61,15 +61,15 @@ class Transfer(TypedDict):
     customer_network: Network
     customer_wallet_address: str
     customer_id: str
-    address: str
+    address: Optional[str]
     network: str
     tracking_transaction_monitoring: TransferTrackingStep
     tracking_paymaster: TransferTrackingStep
     tracking_bridge_swap: TransferTrackingStep
     tracking_complete: TransferTrackingStep
     tracking_partner_fee: TransferTrackingStep
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     image_url: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]

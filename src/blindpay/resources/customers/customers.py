@@ -332,30 +332,30 @@ class IndividualWithStandardKYC(TypedDict):
     kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
-    tax_id: str
-    address_line_1: str
+    tax_id: Optional[str]
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: str
-    state_province_region: str
+    city: Optional[str]
+    state_province_region: Optional[str]
     country: Country
-    postal_code: str
+    postal_code: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
-    phone_number: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_address_doc_file: str
-    first_name: str
-    last_name: str
+    phone_number: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_address_doc_file: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
     date_of_birth: str
-    id_doc_country: Country
-    id_doc_type: IdentificationDocument
-    id_doc_front_file: str
-    id_doc_back_file: str
+    id_doc_country: Optional[Country]
+    id_doc_type: Optional[IdentificationDocument]
+    id_doc_front_file: Optional[str]
+    id_doc_back_file: Optional[str]
     aiprise_validation_key: str
     instance_id: str
     tos_id: Optional[str]
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     limit: TransactionLimit
     fraud_warnings: Optional[List[FraudWarning]]
     selfie_file: Optional[str]
@@ -382,35 +382,35 @@ class IndividualWithEnhancedKYC(TypedDict):
     kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
-    tax_id: str
-    address_line_1: str
+    tax_id: Optional[str]
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: str
-    state_province_region: str
+    city: Optional[str]
+    state_province_region: Optional[str]
     country: Country
-    postal_code: str
+    postal_code: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
     phone_number: Optional[str]
-    proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_address_doc_file: str
-    first_name: str
-    last_name: str
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_address_doc_file: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
     date_of_birth: str
-    id_doc_country: Country
-    id_doc_type: IdentificationDocument
-    id_doc_front_file: str
+    id_doc_country: Optional[Country]
+    id_doc_type: Optional[IdentificationDocument]
+    id_doc_front_file: Optional[str]
     id_doc_back_file: Optional[str]
     aiprise_validation_key: str
     instance_id: str
-    source_of_funds_doc_type: str
-    source_of_funds_doc_file: str
+    source_of_funds_doc_type: Optional[str]
+    source_of_funds_doc_file: Optional[str]
     individual_holding_doc_front_file: str
-    purpose_of_transactions: PurposeOfTransactions
+    purpose_of_transactions: Optional[PurposeOfTransactions]
     purpose_of_transactions_explanation: Optional[str]
     tos_id: Optional[str]
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     limit: TransactionLimit
     fraud_warnings: Optional[List[FraudWarning]]
     selfie_file: Optional[str]
@@ -437,31 +437,31 @@ class BusinessWithStandardKYB(TypedDict):
     kyc_status: KycStatus
     kyc_warnings: Optional[List[KycWarning]]
     email: str
-    tax_id: str
-    address_line_1: str
+    tax_id: Optional[str]
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: str
-    state_province_region: str
+    city: Optional[str]
+    state_province_region: Optional[str]
     country: Country
-    postal_code: str
+    postal_code: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
     phone_number: Optional[str]
-    proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_address_doc_file: str
-    legal_name: str
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_address_doc_file: Optional[str]
+    legal_name: Optional[str]
     alternate_name: Optional[str]
     formation_date: str
     website: Optional[str]
-    owners: List[Owner]
-    incorporation_doc_file: str
-    proof_of_ownership_doc_file: str
+    owners: Optional[List[Owner]]
+    incorporation_doc_file: Optional[str]
+    proof_of_ownership_doc_file: Optional[str]
     external_id: Optional[str]
     instance_id: str
     tos_id: Optional[str]
     aiprise_validation_key: str
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
     limit: TransactionLimit
     fraud_warnings: Optional[List[FraudWarning]]
     selfie_file: Optional[str]
@@ -482,25 +482,25 @@ class BusinessWithStandardKYB(TypedDict):
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
     external_id: Optional[str]
-    address_line_1: str
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: str
+    city: Optional[str]
     country: Country
     date_of_birth: str
     email: str
-    first_name: str
+    first_name: Optional[str]
     phone_number: Optional[str]
-    id_doc_country: Country
-    id_doc_front_file: str
-    id_doc_type: IdentificationDocument
+    id_doc_country: Optional[Country]
+    id_doc_front_file: Optional[str]
+    id_doc_type: Optional[IdentificationDocument]
     id_doc_back_file: Optional[str]
-    last_name: str
-    postal_code: str
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    last_name: Optional[str]
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
     selfie_file: Optional[str]
@@ -515,30 +515,30 @@ class CreateIndividualWithStandardKYCResponse(TypedDict):
 
 class CreateIndividualWithEnhancedKYCInput(TypedDict):
     external_id: Optional[str]
-    address_line_1: str
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    city: str
+    city: Optional[str]
     country: Country
     date_of_birth: str
     email: str
-    first_name: str
-    id_doc_country: Country
-    id_doc_front_file: str
-    id_doc_type: IdentificationDocument
+    first_name: Optional[str]
+    id_doc_country: Optional[Country]
+    id_doc_front_file: Optional[str]
+    id_doc_type: Optional[IdentificationDocument]
     id_doc_back_file: Optional[str]
     individual_holding_doc_front_file: str
-    last_name: str
-    postal_code: str
+    last_name: Optional[str]
+    postal_code: Optional[str]
     phone_number: Optional[str]
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    purpose_of_transactions: PurposeOfTransactions
-    source_of_funds_doc_file: str
-    source_of_funds_doc_type: SourceOfFundsDocType
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    purpose_of_transactions: Optional[PurposeOfTransactions]
+    source_of_funds_doc_file: Optional[str]
+    source_of_funds_doc_type: Optional[SourceOfFundsDocType]
     purpose_of_transactions_explanation: Optional[str]
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
     selfie_file: Optional[str]
@@ -554,23 +554,23 @@ class CreateIndividualWithEnhancedKYCResponse(TypedDict):
 
 class CreateBusinessWithStandardKYBInput(TypedDict):
     external_id: Optional[str]
-    address_line_1: str
+    address_line_1: Optional[str]
     address_line_2: Optional[str]
-    alternate_name: str
-    city: str
+    alternate_name: Optional[str]
+    city: Optional[str]
     country: Country
     email: str
     formation_date: str
-    incorporation_doc_file: str
-    legal_name: str
-    owners: List[Owner]
-    postal_code: str
-    proof_of_address_doc_file: str
-    proof_of_address_doc_type: ProofOfAddressDocType
-    proof_of_ownership_doc_file: str
-    state_province_region: str
-    tax_id: str
-    tos_id: str
+    incorporation_doc_file: Optional[str]
+    legal_name: Optional[str]
+    owners: Optional[List[Owner]]
+    postal_code: Optional[str]
+    proof_of_address_doc_file: Optional[str]
+    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_ownership_doc_file: Optional[str]
+    state_province_region: Optional[str]
+    tax_id: Optional[str]
+    tos_id: Optional[str]
     website: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
@@ -706,13 +706,13 @@ class LimitIncreaseRequest(TypedDict):
     id: str
     customer_id: str
     status: LimitIncreaseRequestStatus
-    daily: float
-    monthly: float
-    per_transaction: float
-    supporting_document_file: str
-    supporting_document_type: LimitIncreaseRequestSupportingDocumentType
-    created_at: str
-    updated_at: str
+    daily: Optional[float]
+    monthly: Optional[float]
+    per_transaction: Optional[float]
+    supporting_document_file: Optional[str]
+    supporting_document_type: Optional[LimitIncreaseRequestSupportingDocumentType]
+    created_at: Optional[str]
+    updated_at: Optional[str]
 
 
 GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]
@@ -720,9 +720,9 @@ GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]
 
 class RequestLimitIncreaseInput(TypedDict):
     customer_id: str
-    daily: float
-    monthly: float
-    per_transaction: float
+    daily: Optional[float]
+    monthly: Optional[float]
+    per_transaction: Optional[float]
     supporting_document_file: str
     supporting_document_type: LimitIncreaseRequestSupportingDocumentType
 

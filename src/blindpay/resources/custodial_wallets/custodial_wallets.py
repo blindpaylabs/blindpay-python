@@ -11,8 +11,8 @@ class CustodialWallet(TypedDict):
     customer_id: str
     instance_id: str
     network: Network
-    address: str
-    created_at: str
+    address: Optional[str]
+    created_at: Optional[str]
 
 
 class CustodialWalletBalanceToken(TypedDict):
