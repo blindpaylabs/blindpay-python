@@ -23,6 +23,25 @@ class TestUpload:
             assert response["data"] == mocked_data
             mock_request.assert_called_once_with("POST", "/upload", {"bucket": "avatar", "file": "base64data"})
 
+    @pytest.mark.asyncio
+    async def test_analyze(self):
+        mocked_data = {"approval_rate": "high", "description": "Looks valid"}
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_data, "error": None}
+
+            response = await self.blindpay.upload.analyze(
+                {"file": "base64data", "type": "proof_of_address", "metadata": '{"full_name":"Jane Doe"}'}
+            )
+
+            assert response["error"] is None
+            assert response["data"] == mocked_data
+            mock_request.assert_called_once_with(
+                "POST",
+                "/upload/analyze",
+                {"file": "base64data", "type": "proof_of_address", "metadata": '{"full_name":"Jane Doe"}'},
+            )
+
 
 class TestUploadSync:
     @pytest.fixture(autouse=True)
@@ -40,3 +59,21 @@ class TestUploadSync:
             assert response["error"] is None
             assert response["data"] == mocked_data
             mock_request.assert_called_once_with("POST", "/upload", {"bucket": "avatar", "file": "base64data"})
+
+    def test_analyze(self):
+        mocked_data = {"approval_rate": "high", "description": "Looks valid"}
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_data, "error": None}
+
+            response = self.blindpay.upload.analyze(
+                {"file": "base64data", "type": "proof_of_address", "metadata": '{"full_name":"Jane Doe"}'}
+            )
+
+            assert response["error"] is None
+            assert response["data"] == mocked_data
+            mock_request.assert_called_once_with(
+                "POST",
+                "/upload/analyze",
+                {"file": "base64data", "type": "proof_of_address", "metadata": '{"full_name":"Jane Doe"}'},
+            )

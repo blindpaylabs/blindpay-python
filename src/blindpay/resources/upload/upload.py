@@ -1,9 +1,36 @@
-from typing_extensions import Literal, TypedDict
+from typing import Optional
+
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import ApprovalRate, BlindpayApiResponse
 
 UploadBucket = Literal["avatar", "onboarding", "limit_increase"]
+
+UploadAnalyzeDocumentType = Literal[
+    "proof_of_address",
+    "identity_document",
+    "incorporation_document",
+    "proof_of_ownership",
+    "source_of_funds",
+    "selfie",
+    "bank_statement",
+    "tax_return",
+    "proof_of_income",
+    "financial_statement",
+    "invoice",
+    "transaction_document",
+    "passport",
+    "pay_stub",
+    "employment_letter",
+    "investment",
+    "crypto_exchange",
+    "blockchain_wallet",
+    "contract",
+    "accounts_receivable",
+    "merchant_processor",
+    "shareholder_loan",
+]
 
 
 class UploadInput(TypedDict):
@@ -17,6 +44,8 @@ class UploadResponse(TypedDict):
 
 class UploadAnalyzeInput(TypedDict):
     file: str
+    type: UploadAnalyzeDocumentType
+    metadata: NotRequired[Optional[str]]
 
 
 class UploadAnalyzeOutput(TypedDict):
