@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.0...v3.2.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **customers:** EstimatedAnnualRevenue top band has an extra zero ([#66](https://github.com/blindpaylabs/blindpay-python/issues/66)) ([09892d9](https://github.com/blindpaylabs/blindpay-python/commit/09892d93c6f553ccaef9d1aaf7cf6cc6079116ee))
+
 ## [3.2.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.1.1...v3.2.0) (2026-08-04)
 
 
