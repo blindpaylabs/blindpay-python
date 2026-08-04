@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.2](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.1...v3.2.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* **upload:** add required type and optional metadata to analyze input ([#68](https://github.com/blindpaylabs/blindpay-python/issues/68)) ([9f2acfe](https://github.com/blindpaylabs/blindpay-python/commit/9f2acfe21ab8ed3916fb256ae8cd74d9831c2f4d))
+
 ## [3.2.1](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.0...v3.2.1) (2026-08-04)
 
 
