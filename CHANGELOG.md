@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/blindpaylabs/blindpay-python/compare/v3.1.0...v3.1.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **ci:** merge the release PR from the push-triggered job ([#60](https://github.com/blindpaylabs/blindpay-python/issues/60)) ([a255d91](https://github.com/blindpaylabs/blindpay-python/commit/a255d91ddda3a1cbdd9d1ad6271dd414a0ed6296))
+
 ## [3.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.0.0...v3.1.0) (2026-08-04)
 
 
