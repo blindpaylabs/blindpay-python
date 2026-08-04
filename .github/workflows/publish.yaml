@@ -39,9 +39,22 @@ jobs:
       - name: Merge the release PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
         run: |
-          PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' \
-            --json number,author --jq '[.[] | select(.author.is_bot)] | .[0].number // empty')
+          # The action's own output is authoritative and immediate. Listing by
+          # label is not: the previous run created PR #61 at 00:14:03 and a
+          # label query 3 seconds later still returned nothing, so the release
+          # sat open.
+          PR=$(printf '%s' "$RELEASE_PR" | jq -r '.number // empty' 2>/dev/null || true)
+
+          if [ -z "$PR" ]; then
+            for _ in 1 2 3; do
+              PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' \
+                --json number,author --jq '[.[] | select(.author.is_bot)] | .[0].number // empty')
+              [ -n "$PR" ] && break
+              sleep 5
+            done
+          fi
 
           if [ -z "$PR" ]; then
             echo "No pending release PR to merge."
