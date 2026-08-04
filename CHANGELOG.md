@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.2...v3.3.0) (2026-08-04)
+
+
+### Features
+
+* sync SDK with API changes ([#72](https://github.com/blindpaylabs/blindpay-python/issues/72)) ([e609971](https://github.com/blindpaylabs/blindpay-python/commit/e609971abcc1b8b0aef997b15a69bf15edd56915))
+
 ## [3.2.2](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.1...v3.2.2) (2026-08-04)
 
 
