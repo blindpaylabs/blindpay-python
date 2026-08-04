@@ -231,7 +231,9 @@ class TestImportManagement:
             ],
             "ignore": {"schemas": []},
         }
-        _write_map_and_unmodeled(repo, map_data)
+        # "/t" has no resource module behind it in this synthetic fixture -- suppress
+        # it as a known operation gap so this test stays focused on property splicing.
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("post", "/t")))
         old_spec = base_schema(
             {
                 "ThingIn": {
@@ -298,6 +300,17 @@ def _write_fixture_repo(root: Path) -> None:
 def _write_map_and_unmodeled(root: Path, map_data: dict[str, Any], unmodeled: Optional[list[Any]] = None) -> None:
     write(root, ".api-sync/spec-map.json", json.dumps(map_data))
     write(root, ".api-sync/unmodeled.json", json.dumps(unmodeled or []))
+
+
+def _op_unmodeled(*pairs: tuple[str, str]) -> list[dict[str, str]]:
+    """kind=operation unmodeled entries for (method, path) pairs. These fixture
+    repos' resource modules are TypedDict-only stand-ins with no real resource
+    class behind them, so their spec paths would otherwise show up as
+    operation-coverage gaps unrelated to whatever the test actually exercises."""
+    return [
+        {"kind": "operation", "method": m, "path": p, "reason": "test fixture has no resource module", "owner": "t"}
+        for m, p in pairs
+    ]
 
 
 class TestReconciliation:
@@ -926,14 +939,19 @@ class TestNeedsHuman:
         problems = sync.diff_removals_and_changes(old, new, self._map(), index)
         assert problems == []
 
-    def test_new_operation_is_needs_human(self, repo: Path):
+    def test_new_operation_with_no_matching_resource_is_needs_human(self, repo: Path):
+        """New/uncovered operations are no longer caught by diffing path keys
+        between old and new specs (an operation can be "new" to the SDK
+        without its path key being new to the spec, e.g. right after a human
+        deletes a method by hand) -- that's reconcile_operations' job now,
+        checked against whatever spec is current, state-based like every
+        other reconcile_* check."""
         _write_fixture_repo(repo)
         sync = load_sync(repo)
-        index = sync.build_sdk_index(sync.SRC_ROOT)
-        old = base_schema({}, {})
-        new = base_schema({}, {"/new-path": {"get": op()}})
-        problems = sync.diff_removals_and_changes(old, new, self._map(), index)
-        assert any(p.kind == "new_operation" and "/new-path" in p.detail for p in problems)
+        spec = base_schema({}, {"/new-path": {"get": op()}})
+        plans, problems = sync.reconcile_operations(spec, self._map())
+        assert plans == []
+        assert any(p.kind == "needs_human_operation" and "/new-path" in p.detail for p in problems)
 
     def test_new_unmapped_schema_is_needs_human(self, repo: Path):
         _write_fixture_repo(repo)
@@ -1031,7 +1049,7 @@ class TestApplyFlow:
             "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
             "ignore": {"schemas": []},
         }
-        _write_map_and_unmodeled(repo, map_data)
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("get", "/c"), ("get", "/p")))
         old_spec = base_schema(
             {
                 "ColorOut": {"properties": {"color": {"type": "string", "enum": ["red", "blue"]}}},
@@ -1154,7 +1172,7 @@ class TestDeterminism:
                 ],
                 "ignore": {"schemas": []},
             }
-            _write_map_and_unmodeled(root, map_data)
+            _write_map_and_unmodeled(root, map_data, _op_unmodeled(("get", "/c"), ("get", "/p")))
             old_spec = base_schema(
                 {
                     "ColorOut": {"properties": {"color": {"type": "string", "enum": ["red", "blue"]}}},

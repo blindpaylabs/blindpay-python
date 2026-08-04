@@ -1984,5 +1984,33 @@
     "path": "us",
     "reason": "Found by the new nested-object coverage check: VirtualAccountOut#us is an inline object/array-item shape reachable under a mapped schema. It is already modeled by the USBankDetails TypedDict, but that mapping is not registered as a specPath map entry, so this check cannot verify field parity. Needs a human pass to add the proper specPath map entry (or entries, if the shape recurs across multiple host schemas) rather than a blind mechanical add, since the right host TypedDict per specPath needs manual confirmation.",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "operation",
+    "method": "get",
+    "path": "/v1/instances/{instance_id}/rfi",
+    "reason": "Found by the new operation-coverage check: no resource module implements any RFI (request-for-information) endpoint yet, so there is no existing path prefix an auto-insert can attach to. Needs a human to design the RfiResource shape (module, class names, TypedDicts) before this and its sibling RFI operations can be added.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "operation",
+    "method": "post",
+    "path": "/v1/instances/{instance_id}/rfi",
+    "reason": "Same pre-existing gap as GET /v1/instances/{instance_id}/rfi above.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "operation",
+    "method": "get",
+    "path": "/v1/instances/{instance_id}/customers/{customer_id}/rfi",
+    "reason": "Same pre-existing gap as GET /v1/instances/{instance_id}/rfi above.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "operation",
+    "method": "post",
+    "path": "/v1/instances/{instance_id}/customers/{customer_id}/rfi",
+    "reason": "Same pre-existing gap as GET /v1/instances/{instance_id}/rfi above.",
+    "owner": "eric@blindpay.com"
   }
 ]
