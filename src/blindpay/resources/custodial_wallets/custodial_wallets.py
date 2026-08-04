@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import BlindpayApiResponse, Network
@@ -30,6 +30,8 @@ class CustodialWalletBalance(TypedDict):
 class CreateCustodialWalletInput(TypedDict):
     customer_id: str
     network: Network
+    name: str
+    external_id: NotRequired[Optional[str]]
 
 
 CreateCustodialWalletResponse = CustodialWallet

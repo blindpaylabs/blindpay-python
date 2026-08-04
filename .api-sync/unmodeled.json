@@ -233,13 +233,6 @@
   {
     "kind": "property",
     "schema": "CreatePayinOut",
-    "field": "billing_fee_amount",
-    "reason": "Not modeled on CreateEvmPayinResponse (Payin/GetPayinTrackResponse do model it).",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "CreatePayinOut",
     "field": "partner_fee",
     "reason": "Modeled instead as separate scalar fields (partner_fee_id, partner_fee_amount) rather than this nested object; same pattern as the pre-existing tracking_partner_fee divergence in allowlist.json.",
     "owner": "eric@blindpay.com"
@@ -277,20 +270,6 @@
     "schema": "CreatePayinQuoteOut",
     "field": "is_otc",
     "reason": "Not modeled on CreatePayinQuoteResponse.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "CreateWalletIn",
-    "field": "external_id",
-    "reason": "Optional caller-supplied external reference; not modeled on CreateCustodialWalletInput.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "CreateWalletIn",
-    "field": "name",
-    "reason": "REQUIRED by the API (CreateWalletIn.required includes name) but CreateCustodialWalletInput (customer_id, network only) never sends it -- likely a functional bug, not just a documentation gap; flagging for priority triage.",
     "owner": "eric@blindpay.com"
   },
   {
@@ -1015,15 +994,6 @@
     "schema": "WalletTokenOut",
     "field": "symbol",
     "reason": "Modeled under a different name: CustodialWalletBalanceToken uses `token` where the wire's WalletTokenOut object uses `symbol`.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "enum",
-    "enum": "BankAccountType",
-    "missing_values": [
-      "saving"
-    ],
-    "reason": "Live defect, not just typing: the wire's real enum is [checking, saving] (singular); the SDK Literal is [checking, savings] (plural). Confirmed against packages/api-contract in blindpay-v2 and the API's own payout code, which branches on `account_type === 'saving'`. Do not auto-append \"saving\" as a 3rd member; this needs a coordinated rename PR (node and go already use the correct singular spelling).",
     "owner": "eric@blindpay.com"
   },
   {

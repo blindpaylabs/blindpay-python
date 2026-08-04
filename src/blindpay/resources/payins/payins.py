@@ -1,4 +1,4 @@
-from typing import List, Optional, TypedDict
+from typing import List, NotRequired, Optional, TypedDict
 from urllib.parse import urlencode
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
@@ -92,7 +92,7 @@ class Payin(TypedDict):
     network: Network
     blindpay_bank_details: BankDetails
     is_otc: Optional[bool]
-    billing_fee_amount: Optional[str]
+    billing_fee_amount: Optional[float]
     pse_document_type: Optional[str]
     pse_full_name: Optional[str]
     pse_payment_link: Optional[str]
@@ -170,6 +170,7 @@ class GetPayinTrackResponse(TypedDict):
     network: Network
     blindpay_bank_details: BankDetails
     partner_fee_id: Optional[str]
+    billing_fee_amount: NotRequired[Optional[float]]
 
 
 class ExportPayinsInput(TypedDict):
@@ -194,6 +195,7 @@ class CreateEvmPayinResponse(TypedDict):
     blindpay_bank_details: BankDetails
     customer_id: str
     receiver_amount: float
+    billing_fee_amount: NotRequired[Optional[float]]
 
 
 class PayinsResource:

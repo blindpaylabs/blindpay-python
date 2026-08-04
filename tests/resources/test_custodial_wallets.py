@@ -28,6 +28,7 @@ class TestCustodialWallets:
                 {
                     "customer_id": "re_000000000000",
                     "network": "solana",
+                    "name": "My Solana Wallet",
                 }
             )
 
@@ -36,10 +37,44 @@ class TestCustodialWallets:
             assert response["data"]["id"] == "cw_000000000000"
             assert response["data"]["network"] == "solana"
             assert response["data"]["address"] == "So1ana1234567890"
+            # `name` is required on the wire (CreateWalletIn.required includes it);
+            # the create() body must actually carry it, not just the type.
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/customers/re_000000000000/wallets",
-                {"network": "solana"},
+                {"network": "solana", "name": "My Solana Wallet"},
+            )
+
+    @pytest.mark.asyncio
+    async def test_create_custodial_wallet_with_external_id(self):
+        """external_id is optional on the wire; proves it flows through when
+        supplied and that name alone (without external_id) still type-checks."""
+        mocked_wallet = {
+            "id": "cw_000000000000",
+            "customer_id": "re_000000000000",
+            "instance_id": "in_000000000000",
+            "network": "solana",
+            "address": "So1ana1234567890",
+            "created_at": "2025-01-01T00:00:00Z",
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_wallet, "error": None}
+
+            response = await self.blindpay.wallets.custodial.create(
+                {
+                    "customer_id": "re_000000000000",
+                    "network": "solana",
+                    "name": "My Solana Wallet",
+                    "external_id": "your-database-id",
+                }
+            )
+
+            assert response["error"] is None
+            mock_request.assert_called_once_with(
+                "POST",
+                "/instances/in_000000000000/customers/re_000000000000/wallets",
+                {"network": "solana", "name": "My Solana Wallet", "external_id": "your-database-id"},
             )
 
     @pytest.mark.asyncio
@@ -162,6 +197,7 @@ class TestCustodialWalletsSync:
                 {
                     "customer_id": "re_000000000000",
                     "network": "solana",
+                    "name": "My Solana Wallet",
                 }
             )
 
@@ -171,7 +207,36 @@ class TestCustodialWalletsSync:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/customers/re_000000000000/wallets",
-                {"network": "solana"},
+                {"network": "solana", "name": "My Solana Wallet"},
+            )
+
+    def test_create_custodial_wallet_with_external_id(self):
+        mocked_wallet = {
+            "id": "cw_000000000000",
+            "customer_id": "re_000000000000",
+            "instance_id": "in_000000000000",
+            "network": "solana",
+            "address": "So1ana1234567890",
+            "created_at": "2025-01-01T00:00:00Z",
+        }
+
+        with patch.object(self.blindpay._api, "_request") as mock_request:
+            mock_request.return_value = {"data": mocked_wallet, "error": None}
+
+            response = self.blindpay.wallets.custodial.create(
+                {
+                    "customer_id": "re_000000000000",
+                    "network": "solana",
+                    "name": "My Solana Wallet",
+                    "external_id": "your-database-id",
+                }
+            )
+
+            assert response["error"] is None
+            mock_request.assert_called_once_with(
+                "POST",
+                "/instances/in_000000000000/customers/re_000000000000/wallets",
+                {"network": "solana", "name": "My Solana Wallet", "external_id": "your-database-id"},
             )
 
     def test_list_custodial_wallets(self):
