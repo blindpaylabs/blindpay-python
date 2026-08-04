@@ -31,6 +31,26 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+      # Merging the release PR here, from a push-triggered job, is what makes a
+      # release land without a human. A pull_request-triggered workflow cannot
+      # do it: GitHub holds runs on bot-authored PRs as action_required, and it
+      # never starts CI on a PR the GITHUB_TOKEN opened, so waiting on checks
+      # would wait forever.
+      - name: Merge the release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' \
+            --json number,author --jq '[.[] | select(.author.is_bot)] | .[0].number // empty')
+
+          if [ -z "$PR" ]; then
+            echo "No pending release PR to merge."
+            exit 0
+          fi
+
+          echo "Merging release PR #$PR"
+          gh pr merge "$PR" --squash --repo "$GITHUB_REPOSITORY"
+
   publish:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
