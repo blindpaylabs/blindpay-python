@@ -444,6 +444,264 @@ class TestReconciliation:
 
 
 # --------------------------------------------------------------------------- #
+# Enum locator detection (bare, items, anyOf/oneOf wrapper)
+# --------------------------------------------------------------------------- #
+
+
+class TestFindEnumLocator:
+    def test_bare_enum(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.find_enum_locator({"type": "string", "enum": ["a", "b"]}) == (False, ["a", "b"])
+
+    def test_items_enum(self):
+        sync = load_sync(Path("/nonexistent"))
+        prop = {"type": "array", "items": {"type": "string", "enum": ["a", "b"]}}
+        assert sync.find_enum_locator(prop) == (True, ["a", "b"])
+
+    def test_anyof_wrapped_enum(self):
+        sync = load_sync(Path("/nonexistent"))
+        prop = {"anyOf": [{"type": "string", "enum": ["a", "b"]}, {"type": "null"}]}
+        assert sync.find_enum_locator(prop) == (False, ["a", "b"])
+
+    def test_anyof_wrapped_items_enum(self):
+        sync = load_sync(Path("/nonexistent"))
+        prop = {"anyOf": [{"type": "array", "items": {"enum": ["a", "b"]}}, {"type": "null"}]}
+        assert sync.find_enum_locator(prop) == (True, ["a", "b"])
+
+    def test_no_enum_returns_none(self):
+        sync = load_sync(Path("/nonexistent"))
+        assert sync.find_enum_locator({"type": "string"}) is None
+
+
+# --------------------------------------------------------------------------- #
+# Enum coverage: every enum-constrained property on a mapped schema must
+# resolve to a mapped Literal or a recorded exclusion.
+# --------------------------------------------------------------------------- #
+
+
+class TestEnumCoverage:
+    def test_gap_detected_for_unmapped_enum_property(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string", "enum": ["red", "blue"]},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_enum_coverage(spec, map_data, [], index)
+        assert len(gaps) == 1
+        assert (gaps[0].schema, gaps[0].path, gaps[0].property) == ("PlainOut", None, "name")
+
+    def test_gap_suppressed_when_property_itself_is_unmapped(self, repo: Path):
+        """A property absent from the SDK entirely is reconcile_types's concern,
+        not this check's -- it must not double-report the same gap."""
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "not_on_sdk": {"type": "string", "enum": ["red", "blue"]},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_enum_coverage(spec, map_data, [], index)
+        assert gaps == []
+
+    def test_gap_suppressed_by_enums_map_entry(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [
+                {
+                    "spec": {"schema": "PlainOut", "property": "name"},
+                    "sdk": {"file": "src/blindpay/types.py", "symbol": "Color"},
+                }
+            ],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string", "enum": ["red", "blue"]},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_enum_coverage(spec, map_data, [], index)
+        assert gaps == []
+
+    def test_gap_suppressed_by_unmodeled_enum_coverage_entry(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        unmodeled = [
+            {"kind": "enum_coverage", "schema": "PlainOut", "property": "name", "reason": "test", "owner": "x"}
+        ]
+        _write_map_and_unmodeled(repo, map_data, unmodeled)
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string", "enum": ["red", "blue"]},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_enum_coverage(spec, map_data, unmodeled, index)
+        assert gaps == []
+
+
+# --------------------------------------------------------------------------- #
+# Nested-object coverage: inline object/array-item shapes under a mapped
+# schema must themselves have a map entry or a recorded omission.
+# --------------------------------------------------------------------------- #
+
+
+class TestNestedObjectCoverage:
+    def test_gap_detected_for_unmapped_inline_object(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "meta": {"type": "object", "properties": {"note": {"type": "string"}}},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_nested_coverage(spec, map_data, [])
+        assert len(gaps) == 1
+        assert (gaps[0].schema, gaps[0].path) == ("PlainOut", "meta")
+
+    def test_gap_detected_for_inline_array_item_object(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "items_list": {
+                            "type": "array",
+                            "items": {"type": "object", "properties": {"note": {"type": "string"}}},
+                        },
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_nested_coverage(spec, map_data, [])
+        assert len(gaps) == 1
+        assert (gaps[0].schema, gaps[0].path) == ("PlainOut", "items_list.items")
+
+    def test_gap_suppressed_when_nested_shape_has_its_own_map_entry(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [
+                {"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]},
+                {
+                    "spec": ["PlainOut"],
+                    "specPath": "meta",
+                    "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}],
+                },
+            ],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data)
+        sync = load_sync(repo)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "meta": {"type": "object", "properties": {"note": {"type": "string"}}},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_nested_coverage(spec, map_data, [])
+        assert gaps == []
+
+    def test_gap_suppressed_by_unmodeled_nested_object_entry(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        unmodeled = [{"kind": "nested_object", "schema": "PlainOut", "path": "meta", "reason": "test", "owner": "x"}]
+        _write_map_and_unmodeled(repo, map_data, unmodeled)
+        sync = load_sync(repo)
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "meta": {"type": "object", "properties": {"note": {"type": "string"}}},
+                    }
+                }
+            },
+            {"/x": {"get": op(ref_out="PlainOut")}},
+        )
+        gaps = sync.reconcile_nested_coverage(spec, map_data, unmodeled)
+        assert gaps == []
+
+
+# --------------------------------------------------------------------------- #
 # Map validity
 # --------------------------------------------------------------------------- #
 
@@ -948,6 +1206,18 @@ class TestUnmodeledLoading:
         with pytest.raises(SystemExit):
             sync.load_unmodeled()
 
+    def test_enum_coverage_entry_requires_all_keys(self, repo: Path):
+        write(repo, ".api-sync/unmodeled.json", json.dumps([{"kind": "enum_coverage", "schema": "X"}]))
+        sync = load_sync(repo)
+        with pytest.raises(SystemExit):
+            sync.load_unmodeled()
+
+    def test_nested_object_entry_requires_all_keys(self, repo: Path):
+        write(repo, ".api-sync/unmodeled.json", json.dumps([{"kind": "nested_object", "schema": "X"}]))
+        sync = load_sync(repo)
+        with pytest.raises(SystemExit):
+            sync.load_unmodeled()
+
     def test_valid_entries_load(self, repo: Path):
         write(
             repo,
@@ -956,11 +1226,25 @@ class TestUnmodeledLoading:
                 [
                     {"kind": "property", "schema": "X", "field": "y", "reason": "r", "owner": "eric@blindpay.com"},
                     {"kind": "enum", "enum": "X", "missing_values": ["a"], "reason": "r", "owner": "eric@blindpay.com"},
+                    {
+                        "kind": "enum_coverage",
+                        "schema": "X",
+                        "property": "y",
+                        "reason": "r",
+                        "owner": "eric@blindpay.com",
+                    },
+                    {
+                        "kind": "nested_object",
+                        "schema": "X",
+                        "path": "y",
+                        "reason": "r",
+                        "owner": "eric@blindpay.com",
+                    },
                 ]
             ),
         )
         sync = load_sync(repo)
-        assert len(sync.load_unmodeled()) == 2
+        assert len(sync.load_unmodeled()) == 4
 
 
 # --------------------------------------------------------------------------- #

@@ -6,267 +6,1889 @@
   ],
   "enums": [
     {
-      "spec": { "schema": "WebhookEndpointIn", "property": "events", "items": true },
-      "sdk": { "file": "src/blindpay/resources/webhooks/webhooks.py", "symbol": "WebhookEvents" }
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "account_class"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "AccountClass"
+      }
     },
     {
-      "spec": { "schema": "QuoteIn", "property": "network" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "Network" }
-    },
-    {
-      "spec": { "schema": "QuoteIn", "property": "token" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "StablecoinToken" }
-    },
-    {
-      "spec": { "schema": "PayoutOut", "property": "transaction_document_type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "TransactionDocumentType" }
-    },
-    {
-      "spec": { "schema": "CreateBankAccountIn", "property": "type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "Rail" }
-    },
-    {
-      "spec": { "schema": "QuoteIn", "property": "currency_type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "CurrencyType" }
-    },
-    {
-      "spec": { "schema": "CustomerOut", "property": "type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "AccountClass" }
-    },
-    {
-      "spec": { "schema": "PayoutOut", "property": "status" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "TransactionStatus" },
-      "note": "spec is a strict subset per-schema (PayoutOut/PayinOut/TransferOut each expose 4-5 of the SDK's 6 values); SDK Literal already a superset, nothing to reconcile"
-    },
-    {
-      "spec": { "schema": "CreateBankAccountIn", "property": "spei_protocol" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "SpeiProtocol" }
-    },
-    {
-      "spec": { "schema": "CreateBankAccountIn", "property": "recipient_relationship" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "RecipientRelationship" }
-    },
-    {
-      "spec": { "schema": "VirtualAccountOut", "property": "banking_partner" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "BankingPartner" }
-    },
-    {
-      "spec": { "schema": "CreatePayinQuoteIn", "property": "payment_method" },
-      "sdk": { "file": "src/blindpay/resources/payins/quotes.py", "symbol": "PaymentMethod" },
-      "note": "the FIELD ACTUALLY USES this local symbol (CreatePayinQuoteInput.payment_method: PaymentMethod resolves to payins/quotes.py's own Literal, not the shared types.py one) -- mapping must point here, not at types.py, or a future member addition would land in a Literal this field never references. Confirmed against blindpay-v2 packages/reference/src/rails.ts (paymentMethod, 9 values) and the other 4 SDKs (node/go/php/swift all carry all 9; python was the only one stuck at 6). Discovered missing transfers/pse/international_swift during Phase A bootstrap; textbook APPLICABLE case (pure member additions, same risk class as BankingPartner/portage), applied in the Phase A drift-application commit. Follow-up: after this fix, payins/quotes.py's local PaymentMethod is a byte-identical duplicate of types.py's shared PaymentMethod -- deliberately NOT refactored away here (a patcher should not delete symbols); worth a dedicated follow-up to import the shared one instead."
-    },
-    {
-      "spec": { "schema": "PayinOut", "property": "payment_method" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "PaymentMethod" },
-      "note": "the shared, publicly-exported types.py PaymentMethod (9 values) is not referenced by any TypedDict field today (grep confirms it), but it is exported from blindpay/__init__.py and blindpay.resources.payins, so it is kept reconciled against a real 9-value anchor rather than left un-anchored. No gap: already matches exactly."
-    },
-    {
-      "spec": { "schema": "RfiField", "property": "aiprise_document_type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "AipriseDocumentType" },
-      "note": "the Rfi family itself is in ignore.schemas (unmodeled resource), but the enum values are shared with the modeled onboarding flow so the Literal is kept reconciled"
-    },
-    {
-      "spec": { "schema": "UploadAnalyzeOut", "property": "approval_rate" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "ApprovalRate" }
-    },
-    {
-      "spec": { "schema": "BankAccountOut", "property": "account_type" },
-      "sdk": { "file": "src/blindpay/types.py", "symbol": "BankAccountType" },
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "account_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "BankAccountType"
+      },
       "note": "KNOWN DIVERGENCE, kept mapped on purpose: spec enum is [checking, saving], SDK Literal is [checking, savings]. See unmodeled.json kind=enum entry; do not blindly append, this needs a coordinated rename PR (confirmed live defect, not just typing)."
     },
     {
-      "spec": { "schema": "CustomerOut", "property": "kyc_status" },
-      "sdk": { "file": "src/blindpay/resources/customers/customers.py", "symbol": "KycStatus" },
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "ach_cop_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "AchCopDocument"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "swift_bank_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "swift_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "swift_intermediary_bank_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "transfers_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "ArgentinaTransfers"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Rail"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BlockchainWalletOut",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "account_class"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "AccountClass"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "account_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "BankAccountType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "ach_cop_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "AchCopDocument"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "recipient_relationship"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "RecipientRelationship"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "sepa_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "spei_protocol"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "SpeiProtocol"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "swift_bank_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "swift_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "swift_intermediary_bank_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "transfers_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "ArgentinaTransfers"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Rail"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBlockchainWalletIn",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "account_purpose"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "AccountPurpose"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "business_industry"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "BusinessIndustry"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "business_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "CustomerBusinessType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "estimated_annual_revenue"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "EstimatedAnnualRevenue"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "id_doc_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "id_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "IdentificationDocument"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "proof_of_address_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "ProofOfAddressDocType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "purpose_of_transactions"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "PurposeOfTransactions"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "source_of_funds_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "SourceOfFundsDocType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateCustomerIn",
+        "property": "source_of_wealth"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "SourceOfWealth"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinQuoteIn",
+        "property": "currency_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "CurrencyType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinQuoteIn",
+        "property": "payment_method"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/payins/quotes.py",
+        "symbol": "PaymentMethod"
+      },
+      "note": "the FIELD ACTUALLY USES this local symbol (CreatePayinQuoteInput.payment_method: PaymentMethod resolves to payins/quotes.py's own Literal, not the shared types.py one) -- mapping must point here, not at types.py, or a future member addition would land in a Literal this field never references. Confirmed against blindpay-v2 packages/reference/src/rails.ts (paymentMethod, 9 values) and the other 4 SDKs (node/go/php/swift all carry all 9; python was the only one stuck at 6). Discovered missing transfers/pse/international_swift during Phase A bootstrap; textbook APPLICABLE case (pure member additions, same risk class as BankingPartner/portage), applied in the Phase A drift-application commit. Follow-up: after this fix, payins/quotes.py's local PaymentMethod is a byte-identical duplicate of types.py's shared PaymentMethod -- deliberately NOT refactored away here (a patcher should not delete symbols); worth a dedicated follow-up to import the shared one instead."
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinQuoteIn",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateTransferOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateTransferQuoteIn",
+        "property": "amount_reference"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/transfers/transfers.py",
+        "symbol": "AmountReference"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateTransferQuoteIn",
+        "property": "customer_network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateTransferQuoteIn",
+        "property": "customer_token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateTransferQuoteIn",
+        "property": "sender_token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateVirtualAccountIn",
+        "property": "banking_partner"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "BankingPartner"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateVirtualAccountIn",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateWalletIn",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerLimitIncreaseIn",
+        "property": "supporting_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "LimitIncreaseRequestSupportingDocumentType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "account_purpose"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "AccountPurpose"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "aml_status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "AmlStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "business_industry"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "BusinessIndustry"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "business_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "CustomerBusinessType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "estimated_annual_revenue"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "EstimatedAnnualRevenue"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "id_doc_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "id_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "IdentificationDocument"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "kyc_status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "KycStatus"
+      },
       "note": "KNOWN DIVERGENCE, kept mapped on purpose: spec has 8 members, SDK Literal has 2. See unmodeled.json kind=enum entry; needs a human decision on whether this Literal is even the right type for this field before adding members."
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "proof_of_address_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "ProofOfAddressDocType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "purpose_of_transactions"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "PurposeOfTransactions"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "source_of_wealth"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "SourceOfWealth"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerOut",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "AccountClass"
+      }
+    },
+    {
+      "spec": {
+        "schema": "GetCustomerLimitIncreaseOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "LimitIncreaseRequestStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "GetCustomerLimitIncreaseOut",
+        "property": "supporting_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "LimitIncreaseRequestSupportingDocumentType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "OfframpWallet",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayinOut",
+        "property": "manual_execution_status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "ManualExecutionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayinOut",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayinOut",
+        "property": "payment_method"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "PaymentMethod"
+      },
+      "note": "the shared, publicly-exported types.py PaymentMethod (9 values) is not referenced by any TypedDict field today (grep confirms it), but it is exported from blindpay/__init__.py and blindpay.resources.payins, so it is kept reconciled against a real 9-value anchor rather than left un-anchored. No gap: already matches exactly."
+    },
+    {
+      "spec": {
+        "schema": "PayinOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayinOut",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOnEvmOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "account_class"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "AccountClass"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "account_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "BankAccountType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "currency"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Currency"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "spei_protocol"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "SpeiProtocol"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      },
+      "note": "spec is a strict subset per-schema (PayoutOut/PayinOut/TransferOut each expose 4-5 of the SDK's 6 values); SDK Literal already a superset, nothing to reconcile"
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "swift_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "transaction_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionDocumentType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "transfers_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/payouts/payouts.py",
+        "symbol": "ArgentinaTransfers"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Rail"
+      }
+    },
+    {
+      "spec": {
+        "schema": "QuoteIn",
+        "property": "currency_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "CurrencyType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "QuoteIn",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "QuoteIn",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "RfiField",
+        "property": "aiprise_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "AipriseDocumentType"
+      },
+      "note": "the Rfi family itself is in ignore.schemas (unmodeled resource), but the enum values are shared with the modeled onboarding flow so the Literal is kept reconciled"
+    },
+    {
+      "spec": {
+        "schema": "SubmitPayoutDocumentsIn",
+        "property": "transaction_document_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionDocumentType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "TransferOut",
+        "property": "customer_network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "TransferOut",
+        "property": "customer_token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "TransferOut",
+        "property": "sender_token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "TransferOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "TransactionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "account_purpose"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "AccountPurpose"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "business_industry"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "BusinessIndustry"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "business_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "CustomerBusinessType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "estimated_annual_revenue"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "EstimatedAnnualRevenue"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "id_doc_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "id_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "IdentificationDocument"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "proof_of_address_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "ProofOfAddressDocType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "purpose_of_transactions"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "PurposeOfTransactions"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "source_of_funds_doc_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "SourceOfFundsDocType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateCustomerIn",
+        "property": "source_of_wealth"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "SourceOfWealth"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateVirtualAccountIn",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UploadAnalyzeOut",
+        "property": "approval_rate"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "ApprovalRate"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UploadIn",
+        "property": "bucket"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/upload/upload.py",
+        "symbol": "UploadBucket"
+      }
+    },
+    {
+      "spec": {
+        "schema": "VirtualAccountOut",
+        "property": "banking_partner"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "BankingPartner"
+      }
+    },
+    {
+      "spec": {
+        "schema": "VirtualAccountOut",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "StablecoinToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WalletOut",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WebhookEndpoint",
+        "property": "events",
+        "items": true
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/webhooks/webhooks.py",
+        "symbol": "WebhookEvents"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WebhookEndpointIn",
+        "property": "events",
+        "items": true
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/webhooks/webhooks.py",
+        "symbol": "WebhookEvents"
+      }
     }
   ],
   "types": [
-    { "spec": "AvailableBankDetails", "sdk": [{ "file": "src/blindpay/resources/available/available.py", "symbol": "BankDetail" }] },
-    { "spec": "AvailableNaicsList", "sdk": [{ "file": "src/blindpay/resources/available/available.py", "symbol": "NaicsCode" }] },
-    { "spec": "AvailableRails", "sdk": [{ "file": "src/blindpay/resources/available/available.py", "symbol": "RailInfo" }] },
-    { "spec": ["SwiftCodeItem", "SwiftCodeResponse"], "sdk": [{ "file": "src/blindpay/resources/available/available.py", "symbol": "SwiftCodeBankDetail" }],
+    {
+      "spec": "AvailableBankDetails",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/available/available.py",
+          "symbol": "BankDetail"
+        }
+      ]
+    },
+    {
+      "spec": "AvailableNaicsList",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/available/available.py",
+          "symbol": "NaicsCode"
+        }
+      ]
+    },
+    {
+      "spec": "AvailableRails",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/available/available.py",
+          "symbol": "RailInfo"
+        }
+      ]
+    },
+    {
+      "spec": [
+        "SwiftCodeItem",
+        "SwiftCodeResponse"
+      ],
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/available/available.py",
+          "symbol": "SwiftCodeBankDetail"
+        }
+      ],
       "note": "SwiftCodeResponse is the bare-array wrapper (List[SwiftCodeItem]) with no properties of its own; listed so it is not reported as an unaccounted schema"
     },
-    { "spec": "PaginationMetadata", "sdk": [{ "file": "src/blindpay/types.py", "symbol": "PaginationMetadata" }] },
-
-    { "spec": "BankAccountOut", "sdk": [
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "BankAccount" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "GetBankAccountResponse" }
+    {
+      "spec": "PaginationMetadata",
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "PaginationMetadata"
+        }
+      ]
+    },
+    {
+      "spec": "BankAccountOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "BankAccount"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "GetBankAccountResponse"
+        }
       ],
       "note": "discriminator fan-out target for the response side; BankAccount is the list() shape, GetBankAccountResponse is the get() shape (already carries pre-existing allowlist.json divergences: account_holder_name/is_primary/swift_code/iban)"
     },
-    { "spec": "CreateBankAccountIn", "sdk": [
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreatePixInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateArgentinaTransfersInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateSpeiInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateColombiaAchInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateAchInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateWireInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateInternationalSwiftInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateRtpInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateSepaInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreatePixSafeInput" },
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "CreateTedInput" }
+    {
+      "spec": "CreateBankAccountIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreatePixInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateArgentinaTransfersInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateSpeiInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateColombiaAchInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateAchInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateWireInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateInternationalSwiftInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateRtpInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateSepaInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreatePixSafeInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateTedInput"
+        }
       ],
       "note": "the 11-rail discriminator fan-out on the request side (design doc's headline case); `type` is injected by each create_* method, never a field on these TypedDicts"
     },
-
-    { "spec": "CreateBlockchainWalletIn", "sdk": [
-        { "file": "src/blindpay/resources/wallets/blockchain.py", "symbol": "CreateBlockchainWalletWithAddressInput" },
-        { "file": "src/blindpay/resources/wallets/blockchain.py", "symbol": "CreateBlockchainWalletWithHashInput" }
+    {
+      "spec": "CreateBlockchainWalletIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/wallets/blockchain.py",
+          "symbol": "CreateBlockchainWalletWithAddressInput"
+        },
+        {
+          "file": "src/blindpay/resources/wallets/blockchain.py",
+          "symbol": "CreateBlockchainWalletWithHashInput"
+        }
       ],
       "note": "discriminated by is_account_abstraction, which each create_with_* method injects rather than exposing as a field"
     },
-    { "spec": "BlockchainWalletOut", "sdk": [{ "file": "src/blindpay/resources/wallets/blockchain.py", "symbol": "BlockchainWallet" }] },
-    { "spec": "BlockchainWalletMessageOut", "sdk": [{ "file": "src/blindpay/resources/wallets/blockchain.py", "symbol": "GetBlockchainWalletMessageResponse" }] },
-
-    { "spec": "CreateCustomerIn", "sdk": [
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "CreateIndividualWithStandardKYCInput" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "CreateIndividualWithEnhancedKYCInput" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "CreateBusinessWithStandardKYBInput" }
+    {
+      "spec": "BlockchainWalletOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/wallets/blockchain.py",
+          "symbol": "BlockchainWallet"
+        }
+      ]
+    },
+    {
+      "spec": "BlockchainWalletMessageOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/wallets/blockchain.py",
+          "symbol": "GetBlockchainWalletMessageResponse"
+        }
+      ]
+    },
+    {
+      "spec": "CreateCustomerIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CreateIndividualWithStandardKYCInput"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CreateIndividualWithEnhancedKYCInput"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CreateBusinessWithStandardKYBInput"
+        }
       ],
       "note": "the 3-way KYC discriminator fan-out on the request side; `type`/`kyc_type` are injected by each create_* method"
     },
-    { "spec": "CustomerOut", "sdk": [
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "IndividualWithStandardKYC" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "IndividualWithEnhancedKYC" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "BusinessWithStandardKYB" }
+    {
+      "spec": "CustomerOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "IndividualWithStandardKYC"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "IndividualWithEnhancedKYC"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "BusinessWithStandardKYB"
+        }
       ],
       "note": "the 3-way KYC discriminator fan-out on the response side (design doc's headline case)"
     },
-    { "spec": "UpdateCustomerIn", "sdk": [{ "file": "src/blindpay/resources/customers/customers.py", "symbol": "UpdateCustomerInput" }] },
-    { "spec": "CustomerLimitIncreaseIn", "sdk": [{ "file": "src/blindpay/resources/customers/customers.py", "symbol": "RequestLimitIncreaseInput" }] },
-    { "spec": "CustomerLimitIncreaseOut", "sdk": [{ "file": "src/blindpay/resources/customers/customers.py", "symbol": "RequestLimitIncreaseResponse" }] },
-    { "spec": "GetCustomerLimitIncreaseOut", "sdk": [{ "file": "src/blindpay/resources/customers/customers.py", "symbol": "LimitIncreaseRequest" }] },
-    { "spec": "GetCustomerLimitsOut", "sdk": [
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "GetCustomerLimitsResponse" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "Limits" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "PayinLimit" },
-        { "file": "src/blindpay/resources/customers/customers.py", "symbol": "PayoutLimit" },
-        { "file": "src/blindpay/resources/limits/limits.py", "symbol": "GetCustomerLimitsResponse" },
-        { "file": "src/blindpay/resources/limits/limits.py", "symbol": "CustomerLimits" },
-        { "file": "src/blindpay/resources/limits/limits.py", "symbol": "PayinLimit" },
-        { "file": "src/blindpay/resources/limits/limits.py", "symbol": "PayoutLimit" }
+    {
+      "spec": "UpdateCustomerIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "UpdateCustomerInput"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerLimitIncreaseIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "RequestLimitIncreaseInput"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerLimitIncreaseOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "RequestLimitIncreaseResponse"
+        }
+      ]
+    },
+    {
+      "spec": "GetCustomerLimitIncreaseOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "LimitIncreaseRequest"
+        }
+      ]
+    },
+    {
+      "spec": "GetCustomerLimitsOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "GetCustomerLimitsResponse"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "Limits"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "PayinLimit"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "PayoutLimit"
+        },
+        {
+          "file": "src/blindpay/resources/limits/limits.py",
+          "symbol": "GetCustomerLimitsResponse"
+        },
+        {
+          "file": "src/blindpay/resources/limits/limits.py",
+          "symbol": "CustomerLimits"
+        },
+        {
+          "file": "src/blindpay/resources/limits/limits.py",
+          "symbol": "PayinLimit"
+        },
+        {
+          "file": "src/blindpay/resources/limits/limits.py",
+          "symbol": "PayoutLimit"
+        }
       ],
       "note": "pre-existing duplicate modeling: customers.py and limits.py each declare their own near-identical copy of this shape (survey irregularity #4, out of scope for this project); both are listed so reconciliation checks either copy"
     },
-
-    { "spec": "CreatePayinIn", "sdk": [{ "file": "src/blindpay/resources/payins/payins.py", "symbol": "CreatePayinInput" }],
-      "note": "CreatePayinInput is dead code (create_evm() takes a bare payin_quote_id str, per allowlist.json); mapped anyway so drift on this schema stays visible instead of silently skipped" },
-    { "spec": "CreatePayinOut", "sdk": [{ "file": "src/blindpay/resources/payins/payins.py", "symbol": "CreateEvmPayinResponse" }] },
-    { "spec": "PayinOut", "sdk": [
-        { "file": "src/blindpay/resources/payins/payins.py", "symbol": "Payin" },
-        { "file": "src/blindpay/resources/payins/payins.py", "symbol": "GetPayinTrackResponse" }
+    {
+      "spec": "CreatePayinIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payins/payins.py",
+          "symbol": "CreatePayinInput"
+        }
+      ],
+      "note": "CreatePayinInput is dead code (create_evm() takes a bare payin_quote_id str, per allowlist.json); mapped anyway so drift on this schema stays visible instead of silently skipped"
+    },
+    {
+      "spec": "CreatePayinOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payins/payins.py",
+          "symbol": "CreateEvmPayinResponse"
+        }
       ]
     },
-    { "spec": "CreatePayinQuoteIn", "sdk": [{ "file": "src/blindpay/resources/payins/quotes.py", "symbol": "CreatePayinQuoteInput" }] },
-    { "spec": "CreatePayinQuoteOut", "sdk": [{ "file": "src/blindpay/resources/payins/quotes.py", "symbol": "CreatePayinQuoteResponse" }] },
-
-    { "spec": "PayoutOut", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "Payout" }] },
-    { "spec": "PayoutOnEvmIn", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateEvmPayoutInput" }] },
-    { "spec": "PayoutOnEvmOut", "sdk": [
-        { "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateEvmPayoutResponse" },
-        { "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateSolanaPayoutResponse" },
-        { "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateStellarPayoutResponse" }
+    {
+      "spec": "PayinOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payins/payins.py",
+          "symbol": "Payin"
+        },
+        {
+          "file": "src/blindpay/resources/payins/payins.py",
+          "symbol": "GetPayinTrackResponse"
+        }
+      ]
+    },
+    {
+      "spec": "CreatePayinQuoteIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payins/quotes.py",
+          "symbol": "CreatePayinQuoteInput"
+        }
+      ]
+    },
+    {
+      "spec": "CreatePayinQuoteOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payins/quotes.py",
+          "symbol": "CreatePayinQuoteResponse"
+        }
+      ]
+    },
+    {
+      "spec": "PayoutOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "Payout"
+        }
+      ]
+    },
+    {
+      "spec": "PayoutOnEvmIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateEvmPayoutInput"
+        }
+      ]
+    },
+    {
+      "spec": "PayoutOnEvmOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateEvmPayoutResponse"
+        },
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateSolanaPayoutResponse"
+        },
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateStellarPayoutResponse"
+        }
       ],
       "note": "the spec reuses this ONE schema as the 200 response for evm, solana AND stellar payout creation; the SDK models 3 separate response TypedDicts for it"
     },
-    { "spec": "PayoutOnSolanaIn", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateSolanaPayoutInput" }] },
-    { "spec": "PayoutOnStellarIn", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "CreateStellarPayoutInput" }] },
-    { "spec": "PayoutOnStellarAuthorizeIn", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "AuthorizeStellarTokenInput" }] },
-    { "spec": "SubmitPayoutDocumentsIn", "sdk": [{ "file": "src/blindpay/resources/payouts/payouts.py", "symbol": "SubmitPayoutDocumentsInput" }] },
-
-    { "spec": "QuoteIn", "sdk": [{ "file": "src/blindpay/resources/quotes/quotes.py", "symbol": "CreateQuoteInput" }],
-      "note": "refund_wallet_address lands here (Phase A delta field)" },
-    { "spec": "QuoteOut", "sdk": [
-        { "file": "src/blindpay/resources/quotes/quotes.py", "symbol": "CreateQuoteResponse" },
-        { "file": "src/blindpay/resources/quotes/quotes.py", "symbol": "Contract" },
-        { "file": "src/blindpay/resources/quotes/quotes.py", "symbol": "ContractNetwork" }
+    {
+      "spec": "PayoutOnSolanaIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateSolanaPayoutInput"
+        }
       ]
     },
-
-    { "spec": "CreateTransferQuoteIn", "sdk": [{ "file": "src/blindpay/resources/transfers/transfers.py", "symbol": "CreateTransferQuoteInput" }] },
-    { "spec": "CreateTransferQuoteOut", "sdk": [{ "file": "src/blindpay/resources/transfers/transfers.py", "symbol": "CreateTransferQuoteResponse" }] },
-    { "spec": "CreateTransferIn", "sdk": [{ "file": "src/blindpay/resources/transfers/transfers.py", "symbol": "CreateTransferInput" }] },
-    { "spec": "CreateTransferOut", "sdk": [{ "file": "src/blindpay/resources/transfers/transfers.py", "symbol": "Transfer" }] },
-    { "spec": "TransferOut", "sdk": [{ "file": "src/blindpay/resources/transfers/transfers.py", "symbol": "Transfer" }] },
-
-    { "spec": "CreateVirtualAccountIn", "sdk": [{ "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py", "symbol": "CreateVirtualAccountInput" }] },
-    { "spec": "VirtualAccountOut", "sdk": [{ "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py", "symbol": "VirtualAccount" }] },
-    { "spec": "UpdateVirtualAccountIn", "sdk": [{ "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py", "symbol": "UpdateVirtualAccountInput" }] },
-
-    { "spec": "CreateWalletIn", "sdk": [{ "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py", "symbol": "CreateCustodialWalletInput" }] },
-    { "spec": "WalletOut", "sdk": [{ "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py", "symbol": "CustodialWallet" }] },
-    { "spec": "WalletBalanceOut", "sdk": [{ "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py", "symbol": "CustodialWalletBalance" }] },
-    { "spec": "WalletTokenOut", "sdk": [{ "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py", "symbol": "CustodialWalletBalanceToken" }] },
-
-    { "spec": "OfframpWallet", "sdk": [
-        { "file": "src/blindpay/resources/bank_accounts/bank_accounts.py", "symbol": "OfframpWallet" },
-        { "file": "src/blindpay/resources/wallets/offramp.py", "symbol": "OfframpWallet" }
+    {
+      "spec": "PayoutOnStellarIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "CreateStellarPayoutInput"
+        }
+      ]
+    },
+    {
+      "spec": "PayoutOnStellarAuthorizeIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "AuthorizeStellarTokenInput"
+        }
+      ]
+    },
+    {
+      "spec": "SubmitPayoutDocumentsIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payouts/payouts.py",
+          "symbol": "SubmitPayoutDocumentsInput"
+        }
+      ]
+    },
+    {
+      "spec": "QuoteIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/quotes/quotes.py",
+          "symbol": "CreateQuoteInput"
+        }
+      ],
+      "note": "refund_wallet_address lands here (Phase A delta field)"
+    },
+    {
+      "spec": "QuoteOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/quotes/quotes.py",
+          "symbol": "CreateQuoteResponse"
+        },
+        {
+          "file": "src/blindpay/resources/quotes/quotes.py",
+          "symbol": "Contract"
+        },
+        {
+          "file": "src/blindpay/resources/quotes/quotes.py",
+          "symbol": "ContractNetwork"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferQuoteIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferQuoteInput"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferQuoteOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferQuoteResponse"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferInput"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "Transfer"
+        }
+      ]
+    },
+    {
+      "spec": "TransferOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "Transfer"
+        }
+      ]
+    },
+    {
+      "spec": "CreateVirtualAccountIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py",
+          "symbol": "CreateVirtualAccountInput"
+        }
+      ]
+    },
+    {
+      "spec": "VirtualAccountOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py",
+          "symbol": "VirtualAccount"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateVirtualAccountIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/virtual_accounts/virtual_accounts.py",
+          "symbol": "UpdateVirtualAccountInput"
+        }
+      ]
+    },
+    {
+      "spec": "CreateWalletIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "CreateCustodialWalletInput"
+        }
+      ]
+    },
+    {
+      "spec": "WalletOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "CustodialWallet"
+        }
+      ]
+    },
+    {
+      "spec": "WalletBalanceOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "CustodialWalletBalance"
+        }
+      ]
+    },
+    {
+      "spec": "WalletTokenOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "CustodialWalletBalanceToken"
+        }
+      ]
+    },
+    {
+      "spec": "OfframpWallet",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "OfframpWallet"
+        },
+        {
+          "file": "src/blindpay/resources/wallets/offramp.py",
+          "symbol": "OfframpWallet"
+        }
       ],
       "note": "pre-existing duplicate modeling: two separate TypedDicts with the same name and shape in two files (survey irregularity, out of scope for this project); both listed"
     },
-
-    { "spec": "WebhookEndpointIn", "sdk": [{ "file": "src/blindpay/resources/webhooks/webhooks.py", "symbol": "CreateWebhookEndpointInput" }] },
-    { "spec": "WebhookEndpointOut", "sdk": [{ "file": "src/blindpay/resources/webhooks/webhooks.py", "symbol": "CreateWebhookEndpointResponse" }] },
-    { "spec": "WebhookEndpoint", "sdk": [{ "file": "src/blindpay/resources/webhooks/webhooks.py", "symbol": "WebhookEndpoint" }] },
-    { "spec": "PortalAccessOut", "sdk": [{ "file": "src/blindpay/resources/webhooks/webhooks.py", "symbol": "GetPortalAccessUrlResponse" }] },
-
-    { "spec": "InitiateTosIn", "sdk": [{ "file": "src/blindpay/resources/terms_of_service/terms_of_service.py", "symbol": "InitiateInput" }] },
-    { "spec": "InitiateTosOut", "sdk": [{ "file": "src/blindpay/resources/terms_of_service/terms_of_service.py", "symbol": "InitiateResponse" }] },
-
-    { "spec": "UpdateInstanceIn", "sdk": [{ "file": "src/blindpay/resources/instances/instances.py", "symbol": "UpdateInstanceInput" }] },
-    { "spec": "UpdateInstanceMemberIn", "sdk": [{ "file": "src/blindpay/resources/instances/instances.py", "symbol": "UpdateInstanceMemberRoleInput" }],
-      "note": "UpdateInstanceMemberRoleInput is dead code per allowlist.json (update_member_role takes member_id/role as loose args); mapped anyway so drift stays visible" },
-    { "spec": "MigrateInstanceOwnershipIn", "sdk": [
-        { "file": "src/blindpay/resources/instances/instances.py", "symbol": "MigrateInstanceOwnershipInput" },
-        { "file": "src/blindpay/resources/ownership/ownership.py", "symbol": "MigrateInstanceOwnershipInput" }
+    {
+      "spec": "WebhookEndpointIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/webhooks/webhooks.py",
+          "symbol": "CreateWebhookEndpointInput"
+        }
+      ]
+    },
+    {
+      "spec": "WebhookEndpointOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/webhooks/webhooks.py",
+          "symbol": "CreateWebhookEndpointResponse"
+        }
+      ]
+    },
+    {
+      "spec": "WebhookEndpoint",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/webhooks/webhooks.py",
+          "symbol": "WebhookEndpoint"
+        }
+      ]
+    },
+    {
+      "spec": "PortalAccessOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/webhooks/webhooks.py",
+          "symbol": "GetPortalAccessUrlResponse"
+        }
+      ]
+    },
+    {
+      "spec": "InitiateTosIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/terms_of_service/terms_of_service.py",
+          "symbol": "InitiateInput"
+        }
+      ]
+    },
+    {
+      "spec": "InitiateTosOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/terms_of_service/terms_of_service.py",
+          "symbol": "InitiateResponse"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateInstanceIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/instances/instances.py",
+          "symbol": "UpdateInstanceInput"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateInstanceMemberIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/instances/instances.py",
+          "symbol": "UpdateInstanceMemberRoleInput"
+        }
+      ],
+      "note": "UpdateInstanceMemberRoleInput is dead code per allowlist.json (update_member_role takes member_id/role as loose args); mapped anyway so drift stays visible"
+    },
+    {
+      "spec": "MigrateInstanceOwnershipIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/instances/instances.py",
+          "symbol": "MigrateInstanceOwnershipInput"
+        },
+        {
+          "file": "src/blindpay/resources/ownership/ownership.py",
+          "symbol": "MigrateInstanceOwnershipInput"
+        }
       ],
       "note": "pre-existing duplicate: instances.py and ownership.py both declare this (survey irregularity #4); both listed"
     },
-    { "spec": "Success", "sdk": [
-        { "file": "src/blindpay/resources/instances/instances.py", "symbol": "MigrateInstanceOwnershipResponse" },
-        { "file": "src/blindpay/resources/ownership/ownership.py", "symbol": "MigrateInstanceOwnershipResponse" }
+    {
+      "spec": "Success",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/instances/instances.py",
+          "symbol": "MigrateInstanceOwnershipResponse"
+        },
+        {
+          "file": "src/blindpay/resources/ownership/ownership.py",
+          "symbol": "MigrateInstanceOwnershipResponse"
+        }
       ]
     },
-
-    { "spec": "FeeOptions", "sdk": [{ "file": "src/blindpay/resources/fees/fees.py", "symbol": "FeeOptions" }] },
-    { "spec": "GetFeesOut", "sdk": [{ "file": "src/blindpay/resources/fees/fees.py", "symbol": "FeesResponse" }] },
-
-    { "spec": "UploadIn", "sdk": [{ "file": "src/blindpay/resources/upload/upload.py", "symbol": "UploadInput" }] },
-    { "spec": "UploadOut", "sdk": [{ "file": "src/blindpay/resources/upload/upload.py", "symbol": "UploadResponse" }] },
-
-    { "spec": ["PayoutOut", "PayoutOnEvmOut", "PayoutNewWebhookOut", "PayoutCompleteWebhookOut", "PayoutUpdateWebhookOut", "PayoutPartnerFeeWebhookOut"],
+    {
+      "spec": "FeeOptions",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/fees/fees.py",
+          "symbol": "FeeOptions"
+        }
+      ]
+    },
+    {
+      "spec": "GetFeesOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/fees/fees.py",
+          "symbol": "FeesResponse"
+        }
+      ]
+    },
+    {
+      "spec": "UploadIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "UploadInput"
+        }
+      ]
+    },
+    {
+      "spec": "UploadOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "UploadResponse"
+        }
+      ]
+    },
+    {
+      "spec": [
+        "PayoutOut",
+        "PayoutOnEvmOut",
+        "PayoutNewWebhookOut",
+        "PayoutCompleteWebhookOut",
+        "PayoutUpdateWebhookOut",
+        "PayoutPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_payment",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingPayment" }],
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingPayment"
+        }
+      ],
       "note": "inline sub-object duplicated across 6 payout-side schemas (never $ref'd, no shared spec component); SDK models one shared TypedDict used for both payout and payin. Payout wire shape has 20 properties, SDK models 6 -- see unmodeled.json"
     },
-    { "spec": ["PayoutOut", "PayoutOnEvmOut", "PayoutNewWebhookOut", "PayoutCompleteWebhookOut", "PayoutUpdateWebhookOut", "PayoutPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayoutOut",
+        "PayoutOnEvmOut",
+        "PayoutNewWebhookOut",
+        "PayoutCompleteWebhookOut",
+        "PayoutUpdateWebhookOut",
+        "PayoutPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_transaction",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingTransaction" }]
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingTransaction"
+        }
+      ]
     },
-    { "spec": ["PayoutOut", "PayoutOnEvmOut", "PayoutNewWebhookOut", "PayoutCompleteWebhookOut", "PayoutUpdateWebhookOut", "PayoutPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayoutOut",
+        "PayoutOnEvmOut",
+        "PayoutNewWebhookOut",
+        "PayoutCompleteWebhookOut",
+        "PayoutUpdateWebhookOut",
+        "PayoutPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_complete",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingComplete" }]
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingComplete"
+        }
+      ]
     },
-    { "spec": ["PayoutOut", "PayoutOnEvmOut", "PayoutNewWebhookOut", "PayoutCompleteWebhookOut", "PayoutUpdateWebhookOut", "PayoutPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayoutOut",
+        "PayoutOnEvmOut",
+        "PayoutNewWebhookOut",
+        "PayoutCompleteWebhookOut",
+        "PayoutUpdateWebhookOut",
+        "PayoutPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_liquidity",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingLiquidity" }],
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingLiquidity"
+        }
+      ],
       "note": "no gaps: SDK's 5-field TrackingLiquidity already matches this sub-object exactly"
     },
-    { "spec": ["PayinOut", "CreatePayinOut", "PayinNewWebhookOut", "PayinCompleteWebhookOut", "PayinUpdateWebhookOut", "PayinPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayinOut",
+        "CreatePayinOut",
+        "PayinNewWebhookOut",
+        "PayinCompleteWebhookOut",
+        "PayinUpdateWebhookOut",
+        "PayinPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_payment",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingPayment" }],
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingPayment"
+        }
+      ],
       "note": "payin-side tracking_payment shape (6 properties) differs entirely from payout-side (20 properties) despite sharing the same SDK TypedDict; see unmodeled.json"
     },
-    { "spec": ["PayinOut", "CreatePayinOut", "PayinNewWebhookOut", "PayinCompleteWebhookOut", "PayinUpdateWebhookOut", "PayinPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayinOut",
+        "CreatePayinOut",
+        "PayinNewWebhookOut",
+        "PayinCompleteWebhookOut",
+        "PayinUpdateWebhookOut",
+        "PayinPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_transaction",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingTransaction" }],
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingTransaction"
+        }
+      ],
       "note": "payin-side wire shape has ~15 properties; SDK's generic 4-field TrackingTransaction covers only step/status/transaction_hash/completed_at. A fuller GetPayinTrackingTransaction TypedDict already exists in payins.py but is dead code (never referenced) -- see unmodeled.json"
     },
-    { "spec": ["PayinOut", "CreatePayinOut", "PayinNewWebhookOut", "PayinCompleteWebhookOut", "PayinUpdateWebhookOut", "PayinPartnerFeeWebhookOut"],
+    {
+      "spec": [
+        "PayinOut",
+        "CreatePayinOut",
+        "PayinNewWebhookOut",
+        "PayinCompleteWebhookOut",
+        "PayinUpdateWebhookOut",
+        "PayinPartnerFeeWebhookOut"
+      ],
       "specPath": "tracking_complete",
-      "sdk": [{ "file": "src/blindpay/types.py", "symbol": "TrackingComplete" }],
+      "sdk": [
+        {
+          "file": "src/blindpay/types.py",
+          "symbol": "TrackingComplete"
+        }
+      ],
       "note": "no gaps: payin-side tracking_complete (3 properties) is a subset of the SDK's 4-field TrackingComplete"
     }
   ],
@@ -280,9 +1902,18 @@
         "schema": "Rfi",
         "reason": "the RFI (request-for-information) resource family is entirely unmodeled by this SDK: no resource file, no client method. GET /v1/instances/{instance_id}/rfi and GET .../customers/{customer_id}/rfi are real, reachable operations with zero SDK coverage. Adding it is additive, non-breaking, human-scoped work (Phase C per the design doc), not a field-level patch."
       },
-      { "schema": "RfiField", "reason": "nested under Rfi/InstanceRfi/RfiSection; same Rfi-family gap as Rfi." },
-      { "schema": "RfiSection", "reason": "nested under Rfi/InstanceRfi; same Rfi-family gap as Rfi." },
-      { "schema": "InstanceRfi", "reason": "instance-level counterpart of Rfi (GET /v1/instances/{instance_id}/rfi); same Rfi-family gap." },
+      {
+        "schema": "RfiField",
+        "reason": "nested under Rfi/InstanceRfi/RfiSection; same Rfi-family gap as Rfi."
+      },
+      {
+        "schema": "RfiSection",
+        "reason": "nested under Rfi/InstanceRfi; same Rfi-family gap as Rfi."
+      },
+      {
+        "schema": "InstanceRfi",
+        "reason": "instance-level counterpart of Rfi (GET /v1/instances/{instance_id}/rfi); same Rfi-family gap."
+      },
       {
         "schema": "CreateRfiBody",
         "reason": "unreferenced by any public operation (0 $ref); the public POST .../rfi endpoints take an untyped object body, not this schema. Orphan, and also part of the unmodeled Rfi family."
@@ -293,11 +1924,11 @@
       },
       {
         "schema": "UploadAnalyzeIn",
-        "reason": "reachable (POST /v1/upload/analyze) but the SDK's UploadAnalyzeInput/analyze() predates the current spec shape: `type` is required by the API and never sent by the SDK, so calling analyze() as currently typed does not produce a valid request. A known, real, broken integration needing dedicated human work (Phase C), not an incremental field-add."
+        "reason": "reachable (POST /v1/upload/analyze); UploadAnalyzeInput now declares `type` and `metadata` (fixed), but the request body is multipart/form-data and the SDK's analyze()/create() still send it via the same JSON post() path as every other resource call, with `file` typed as a bare str. Whether that JSON path actually produces a valid multipart upload against the live API needs dedicated human verification (Phase C), not a field-level patch."
       },
       {
         "schema": "UploadAnalyzeOut",
-        "reason": "response counterpart of UploadAnalyzeIn; same broken/incomplete-integration reasoning."
+        "reason": "response counterpart of UploadAnalyzeIn; same open multipart-transport question."
       },
       {
         "schema": "Error",
@@ -311,28 +1942,70 @@
         "schema": "BankAccountWebhookOut",
         "reason": "webhook payload; the SDK does not parse webhook payloads at all, only verify_webhook_signature() (HMAC check). Callers deserialize the body themselves."
       },
-      { "schema": "BlockchainWalletWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "CustomerNewWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "CustomerUpdateWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "CustomerDeleteWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "LimitIncreaseNewWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "LimitIncreaseUpdateWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "TosAcceptWebhookOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
-      { "schema": "WalletInboundSchemaOut", "reason": "webhook payload; same as BankAccountWebhookOut above." },
+      {
+        "schema": "BlockchainWalletWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "CustomerNewWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "CustomerUpdateWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "CustomerDeleteWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "LimitIncreaseNewWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "LimitIncreaseUpdateWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "TosAcceptWebhookOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
+      {
+        "schema": "WalletInboundSchemaOut",
+        "reason": "webhook payload; same as BankAccountWebhookOut above."
+      },
       {
         "schema": "PayoutNewWebhookOut",
         "reason": "webhook envelope; same as BankAccountWebhookOut above for its own top-level fields (type, timestamp, key, ...). Its nested tracking_payment/tracking_transaction/tracking_complete/tracking_liquidity sub-objects ARE separately reconciled via the specPath entries in `types` above, since those are reused verbatim from the modeled GET/POST payout responses."
       },
-      { "schema": "PayoutCompleteWebhookOut", "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above." },
-      { "schema": "PayoutUpdateWebhookOut", "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above." },
-      { "schema": "PayoutPartnerFeeWebhookOut", "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above." },
+      {
+        "schema": "PayoutCompleteWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above."
+      },
+      {
+        "schema": "PayoutUpdateWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above."
+      },
+      {
+        "schema": "PayoutPartnerFeeWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above."
+      },
       {
         "schema": "PayinNewWebhookOut",
         "reason": "webhook envelope; same split treatment as PayoutNewWebhookOut above, but for the payin-side tracking_payment/tracking_transaction/tracking_complete specPath entries."
       },
-      { "schema": "PayinCompleteWebhookOut", "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above." },
-      { "schema": "PayinUpdateWebhookOut", "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above." },
-      { "schema": "PayinPartnerFeeWebhookOut", "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above." }
+      {
+        "schema": "PayinCompleteWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above."
+      },
+      {
+        "schema": "PayinUpdateWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above."
+      },
+      {
+        "schema": "PayinPartnerFeeWebhookOut",
+        "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above."
+      }
     ]
   }
 }
