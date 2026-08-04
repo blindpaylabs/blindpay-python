@@ -6,6 +6,7 @@ checker, not just a test assertion.
 """
 
 from blindpay.resources.custodial_wallets.custodial_wallets import CreateCustodialWalletInput
+from blindpay.resources.customers.customers import EstimatedAnnualRevenue
 from blindpay.resources.payins.payins import BankDetails, CreateEvmPayinResponse, GetPayinTrackResponse, Payin
 from blindpay.types import BankAccountType, PaginationMetadata
 
@@ -254,3 +255,12 @@ class TestCreateCustodialWalletInputRequiresName:
             "external_id": "your-database-id",
         }
         assert with_external_id.get("external_id") == "your-database-id"
+
+
+class TestEstimatedAnnualRevenueTopBandIsCorrect:
+    def test_250_million_plus_is_a_valid_value(self):
+        # The band below tops out at 249999999, so 250000000_plus is the only
+        # coherent top band; the old "2500000000_plus" (2.5 billion, an extra
+        # zero) is a value the API rejects.
+        value: EstimatedAnnualRevenue = "250000000_plus"
+        assert value == "250000000_plus"

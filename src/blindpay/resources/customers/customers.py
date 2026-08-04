@@ -252,7 +252,7 @@ EstimatedAnnualRevenue = Literal[
     "1000000_9999999",
     "10000000_49999999",
     "50000000_249999999",
-    "2500000000_plus",
+    "250000000_plus",
 ]
 
 SourceOfWealth = Literal[
