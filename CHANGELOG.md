@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.3.0...v3.4.0) (2026-08-04)
+
+
+### Features
+
+* **types:** widen 291 nullable response fields to Optional ([#74](https://github.com/blindpaylabs/blindpay-python/issues/74)) ([2810f7f](https://github.com/blindpaylabs/blindpay-python/commit/2810f7f351af490e3fc994a335cd9d1bbf6e31df))
+
 ## [3.3.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.2.2...v3.3.0) (2026-08-04)
 
 
