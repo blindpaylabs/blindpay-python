@@ -942,27 +942,6 @@
   },
   {
     "kind": "property",
-    "schema": "WalletBalanceOut",
-    "field": "USDB",
-    "reason": "Same case divergence as WalletBalanceOut.USDC above.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "WalletBalanceOut",
-    "field": "USDC",
-    "reason": "Pre-existing case divergence, already tracked in .api-sync/allowlist.json (CustodialWalletBalance.usdc): the wire uses uppercase USDC/USDT/USDB, the SDK models lowercase keys.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "WalletBalanceOut",
-    "field": "USDT",
-    "reason": "Same case divergence as WalletBalanceOut.USDC above.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
     "schema": "WalletOut",
     "field": "external_id",
     "reason": "Response counterpart of the CreateWalletIn.external_id gap above.",
@@ -973,20 +952,6 @@
     "schema": "WalletOut",
     "field": "name",
     "reason": "Response counterpart of the CreateWalletIn.name gap above; CustodialWallet has no name field.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "WalletTokenOut",
-    "field": "id",
-    "reason": "The per-token balance entry id is not modeled on CustodialWalletBalanceToken (amount, token, address only).",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
-    "schema": "WalletTokenOut",
-    "field": "symbol",
-    "reason": "Modeled under a different name: CustodialWalletBalanceToken uses `token` where the wire's WalletTokenOut object uses `symbol`.",
     "owner": "eric@blindpay.com"
   },
   {
@@ -2004,6 +1969,13 @@
     "method": "post",
     "path": "/v1/instances/{instance_id}/customers/{customer_id}/rfi",
     "reason": "Same pre-existing gap as GET /v1/instances/{instance_id}/rfi above.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "kind": "enum_coverage",
+    "schema": "WalletTokenOut",
+    "property": "symbol",
+    "reason": "CustodialWalletBalanceToken.symbol is typed str on purpose: it is a response-only field, and the reference spec (blindpay-v2@66144f3b2) already returns EURC/EURB that the shared StablecoinToken Literal does not list yet. Revisit when response enums move to open Literal-plus-str types.",
     "owner": "eric@blindpay.com"
   }
 ]

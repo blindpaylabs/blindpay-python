@@ -168,24 +168,6 @@
     "owner": "eric@blindpay.com"
   },
   {
-    "schema": "CustodialWalletBalance",
-    "field": "usdb",
-    "reason": "Pre-existing: the spec's WalletBalanceOut uses uppercase USDB/USDC/USDT. Case-only divergence, unrelated to the customers rename.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "usdc",
-    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "usdt",
-    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
-    "owner": "eric@blindpay.com"
-  },
-  {
     "schema": "GetBankAccountResponse",
     "field": "iban",
     "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
@@ -243,6 +225,30 @@
     "schema": "UploadAnalyzeInput",
     "field": "content_type",
     "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalanceToken",
+    "field": "earning_amount",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalanceToken",
+    "field": "total_amount",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "EURC",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "EURB",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
     "owner": "eric@blindpay.com"
   }
 ]
