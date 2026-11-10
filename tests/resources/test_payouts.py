@@ -327,7 +327,8 @@ class TestPayouts:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_export_payouts, "error": None}
 
-            response = await self.blindpay.payouts.export()
+            with pytest.warns(DeprecationWarning, match="route the API does not have"):
+                response = await self.blindpay.payouts.export()  # pyright: ignore[reportDeprecated]
 
             assert response["error"] is None
             assert response["data"] == mocked_export_payouts
@@ -910,7 +911,8 @@ class TestPayoutsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_export_payouts, "error": None}
 
-            response = self.blindpay.payouts.export()
+            with pytest.warns(DeprecationWarning, match="route the API does not have"):
+                response = self.blindpay.payouts.export()  # pyright: ignore[reportDeprecated]
 
             assert response["error"] is None
             assert response["data"] == mocked_export_payouts
