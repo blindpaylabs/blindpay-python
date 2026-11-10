@@ -42,6 +42,8 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
+HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
+
 
 def _to_api_response(response: httpx.Response) -> BlindpayApiResponse[Any]:
     if response.status_code >= 400:
@@ -90,7 +92,7 @@ class ApiClientImpl:
 
     async def _request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
@@ -98,7 +100,7 @@ class ApiClientImpl:
             return await self._send(method, path, json=body)
         return await self._send(method, path)
 
-    async def _send(self, method: str, path: str, **content: Any) -> BlindpayApiResponse[T]:
+    async def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
         url = f"{self.base_url}{path}"
 
         try:
@@ -139,7 +141,7 @@ class ApiClientImplSync:
 
     def _request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
@@ -147,7 +149,7 @@ class ApiClientImplSync:
             return self._send(method, path, json=body)
         return self._send(method, path)
 
-    def _send(self, method: str, path: str, **content: Any) -> BlindpayApiResponse[T]:
+    def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
         try:
             response = self.client.request(method=method, url=path, **content)
             return _to_api_response(response)
@@ -353,7 +355,7 @@ class BlindPay:
     def upload(self) -> "UploadResource":
         from blindpay.resources.upload import create_upload_resource
 
-        return create_upload_resource(self._api, self._instance_id)
+        return create_upload_resource(self._instance_id, self._api)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResource":
@@ -590,7 +592,7 @@ class BlindPaySync:
     def upload(self) -> "UploadResourceSync":
         from blindpay.resources.upload import create_upload_resource_sync
 
-        return create_upload_resource_sync(self._api, self._instance_id)
+        return create_upload_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResourceSync":

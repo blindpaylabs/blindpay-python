@@ -180,57 +180,45 @@
     "owner": "eric@blindpay.com"
   },
   {
-    "schema": "UploadInput",
-    "field": "filename",
-    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "UploadInput",
-    "field": "content_type",
-    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "UploadAnalyzeInput",
-    "field": "filename",
-    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "UploadAnalyzeInput",
-    "field": "content_type",
-    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
-    "owner": "eric@blindpay.com"
-  },
-  {
     "schema": "CustodialWalletBalanceToken",
     "field": "earning_amount",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "schema": "CustodialWalletBalanceToken",
     "field": "total_amount",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "schema": "CustodialWalletBalance",
     "field": "EURC",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "schema": "CustodialWalletBalance",
     "field": "EURB",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "schema": "CreateTransferResponse",
     "field": "tracking_partner_fee",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 CreateTransferOut, optional and nullable) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "UploadFile",
+    "field": "filename",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "UploadFile",
+    "field": "content_type",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "sdk-maintainers"
   }
 ]

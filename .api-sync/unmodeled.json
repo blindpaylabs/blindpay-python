@@ -1948,7 +1948,7 @@
     "schema": "WalletTokenOut",
     "property": "symbol",
     "reason": "CustodialWalletBalanceToken.symbol is typed str on purpose: it is a response-only field, and the reference spec (blindpay-v2@66144f3b2) already returns EURC/EURB that the shared StablecoinToken Literal does not list yet. Revisit when response enums move to open Literal-plus-str types.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "kind": "enum_coverage",
@@ -1956,7 +1956,7 @@
     "path": "tracking_bridge_swap",
     "property": "step",
     "reason": "Tracking `step` is typed str on purpose, like TransferTrackingStep.step: it is response-only, and the reference spec (blindpay-v2@66144f3b2) adds pending_refund_review, which no shared tracking-step Literal lists yet. Revisit when response enums move to open Literal-plus-str types.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "kind": "enum_coverage",
@@ -1964,7 +1964,7 @@
     "path": "tracking_complete",
     "property": "step",
     "reason": "Tracking `step` is typed str on purpose, like TransferTrackingStep.step: it is response-only, and the reference spec (blindpay-v2@66144f3b2) adds pending_refund_review, which no shared tracking-step Literal lists yet. Revisit when response enums move to open Literal-plus-str types.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "kind": "enum_coverage",
@@ -1972,7 +1972,7 @@
     "path": "tracking_paymaster",
     "property": "step",
     "reason": "Tracking `step` is typed str on purpose, like TransferTrackingStep.step: it is response-only, and the reference spec (blindpay-v2@66144f3b2) adds pending_refund_review, which no shared tracking-step Literal lists yet. Revisit when response enums move to open Literal-plus-str types.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   },
   {
     "kind": "enum_coverage",
@@ -1980,6 +1980,6 @@
     "path": "tracking_transaction_monitoring",
     "property": "step",
     "reason": "Tracking `step` is typed str on purpose, like TransferTrackingStep.step: it is response-only, and the reference spec (blindpay-v2@66144f3b2) adds pending_refund_review, which no shared tracking-step Literal lists yet. Revisit when response enums move to open Literal-plus-str types.",
-    "owner": "eric@blindpay.com"
+    "owner": "sdk-maintainers"
   }
 ]

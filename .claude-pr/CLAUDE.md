@@ -751,6 +751,9 @@ async def method(self, data: MyInput) -> BlindpayApiResponse[MyResponse]:
 - Multipart bodies (`POST /upload`, `POST /upload/analyze`) go through `post_multipart(path, data, files)`.
   api-sync treats `post_multipart` as a POST when it scans resource methods (`CLIENT_VERB_ALIASES` in
   `.api-sync/sync.py`), so keep the path a literal (f-)string as the first argument.
+- Exception to the factory signature rule: `create_upload_resource(instance_id, client)` (and `_sync`, and the
+  `UploadResource(Sync)` constructors) still accept the legacy `(client)`-only call. Those calls emit a
+  `DeprecationWarning` and send no `?instance_id=`. Remove the shim in the next major.
 
 ### Webhooks
 

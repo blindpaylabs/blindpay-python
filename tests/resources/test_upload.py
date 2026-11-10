@@ -2,10 +2,16 @@
 
 import io
 from typing import Any, Dict
+from unittest.mock import MagicMock
 
 import pytest
 
-from blindpay.resources.upload import UploadAnalyzeOutput, UploadResponse
+from blindpay.resources.upload import (
+    UploadAnalyzeOutput,
+    UploadResponse,
+    create_upload_resource,
+    create_upload_resource_sync,
+)
 from tests.http_mock import INSTANCE_ID, Recorder, async_client, sync_client
 from tests.spec_fixtures import assert_matches_spec, response_variants
 
@@ -152,3 +158,24 @@ class TestUploadSync:
             "selfie.png",
             "image/png",
         )
+
+
+class TestUploadFactories:
+    def test_factories_take_instance_id_first(self):
+        api = MagicMock()
+        resource = create_upload_resource(INSTANCE_ID, api)
+        resource_sync = create_upload_resource_sync(INSTANCE_ID, api)
+
+        assert resource._instance_query == f"?instance_id={INSTANCE_ID}"
+        assert resource_sync._instance_query == f"?instance_id={INSTANCE_ID}"
+        assert resource._client is api and resource_sync._client is api
+
+    def test_legacy_client_only_call_still_works(self):
+        api = MagicMock()
+        with pytest.warns(DeprecationWarning, match="instance id first"):
+            resource = create_upload_resource(api)  # pyright: ignore[reportDeprecated]
+        with pytest.warns(DeprecationWarning, match="instance id first"):
+            resource_sync = create_upload_resource_sync(api)  # pyright: ignore[reportDeprecated]
+
+        assert resource._client is api and resource._instance_query == ""
+        assert resource_sync._client is api and resource_sync._instance_query == ""
