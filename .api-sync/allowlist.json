@@ -1,23 +1,5 @@
 [
   {
-    "schema": "GetBankAccountResponse",
-    "field": "account_holder_name",
-    "reason": "bank_accounts.get() models an older bank-account shape; the current spec returns rail-specific fields instead (e.g. swift_account_holder_name). Pre-existing, unrelated to the customers rename. Needs its own bank-accounts sync PR.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "is_primary",
-    "reason": "Same pre-existing bank_accounts.get() divergence as account_holder_name above; the spec's BankAccountOut has no is_primary property.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "swift_code",
-    "reason": "Same pre-existing bank_accounts.get() divergence; the spec uses swift_code_bic, not swift_code.",
-    "owner": "eric@blindpay.com"
-  },
-  {
     "schema": "Payin",
     "field": "billing_fee",
     "reason": "Pre-existing: the spec's PayinOut only has billing_fee_amount, not billing_fee. Payin already separately declares billing_fee_amount. Unrelated to the customers rename.",
@@ -165,12 +147,6 @@
     "schema": "CreatePayinInput",
     "field": "receiver_address",
     "reason": "Dead code: CreatePayinInput is never passed to any client method (create_evm() takes a bare payin_quote_id). Pre-existing, unrelated to the customers rename.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "iban",
-    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
     "owner": "eric@blindpay.com"
   },
   {

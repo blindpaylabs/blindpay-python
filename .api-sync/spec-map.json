@@ -1170,13 +1170,9 @@
         {
           "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
           "symbol": "BankAccount"
-        },
-        {
-          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
-          "symbol": "GetBankAccountResponse"
         }
       ],
-      "note": "discriminator fan-out target for the response side; BankAccount is the list() shape, GetBankAccountResponse is the get() shape (already carries pre-existing allowlist.json divergences: account_holder_name/is_primary/swift_code/iban)"
+      "note": "BankAccount is the response shape of both list() and get(); GetBankAccountResponse is an alias of it."
     },
     {
       "spec": "CreateBankAccountIn",
