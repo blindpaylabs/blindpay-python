@@ -64,7 +64,6 @@ from blindpay import (
 This SDK uses:
 - `uv` for package management
 - `httpx` for async HTTP requests
-- `pydantic` for data validation
 - `typing_extensions` for typing
 
 ## License

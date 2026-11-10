@@ -9,7 +9,6 @@ keywords = ["blindpay", "payments", "api", "sdk", "global-payments", "payment-pr
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.23.0, <1",
-    "pydantic>=1.9.0, <3",
     "typing-extensions>=4.11, <5",
 ]
 classifiers = [
