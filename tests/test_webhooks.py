@@ -129,3 +129,21 @@ class TestVerifyEdgeCases:
 
     def test_empty_headers_return_false(self):
         assert webhooks.verify(PAYLOAD, {}, SECRET, now=NOW) is False
+
+
+class TestClientWrapperTolerance:
+    @pytest.mark.parametrize("client_class", [BlindPay, BlindPaySync])
+    def test_tolerance_can_be_widened(self, client_class: Any, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr("blindpay.webhooks.time.time", lambda: float(NOW + 600))
+        headers = sign(PAYLOAD)
+        client = client_class(api_key="test_key", instance_id="in_000000000000")
+        kwargs: Dict[str, Any] = {
+            "secret": SECRET,
+            "id": headers["svix-id"],
+            "timestamp": headers["svix-timestamp"],
+            "payload": PAYLOAD,
+            "svix_signature": headers["svix-signature"],
+        }
+
+        assert client.verify_webhook_signature(**kwargs) is False
+        assert client.verify_webhook_signature(**kwargs, tolerance=600) is True
