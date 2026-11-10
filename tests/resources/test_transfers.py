@@ -9,14 +9,13 @@ from tests.spec_fixtures import assert_matches_spec, response_variants
 CREATE_TRANSFER = response_variants("POST /v1/instances/{instance_id}/transfers")
 
 
-def test_create_transfer_response_matches_spec():
-    assert_matches_spec(CreateTransferResponse, CREATE_TRANSFER)
-
-
 class TestTransfers:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
+
+    def test_create_transfer_response_matches_spec(self):
+        assert_matches_spec(CreateTransferResponse, CREATE_TRANSFER)
 
     @pytest.mark.asyncio
     async def test_create_transfer_quote(self):

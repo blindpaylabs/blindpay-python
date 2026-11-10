@@ -9,17 +9,16 @@ from tests.spec_fixtures import assert_matches_spec, response_variants
 GET_BANK_ACCOUNT = response_variants("GET /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{id}")
 
 
-def test_get_bank_account_response_matches_spec():
-    # Every declared key exists in BankAccountOut and every nullable one is Optional. Required-ness is not
-    # checked yet: the spec requires only id, type and name, while BankAccount still declares every key
-    # (Optional values, required keys) like the rest of the SDK's response types.
-    assert_matches_spec(GetBankAccountResponse, GET_BANK_ACCOUNT, check_required=False)
-
-
 class TestBankAccounts:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
+
+    def test_get_bank_account_response_matches_spec(self):
+        # Every declared key exists in BankAccountOut and every nullable one is Optional. Required-ness is not
+        # checked yet: the spec requires only id, type and name, while BankAccount still declares every key
+        # (Optional values, required keys) like the rest of the SDK's response types.
+        assert_matches_spec(GetBankAccountResponse, GET_BANK_ACCOUNT, check_required=False)
 
     @pytest.mark.asyncio
     async def test_create_pix_bank_account(self):
