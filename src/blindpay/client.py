@@ -1,14 +1,12 @@
-import base64
-import hashlib
-import hmac
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar, Union
 
 import httpx
 
 from ._internal.exceptions import BlindPayError
 from ._version import __version__
 from .types import BlindpayApiResponse
+from .webhooks import verify as verify_webhook
 
 if TYPE_CHECKING:
     from blindpay.resources.available.available import AvailableResource, AvailableResourceSync
@@ -42,6 +40,12 @@ if TYPE_CHECKING:
     from blindpay.resources.webhooks.webhooks import WebhookEndpointsResource, WebhookEndpointsResourceSync
 
 T = TypeVar("T")
+
+
+def _signature_header(svix_signature: str) -> str:
+    # Earlier versions of verify_webhook_signature only matched a bare base64 signature, so working integrations
+    # strip the "v1," prefix themselves. Keep accepting that form here; blindpay.webhooks.verify stays strict.
+    return svix_signature if "," in svix_signature else f"v1,{svix_signature}"
 
 
 class ApiClientImpl:
@@ -350,38 +354,26 @@ class BlindPay:
         return create_terms_of_service_resource(self._instance_id, self._api)
 
     def verify_webhook_signature(
-        self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
+        self, *, secret: str, id: str, timestamp: str, payload: Union[str, bytes], svix_signature: str
     ) -> bool:
         """
-        Verifies the BlindPay webhook signature
+        Verifies the BlindPay webhook signature. Same as ``blindpay.webhooks.verify``, which needs no client.
 
         Args:
-            secret: The webhook secret from BlindPay dashboard
+            secret: The webhook secret from BlindPay dashboard (``whsec_...``)
             id: The value of the `svix-id` header
             timestamp: The value of the `svix-timestamp` header
-            payload: The raw request body
-            svix_signature: The value of the `svix-signature` header
+            payload: The raw request body, exactly as received
+            svix_signature: The value of the `svix-signature` header (``v1,<signature>``, space-separated).
+                A bare signature without the ``v1,`` prefix is still accepted, as earlier versions required it.
 
         Returns:
-            True if the signature is valid, False otherwise
+            True if a ``v1`` signature matches and the timestamp is within 5 minutes of now, False otherwise
         """
-        signed_content = f"{id}.{timestamp}.{payload}"
-
-        secret_parts = secret.split("_")
-        if len(secret_parts) < 2:
-            return False
-
-        try:
-            secret_bytes = base64.b64decode(secret_parts[1])
-        except Exception:
-            return False
-
-        expected_signature = base64.b64encode(
-            hmac.new(secret_bytes, signed_content.encode(), hashlib.sha256).digest()
-        ).decode()
-
-        return len(svix_signature) == len(expected_signature) and hmac.compare_digest(
-            svix_signature, expected_signature
+        return verify_webhook(
+            payload,
+            {"svix-id": id, "svix-timestamp": timestamp, "svix-signature": _signature_header(svix_signature)},
+            secret,
         )
 
 
@@ -586,38 +578,26 @@ class BlindPaySync:
         return create_terms_of_service_resource_sync(self._instance_id, self._api)
 
     def verify_webhook_signature(
-        self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
+        self, *, secret: str, id: str, timestamp: str, payload: Union[str, bytes], svix_signature: str
     ) -> bool:
         """
-        Verifies the BlindPay webhook signature
+        Verifies the BlindPay webhook signature. Same as ``blindpay.webhooks.verify``, which needs no client.
 
         Args:
-            secret: The webhook secret from BlindPay dashboard
+            secret: The webhook secret from BlindPay dashboard (``whsec_...``)
             id: The value of the `svix-id` header
             timestamp: The value of the `svix-timestamp` header
-            payload: The raw request body
-            svix_signature: The value of the `svix-signature` header
+            payload: The raw request body, exactly as received
+            svix_signature: The value of the `svix-signature` header (``v1,<signature>``, space-separated).
+                A bare signature without the ``v1,`` prefix is still accepted, as earlier versions required it.
 
         Returns:
-            True if the signature is valid, False otherwise
+            True if a ``v1`` signature matches and the timestamp is within 5 minutes of now, False otherwise
         """
-        signed_content = f"{id}.{timestamp}.{payload}"
-
-        secret_parts = secret.split("_")
-        if len(secret_parts) < 2:
-            return False
-
-        try:
-            secret_bytes = base64.b64decode(secret_parts[1])
-        except Exception:
-            return False
-
-        expected_signature = base64.b64encode(
-            hmac.new(secret_bytes, signed_content.encode(), hashlib.sha256).digest()
-        ).decode()
-
-        return len(svix_signature) == len(expected_signature) and hmac.compare_digest(
-            svix_signature, expected_signature
+        return verify_webhook(
+            payload,
+            {"svix-id": id, "svix-timestamp": timestamp, "svix-signature": _signature_header(svix_signature)},
+            secret,
         )
 
     def close(self) -> None:

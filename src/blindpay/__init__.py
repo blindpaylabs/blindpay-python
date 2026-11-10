@@ -1,3 +1,4 @@
+from . import webhooks as webhooks
 from ._internal.exceptions import BlindPayError
 from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
@@ -35,6 +36,7 @@ __all__ = [
     "BlindPay",
     "BlindPaySync",
     "BlindPayError",
+    "webhooks",
     "AccountClass",
     "AipriseDocumentType",
     "ApprovalRate",
