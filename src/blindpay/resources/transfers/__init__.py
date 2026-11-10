@@ -4,6 +4,8 @@ from .transfers import (
     CreateTransferQuoteInput,
     CreateTransferQuoteResponse,
     CreateTransferResponse,
+    CreateTransferTrackingMonitoring,
+    CreateTransferTrackingStep,
     GetTransferResponse,
     ListTransfersResponse,
     Transfer,
@@ -26,6 +28,8 @@ __all__ = [
     "CreateTransferQuoteResponse",
     "CreateTransferInput",
     "CreateTransferResponse",
+    "CreateTransferTrackingMonitoring",
+    "CreateTransferTrackingStep",
     "GetTransferResponse",
     "ListTransfersResponse",
 ]

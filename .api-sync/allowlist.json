@@ -250,5 +250,11 @@
     "field": "EURB",
     "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CreateTransferResponse",
+    "field": "tracking_partner_fee",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 CreateTransferOut, optional and nullable) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "eric@blindpay.com"
   }
 ]

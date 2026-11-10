@@ -1551,7 +1551,47 @@
       "sdk": [
         {
           "file": "src/blindpay/resources/transfers/transfers.py",
-          "symbol": "Transfer"
+          "symbol": "CreateTransferResponse"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "specPath": "tracking_bridge_swap",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferTrackingStep"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "specPath": "tracking_complete",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferTrackingStep"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "specPath": "tracking_paymaster",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferTrackingStep"
+        }
+      ]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "specPath": "tracking_transaction_monitoring",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/transfers/transfers.py",
+          "symbol": "CreateTransferTrackingMonitoring"
         }
       ]
     },
