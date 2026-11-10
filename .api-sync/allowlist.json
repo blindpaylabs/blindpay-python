@@ -220,5 +220,29 @@
     "field": "payout_id",
     "reason": "Path parameter (the spec names it id) modeled on the request input type for URL building; never a wire body property. Pre-existing modeling choice, unrelated to the customers rename.",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UploadInput",
+    "field": "filename",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UploadInput",
+    "field": "content_type",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UploadAnalyzeInput",
+    "field": "filename",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "UploadAnalyzeInput",
+    "field": "content_type",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "eric@blindpay.com"
   }
 ]

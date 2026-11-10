@@ -1397,3 +1397,30 @@ class TestAuditTypes:
         id_findings = [f for f in findings if f["field"] == "id"]
         assert len(id_findings) == 1
         assert "ParentOut" in id_findings[0]["schema"]
+
+
+# --------------------------------------------------------------------------- #
+# Operation discovery
+# --------------------------------------------------------------------------- #
+
+
+class TestOperationDiscovery:
+    def test_multipart_post_counts_as_a_post(self, repo: Path):
+        write(
+            repo,
+            "src/blindpay/resources/upload.py",
+            """class UploadResource:
+    def __init__(self, client, instance_id=None):
+        self._client = client
+        self._query = ""
+
+    async def create(self, data):
+        return await self._client.post_multipart(f"/upload{self._query}", {}, {})
+""",
+        )
+        sync = load_sync(repo)
+
+        modules = sync.discover_resource_modules(repo / "src" / "blindpay")
+
+        methods = [(m.name, m.verb, m.template) for module in modules for m in module.methods]
+        assert methods == [("create", "post", "/upload")]

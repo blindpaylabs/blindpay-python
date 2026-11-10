@@ -1033,6 +1033,16 @@
     },
     {
       "spec": {
+        "schema": "UploadAnalyzeIn",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/upload/upload.py",
+        "symbol": "UploadAnalyzeDocumentType"
+      }
+    },
+    {
+      "spec": {
         "schema": "UploadAnalyzeOut",
         "property": "approval_rate"
       },
@@ -1768,6 +1778,24 @@
       ]
     },
     {
+      "spec": "UploadAnalyzeIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "UploadAnalyzeInput"
+        }
+      ]
+    },
+    {
+      "spec": "UploadAnalyzeOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "UploadAnalyzeOutput"
+        }
+      ]
+    },
+    {
       "spec": [
         "PayoutOut",
         "PayoutOnEvmOut",
@@ -1921,14 +1949,6 @@
       {
         "schema": "CreateInstanceRfiBody",
         "reason": "unreferenced by any public operation (0 $ref); same as CreateRfiBody -- orphan, and part of the unmodeled Rfi family."
-      },
-      {
-        "schema": "UploadAnalyzeIn",
-        "reason": "reachable (POST /v1/upload/analyze); UploadAnalyzeInput now declares `type` and `metadata` (fixed), but the request body is multipart/form-data and the SDK's analyze()/create() still send it via the same JSON post() path as every other resource call, with `file` typed as a bare str. Whether that JSON path actually produces a valid multipart upload against the live API needs dedicated human verification (Phase C), not a field-level patch."
-      },
-      {
-        "schema": "UploadAnalyzeOut",
-        "reason": "response counterpart of UploadAnalyzeIn; same open multipart-transport question."
       },
       {
         "schema": "Error",

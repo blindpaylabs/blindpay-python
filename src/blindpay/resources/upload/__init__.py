@@ -1,4 +1,5 @@
 from .upload import (
+    FileContent,
     UploadAnalyzeInput,
     UploadAnalyzeOutput,
     UploadBucket,
@@ -13,6 +14,7 @@ from .upload import (
 __all__ = [
     "create_upload_resource",
     "create_upload_resource_sync",
+    "FileContent",
     "UploadAnalyzeInput",
     "UploadAnalyzeOutput",
     "UploadBucket",

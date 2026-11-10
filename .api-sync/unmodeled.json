@@ -935,13 +935,6 @@
   },
   {
     "kind": "property",
-    "schema": "UploadOut",
-    "field": "file_url",
-    "reason": "Modeled under a different name: UploadResponse uses `url` where the wire's UploadOut object uses `file_url` (the name `url` passes the existing global contract-check because it is used elsewhere in the spec, e.g. WebhookEndpoint.url).",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "kind": "property",
     "schema": "VirtualAccountOut",
     "field": "customer_id",
     "reason": "Not modeled on VirtualAccount.",

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
 
 import httpx
 
+from ._internal.api_client import MultipartFile
 from ._internal.exceptions import BlindPayError
 from ._version import __version__
 from .types import BlindpayApiResponse
@@ -42,6 +43,19 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
+def _to_api_response(response: httpx.Response) -> BlindpayApiResponse[Any]:
+    if response.status_code >= 400:
+        try:
+            error_data = response.json()
+            error_message = error_data.get("message", "Unknown error")
+        except Exception:
+            error_message = "Unknown error"
+
+        return {"data": None, "error": {"message": error_message}}
+
+    return {"data": response.json(), "error": None}
+
+
 def _signature_header(svix_signature: str) -> str:
     # Earlier versions of verify_webhook_signature only matched a bare base64 signature, so working integrations
     # strip the "v1," prefix themselves. Keep accepting that form here; blindpay.webhooks.verify stays strict.
@@ -49,9 +63,10 @@ def _signature_header(svix_signature: str) -> str:
 
 
 class ApiClientImpl:
-    def __init__(self, base_url: str, headers: Dict[str, str]):
+    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.AsyncBaseTransport] = None):
         self.base_url = base_url
         self.headers = headers
+        self._transport = transport
 
     async def get(self, path: str) -> BlindpayApiResponse[T]:
         return await self._request("GET", path)
@@ -68,32 +83,28 @@ class ApiClientImpl:
     async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return await self._request("DELETE", path, body)
 
+    async def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[T]:
+        return await self._send("POST", path, data=data, files=files)
+
     async def _request(
         self,
         method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
+        if body is not None:
+            return await self._send(method, path, json=body)
+        return await self._send(method, path)
+
+    async def _send(self, method: str, path: str, **content: Any) -> BlindpayApiResponse[T]:
         url = f"{self.base_url}{path}"
 
         try:
-            async with httpx.AsyncClient() as client:
-                if body is not None:
-                    response = await client.request(method=method, url=url, headers=self.headers, json=body)
-                else:
-                    response = await client.request(method=method, url=url, headers=self.headers)
-
-                if response.status_code >= 400:
-                    try:
-                        error_data = response.json()
-                        error_message = error_data.get("message", "Unknown error")
-                    except Exception:
-                        error_message = "Unknown error"
-
-                    return {"data": None, "error": {"message": error_message}}
-
-                data = response.json()
-                return {"data": data, "error": None}
+            async with httpx.AsyncClient(transport=self._transport) as client:
+                response = await client.request(method=method, url=url, headers=self.headers, **content)
+                return _to_api_response(response)
 
         except Exception as e:
             error_message = str(e) if str(e) else "Unknown error"
@@ -101,10 +112,10 @@ class ApiClientImpl:
 
 
 class ApiClientImplSync:
-    def __init__(self, base_url: str, headers: Dict[str, str]):
+    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.BaseTransport] = None):
         self.base_url = base_url
         self.headers = headers
-        self.client = httpx.Client(base_url=base_url, headers=headers)
+        self.client = httpx.Client(base_url=base_url, headers=headers, transport=transport)
 
     def get(self, path: str) -> BlindpayApiResponse[T]:
         return self._request("GET", path)
@@ -121,29 +132,25 @@ class ApiClientImplSync:
     def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return self._request("DELETE", path, body)
 
+    def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[T]:
+        return self._send("POST", path, data=data, files=files)
+
     def _request(
         self,
         method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
+        if body is not None:
+            return self._send(method, path, json=body)
+        return self._send(method, path)
+
+    def _send(self, method: str, path: str, **content: Any) -> BlindpayApiResponse[T]:
         try:
-            if body is not None:
-                response = self.client.request(method=method, url=path, json=body)
-            else:
-                response = self.client.request(method=method, url=path)
-
-            if response.status_code >= 400:
-                try:
-                    error_data = response.json()
-                    error_message = error_data.get("message", "Unknown error")
-                except Exception:
-                    error_message = "Unknown error"
-
-                return {"data": None, "error": {"message": error_message}}
-
-            data = response.json()
-            return {"data": data, "error": None}
+            response = self.client.request(method=method, url=path, **content)
+            return _to_api_response(response)
 
         except Exception as e:
             error_message = str(e) if str(e) else "Unknown error"
@@ -262,8 +269,9 @@ class BlindPay:
         self._instance_id = instance_id
         self._base_url = "https://api.blindpay.com/v1"
 
+        # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
+        # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
         self._headers = {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
             "Authorization": f"Bearer {self._api_key}",
@@ -345,7 +353,7 @@ class BlindPay:
     def upload(self) -> "UploadResource":
         from blindpay.resources.upload import create_upload_resource
 
-        return create_upload_resource(self._api)
+        return create_upload_resource(self._api, self._instance_id)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResource":
@@ -486,8 +494,9 @@ class BlindPaySync:
         self._instance_id = instance_id
         self._base_url = "https://api.blindpay.com/v1"
 
+        # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
+        # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
         self._headers = {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
             "Authorization": f"Bearer {self._api_key}",
@@ -569,7 +578,7 @@ class BlindPaySync:
     def upload(self) -> "UploadResourceSync":
         from blindpay.resources.upload import create_upload_resource_sync
 
-        return create_upload_resource_sync(self._api)
+        return create_upload_resource_sync(self._api, self._instance_id)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResourceSync":

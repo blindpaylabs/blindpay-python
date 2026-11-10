@@ -868,13 +868,20 @@ def _fstring_template(node: ast.expr) -> Optional[str]:
     return None
 
 
+# Client helpers that send a given HTTP verb with a non-JSON body (multipart uploads).
+CLIENT_VERB_ALIASES = {"post_multipart": "post"}
+
+
 def _client_call_verb(call: ast.Call) -> Optional[str]:
     f = call.func
-    if not isinstance(f, ast.Attribute) or f.attr not in HTTP_VERBS:
+    if not isinstance(f, ast.Attribute):
+        return None
+    verb = CLIENT_VERB_ALIASES.get(f.attr, f.attr)
+    if verb not in HTTP_VERBS:
         return None
     obj = f.value
     if isinstance(obj, ast.Attribute) and obj.attr == "_client" and isinstance(obj.value, ast.Name):
-        return f.attr if obj.value.id == "self" else None
+        return verb if obj.value.id == "self" else None
     return None
 
 
