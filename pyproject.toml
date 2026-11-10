@@ -35,13 +35,13 @@ build-backend = "hatchling.build"
 path = "src/blindpay/_version.py"
 
 [tool.hatch.build]
-include = ["src/*", "README.md", "LICENSE", "py.typed"]
+include = ["src/*", "README.md", "LICENSE"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blindpay"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/README.md", "/LICENSE", "/pyproject.toml", "/py.typed"]
+include = ["/src", "/README.md", "/LICENSE", "/pyproject.toml"]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"

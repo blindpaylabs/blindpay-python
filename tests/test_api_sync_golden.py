@@ -66,7 +66,6 @@ def build_scratch_repo(dest: Path) -> None:
         "uv.lock",
         "pyrightconfig.json",
         "pytest.ini",
-        "py.typed",
         "README.md",
         "LICENSE",
     ):
