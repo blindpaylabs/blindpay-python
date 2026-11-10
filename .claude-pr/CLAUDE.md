@@ -13,13 +13,17 @@ blindpay-python/
   release-please-config.json              # release-please settings (Python type, v-tag)
   .release-please-manifest.json           # Current release-please version tracker
   src/blindpay/
-    __init__.py                           # SDK version, public re-exports (types + clients)
+    __init__.py                           # Public re-exports (types + clients + webhooks module)
+    _version.py                           # __version__ (x-release-please-version marker; used in User-Agent)
+    py.typed                              # PEP 561 marker (must stay inside the package)
+    webhooks.py                           # Standalone Svix verifier: webhooks.verify(payload, headers, secret)
     client.py                             # BlindPay (async) and BlindPaySync classes,
                                           #   ApiClientImpl / ApiClientImplSync (HTTP layer),
                                           #   _*Namespace / _*NamespaceSync classes (sub-resources)
     types.py                              # Shared Literal types and TypedDicts used across resources
     _internal/
-      api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync
+      api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync,
+                                          #   MultipartFile (get/post/put/patch/delete/post_multipart)
       exceptions.py                       # BlindPayError exception class
     resources/
       __init__.py                         # Barrel re-exports of all create_*_resource factory functions
@@ -28,7 +32,13 @@ blindpay-python/
         <resource_name>.py                # TypedDicts (input/output) + Resource classes (async+sync) + factory fns
   tests/
     conftest.py                           # Adds src/ to sys.path
-    test_client.py                        # Tests for BlindPay / BlindPaySync (webhook verification)
+    fixtures/spec/                        # Shared spec-shaped fixtures (all SDKs). Re-copy, never hand-edit
+    fixtures/webhook-vectors.json         # Shared Svix verification vectors (14)
+    spec_fixtures.py                      # Loads fixtures; assert_matches_spec(TypedDict, variants)
+    http_mock.py                          # Wire-level seam: clients backed by httpx.MockTransport + Recorder
+    test_webhooks.py                      # The 14 vectors through webhooks.verify and both client wrappers
+    test_http.py                          # HTTP-layer behaviour shared by all resources
+    test_packaging.py                     # py.typed placement, version single source, User-Agent
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
 ```
@@ -600,6 +610,12 @@ pyright src/blindpay/
 - Each class has `@pytest.fixture(autouse=True) def setup(self)` that creates the client.
 - Async class uses `BlindPay`, sync class uses `BlindPaySync`.
 - Mock target: `patch.object(self.blindpay._api, "_request")`.
+- Response mocks come from the shared fixtures, never hand-written JSON: `response_variants("POST /v1/...")`
+  from `tests/spec_fixtures.py`. Add `assert_matches_spec(ResponseType, variants)` for every response type you
+  touch: it fails on fields the spec doesn't have, on required keys the spec makes optional, and on nullable
+  fields not typed `Optional`. TypedDicts don't validate at runtime, so a round-tripped mock proves nothing.
+- When the wire format matters (multipart, headers, query strings), use `tests/http_mock.py`
+  (`async_client(recorder)` / `sync_client(recorder)`) and assert on the recorded `httpx.Request`.
 - Mock return: `{"data": <expected_data>, "error": None}` for success.
 - Assert: `response["error"] is None`, `response["data"] == expected`, `mock_request.assert_called_once_with(<METHOD>, <PATH>)`.
 - For POST/PUT/PATCH methods, assert the body as well: `mock_request.assert_called_once_with("POST", "/path", {body_dict})`.
@@ -615,15 +631,19 @@ The project uses [release-please](https://github.com/googleapis/release-please) 
 **Config:** `release-please-config.json`
 - Release type: `python`
 - Tags include `v` prefix (e.g., `v1.3.0`)
-- Bumps version in `src/blindpay/__init__.py` (via `extra-files`)
+- Bumps `pyproject.toml` (python strategy) and `src/blindpay/_version.py` (via `extra-files`, Generic updater)
 
 **Manifest:** `.release-please-manifest.json`
 - Tracks the current version at the root path `.`
 
-**Version is stored in TWO places** (keep them in sync for local dev, release-please handles it in CI):
+**The release version lives in three files that release-please moves together.** Never edit them by hand:
+- `.release-please-manifest.json` -> `"."`
 - `pyproject.toml` -> `[project].version`
-- `src/blindpay/__init__.py` -> `__version__`
-- `src/blindpay/client.py` -> `__version__` (duplicated, used in User-Agent header)
+- `src/blindpay/_version.py` -> `__version__`. Keep the `# x-release-please-version` marker on that line:
+  the Generic updater only rewrites marked lines. `client.py` imports it for the `User-Agent` header.
+
+`tests/test_packaging.py` fails if the three drift. Regenerate `uv.lock` with `uv lock --python 3.13` only when
+dependencies change.
 
 ### Commit message format
 
@@ -667,7 +687,6 @@ refactor(client): simplify namespace initialization
 | `PATCH /resources/{id}` | `update(data)` | Same as PUT |
 | `DELETE /resources/{id}` | `delete(id)` | Takes ID as string param |
 | `POST /resources/{id}/action` | `action_name(data)` | Descriptive method name |
-| `GET /export/resources` | `export(params)` | Query string params |
 
 ### Schema to TypedDict mapping
 
@@ -725,6 +744,33 @@ async def method(self, data: MyInput) -> BlindpayApiResponse[MyResponse]:
 
 ---
 
+### Request bodies
+
+- JSON bodies go through `post`/`put`/`patch`/`delete`. httpx sets `Content-Type: application/json`; the clients
+  have no client-wide `Content-Type` (it would override the multipart boundary).
+- Multipart bodies (`POST /upload`, `POST /upload/analyze`) go through `post_multipart(path, data, files)`.
+  api-sync treats `post_multipart` as a POST when it scans resource methods (`CLIENT_VERB_ALIASES` in
+  `.api-sync/sync.py`), so keep the path a literal (f-)string as the first argument.
+
+### Webhooks
+
+`blindpay.webhooks.verify(payload, headers, secret, *, tolerance=300, now=None)` is the one verifier (native
+Svix algorithm, `hmac` + `hashlib`, no `svix` dependency). It never raises. The clients'
+`verify_webhook_signature` methods delegate to it; don't duplicate the algorithm.
+
+### Deprecations
+
+Mark methods that can't work (e.g. routes that don't exist) with `@typing_extensions.deprecated("...")` instead
+of removing them outside a major release. Tests call them inside `pytest.warns(DeprecationWarning)`.
+
+### api-sync ledgers
+
+`.api-sync/allowlist.json` (SDK fields the spec snapshot doesn't know) and `.api-sync/unmodeled.json` (spec
+fields/enums the SDK doesn't model) must stay true. When a fix makes an entry false, delete it in the same commit.
+`python3 .api-sync/sync.py --check` and `python3 .api-sync/check_contract.py` gate CI.
+
+---
+
 ## Checklist for any change
 
 - [ ] Types defined in the resource file (not `types.py`) unless shared across resources
@@ -734,4 +780,5 @@ async def method(self, data: MyInput) -> BlindpayApiResponse[MyResponse]:
 - [ ] `resources/__init__.py` imports factory functions
 - [ ] `client.py` has TYPE_CHECKING import + `@cached_property` in BOTH client classes
 - [ ] Tests cover both async and sync variants
+- [ ] Response types touched are checked with `assert_matches_spec` against the shared fixtures
 - [ ] `ruff format src/` and `ruff check src/` pass
