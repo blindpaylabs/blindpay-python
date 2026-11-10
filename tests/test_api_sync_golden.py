@@ -63,6 +63,7 @@ def build_scratch_repo(dest: Path) -> None:
         "tests",
         ".api-sync",
         "pyproject.toml",
+        ".release-please-manifest.json",
         "uv.lock",
         "pyrightconfig.json",
         "pytest.ini",

@@ -31,9 +31,6 @@ Documentation = "https://api.blindpay.com/reference"
 requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
-[tool.hatch.version]
-path = "src/blindpay/_version.py"
-
 [tool.hatch.build]
 include = ["src/*", "README.md", "LICENSE"]
 
