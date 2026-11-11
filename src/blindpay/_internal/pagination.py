@@ -17,14 +17,11 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
-    TypeVar,
     cast,
 )
 
 from ..types import BlindpayApiResponse
 from .exceptions import BlindPayApiError, BlindPayError
-
-T = TypeVar("T")
 
 DEFAULT_PAGE_SIZE = 100
 

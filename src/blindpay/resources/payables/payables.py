@@ -72,10 +72,7 @@ class Payable(_PayableFrom):
     legal_name: NotRequired[Optional[str]]
 
 
-_CreatePayableFrom = TypedDict("_CreatePayableFrom", {"from": NotRequired[Optional[PayableParty]]})
-
-
-class CreatePayableInput(_CreatePayableFrom):
+class CreatePayableInput(_PayableFrom):
     """Pass at least one of ``boleto_barcode``, ``pix_qrcode`` or ``document_file`` (or line items). Amounts
     (``line_items[].price``, ``discount``, ``taxes``) are integer cents. ``bank_account`` takes the same fields as a
     bank-account create body."""
