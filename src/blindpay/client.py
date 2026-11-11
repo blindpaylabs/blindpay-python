@@ -171,7 +171,7 @@ class ApiClientImpl:
             try:
                 built = self._client.build_request(method, url, **request)
             except Exception as error:  # a request that can't even be built is never retried
-                return {"data": None, "error": error_from_exception(error, key)}
+                return {"data": None, "error": error_from_exception(error, key, method)}
             try:
                 response = await self._client.send(built, stream=True)
             except Exception as error:
@@ -182,7 +182,7 @@ class ApiClientImpl:
                     await self._sleep(delay)
                     attempt += 1
                     continue
-                return {"data": None, "error": error_from_exception(error, key)}
+                return {"data": None, "error": error_from_exception(error, key, method)}
 
             try:
                 await response.aread()
@@ -206,7 +206,7 @@ class ApiClientImpl:
                 await self._sleep(delay)
                 attempt += 1
                 continue
-            return {"data": None, "error": error_from_response(response, key)}
+            return {"data": None, "error": error_from_response(response, key, method)}
 
     async def aclose(self) -> None:
         if self._owns_client:
@@ -302,7 +302,7 @@ class ApiClientImplSync:
             try:
                 built = self.client.build_request(method, url, **request)
             except Exception as error:  # a request that can't even be built is never retried
-                return {"data": None, "error": error_from_exception(error, key)}
+                return {"data": None, "error": error_from_exception(error, key, method)}
             try:
                 response = self.client.send(built, stream=True)
             except Exception as error:
@@ -313,7 +313,7 @@ class ApiClientImplSync:
                     self._sleep(delay)
                     attempt += 1
                     continue
-                return {"data": None, "error": error_from_exception(error, key)}
+                return {"data": None, "error": error_from_exception(error, key, method)}
 
             try:
                 response.read()
@@ -337,7 +337,7 @@ class ApiClientImplSync:
                 self._sleep(delay)
                 attempt += 1
                 continue
-            return {"data": None, "error": error_from_response(response, key)}
+            return {"data": None, "error": error_from_response(response, key, method)}
 
     def close(self) -> None:
         if self._owns_client:

@@ -83,12 +83,12 @@ def build_query(params: Optional[Mapping[str, Any]]) -> str:
     return f"?{urlencode(pairs)}" if pairs else ""
 
 
-def is_mutating(method: str) -> bool:
+def is_mutating(method: HttpMethod) -> bool:
     return method in MUTATING_METHODS
 
 
 def resolve_idempotency_key(
-    method: str, options: Optional[RequestOptions], *, multipart: bool, max_retries: int
+    method: HttpMethod, options: Optional[RequestOptions], *, multipart: bool, max_retries: int
 ) -> Optional[str]:
     if not is_mutating(method) or multipart:
         return None
@@ -140,6 +140,8 @@ def encode_json(body: Any) -> bytes:
 
 def request_timeout(options: Optional[RequestOptions], default: float) -> httpx.Timeout:
     timeout = options.get("timeout") if options else None
+    if timeout is not None and not timeout > 0:
+        raise BlindPayError("timeout must be a positive number of seconds")
     return httpx.Timeout(default if timeout is None else timeout)
 
 
@@ -182,7 +184,7 @@ def _error_code(response: httpx.Response) -> Optional[str]:
 
 
 def response_retry_delay(
-    response: httpx.Response, *, method: str, idempotency_key: Optional[str], multipart: bool, attempt: int
+    response: httpx.Response, *, method: HttpMethod, idempotency_key: Optional[str], multipart: bool, attempt: int
 ) -> Optional[float]:
     """Seconds to wait before retrying this response, or None if it must not be retried."""
     if multipart:
@@ -204,7 +206,7 @@ def response_retry_delay(
 
 
 def exception_retry_delay(
-    error: Exception, *, method: str, idempotency_key: Optional[str], multipart: bool, attempt: int
+    error: Exception, *, method: HttpMethod, idempotency_key: Optional[str], multipart: bool, attempt: int
 ) -> Optional[float]:
     """Seconds to wait before retrying after a transport error, or None if it must not be retried."""
     if multipart:
@@ -215,11 +217,48 @@ def exception_retry_delay(
     return backoff(attempt) if isinstance(error, NETWORK_ERRORS) else None
 
 
+def _error(
+    message: str,
+    status: int,
+    code: Optional[str],
+    *,
+    retryable: bool,
+    idempotency_key: Optional[str],
+    request_id: Optional[str] = None,
+    description: Optional[str] = None,
+    errors: Optional[List[Any]] = None,
+    trace_id: Optional[str] = None,
+) -> ErrorResponse:
+    return {
+        "message": message,
+        "status": status,
+        "code": code,
+        "description": description,
+        "errors": errors if errors is not None else [],
+        "trace_id": trace_id,
+        "request_id": request_id,
+        "idempotency_key": idempotency_key,
+        "retryable": retryable,
+    }
+
+
+def _is_retryable(
+    method: HttpMethod, idempotency_key: Optional[str], status: int, code: Optional[str] = None, in_flight: bool = False
+) -> bool:
+    """Whether resending (with the same key, for a mutation) may succeed. A mutation without a key never is: a
+    resend could run it twice. ``status`` 0 means no response arrived."""
+    if code in TERMINAL_5XX_CODES:
+        return False
+    if is_mutating(method) and (not idempotency_key or status == 408):
+        return False
+    return status == 0 or in_flight or status in RETRYABLE_ERROR_STATUSES
+
+
 def body_read_failure(
     response: httpx.Response,
     error: Exception,
     *,
-    method: str,
+    method: HttpMethod,
     idempotency_key: Optional[str],
     multipart: bool,
     attempt: int,
@@ -234,61 +273,48 @@ def body_read_failure(
             error, method=method, idempotency_key=idempotency_key, multipart=multipart, attempt=attempt
         )
     )
-    return delay, {
-        "message": f"The response body couldn't be read: {error or type(error).__name__}",
-        "status": response.status_code,
-        "code": "SDK_RESPONSE_READ_ERROR",
-        "description": None,
-        "errors": [],
-        "trace_id": None,
-        "request_id": response.headers.get("X-Request-Id"),
-        "idempotency_key": idempotency_key,
-        "retryable": True,
-    }
+    status = response.status_code
+    # A 4xx is an answer about the request itself, so its status decides; for a 2xx/5xx the lost body is what failed.
+    retryable = _is_retryable(method, idempotency_key, status if 400 <= status < 500 else 0)
+    return delay, _error(
+        f"The response body couldn't be read: {error or type(error).__name__}",
+        status,
+        "SDK_RESPONSE_READ_ERROR",
+        retryable=retryable,
+        idempotency_key=idempotency_key,
+        request_id=response.headers.get("X-Request-Id"),
+    )
 
 
-def _is_retryable_error(status: int, code: Optional[str], in_flight: bool) -> bool:
-    if code in TERMINAL_5XX_CODES:
-        return False
-    return in_flight or status in RETRYABLE_ERROR_STATUSES
-
-
-def error_from_response(response: httpx.Response, idempotency_key: Optional[str]) -> ErrorResponse:
+def error_from_response(response: httpx.Response, idempotency_key: Optional[str], method: HttpMethod) -> ErrorResponse:
     body = _json_body(response) or {}
-    message = body.get("message")
-    code = body.get("code")
-    errors = body.get("errors")
+    message, code, errors = body.get("message"), body.get("code"), body.get("errors")
+    description, trace_id = body.get("description"), body.get("trace_id")
     status = response.status_code
     code_value = code if isinstance(code, str) else None
-    description = body.get("description")
-    trace_id = body.get("trace_id")
-    return {
-        "message": message if isinstance(message, str) and message else (response.reason_phrase or f"HTTP {status}"),
-        "status": status,
-        "code": code_value,
-        "description": description if isinstance(description, str) else None,
-        "errors": cast(List[Any], errors) if isinstance(errors, list) else [],
-        "trace_id": trace_id if isinstance(trace_id, str) else None,
-        "request_id": response.headers.get("X-Request-Id"),
-        "idempotency_key": idempotency_key,
-        "retryable": _is_retryable_error(status, code_value, _is_in_flight(response)),
-    }
+    return _error(
+        message if isinstance(message, str) and message else (response.reason_phrase or f"HTTP {status}"),
+        status,
+        code_value,
+        retryable=_is_retryable(method, idempotency_key, status, code_value, _is_in_flight(response)),
+        idempotency_key=idempotency_key,
+        request_id=response.headers.get("X-Request-Id"),
+        description=description if isinstance(description, str) else None,
+        errors=cast(List[Any], errors) if isinstance(errors, list) else [],
+        trace_id=trace_id if isinstance(trace_id, str) else None,
+    )
 
 
-def error_from_exception(error: Exception, idempotency_key: Optional[str]) -> ErrorResponse:
+def error_from_exception(error: Exception, idempotency_key: Optional[str], method: HttpMethod) -> ErrorResponse:
     timeout = isinstance(error, httpx.TimeoutException)
     network = timeout or isinstance(error, (httpx.NetworkError, httpx.RemoteProtocolError))
-    return {
-        "message": str(error) or type(error).__name__,
-        "status": 0,
-        "code": "SDK_TIMEOUT" if timeout else ("SDK_CONNECTION_ERROR" if network else "SDK_ERROR"),
-        "description": None,
-        "errors": [],
-        "trace_id": None,
-        "request_id": None,
-        "idempotency_key": idempotency_key,
-        "retryable": network,
-    }
+    return _error(
+        str(error) or type(error).__name__,
+        0,
+        "SDK_TIMEOUT" if timeout else ("SDK_CONNECTION_ERROR" if network else "SDK_ERROR"),
+        retryable=network and _is_retryable(method, idempotency_key, 0),
+        idempotency_key=idempotency_key,
+    )
 
 
 def success_from_response(response: httpx.Response, idempotency_key: Optional[str]) -> BlindpayApiResponse[Any]:
@@ -297,17 +323,12 @@ def success_from_response(response: httpx.Response, idempotency_key: Optional[st
     try:
         return {"data": response.json(), "error": None}
     except ValueError:
-        return {
-            "data": None,
-            "error": {
-                "message": "The API returned a response that isn't valid JSON",
-                "status": response.status_code,
-                "code": "SDK_INVALID_RESPONSE",
-                "description": None,
-                "errors": [],
-                "trace_id": None,
-                "request_id": response.headers.get("X-Request-Id"),
-                "idempotency_key": idempotency_key,
-                "retryable": False,
-            },
-        }
+        error = _error(
+            "The API returned a response that isn't valid JSON",
+            response.status_code,
+            "SDK_INVALID_RESPONSE",
+            retryable=False,
+            idempotency_key=idempotency_key,
+            request_id=response.headers.get("X-Request-Id"),
+        )
+        return {"data": None, "error": error}

@@ -561,3 +561,44 @@ class TestKeyAndHeaderValidation:
         await Client(kind, script).create({"headers": {"accept": "application/json; v=2"}})
 
         assert script.requests[0].headers.get_list("accept") == ["application/json; v=2"]
+
+
+@pytest.mark.parametrize("kind", KINDS)
+class TestRetryableFlag:
+    """``retryable`` promises that resending may succeed; it depends on the method and the key, not only the status."""
+
+    async def test_keyed_mutation_408_is_not_retryable(self, kind: str):
+        response = await Client(kind, Script(408)).create()
+
+        assert response["error"]["status"] == 408
+        assert response["error"]["retryable"] is False
+
+    @pytest.mark.parametrize("status", [500, 503])
+    async def test_unkeyed_mutation_5xx_is_not_retryable(self, kind: str, status: int):
+        script = Script(status)
+
+        response = await Client(kind, script, max_retries=0).create()
+
+        assert script.keys == [None]
+        assert response["error"]["retryable"] is False
+
+    async def test_unkeyed_mutation_connection_error_is_not_retryable(self, kind: str):
+        response = await Client(kind, Script(connect_error()), max_retries=0).create()
+
+        assert response["error"]["code"] == "SDK_CONNECTION_ERROR"
+        assert response["error"]["retryable"] is False
+
+    async def test_4xx_with_an_unreadable_body_is_classified_by_its_status(self, kind: str):
+        response = await Client(kind, Script(broken_body(400))).create()
+
+        assert response["error"]["status"] == 400
+        assert response["error"]["retryable"] is False
+
+    @pytest.mark.parametrize("timeout", [0, -1])
+    async def test_non_positive_per_request_timeout_is_rejected_before_sending(self, kind: str, timeout: float):
+        script = Script(200)
+
+        with pytest.raises(BlindPayError, match="timeout"):
+            await Client(kind, script).create({"timeout": timeout})
+
+        assert script.requests == []
