@@ -17,6 +17,7 @@ class OfframpWallet(TypedDict):
     address: str
     created_at: Optional[str]
     updated_at: Optional[str]
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 ListOfframpWalletsResponse = List[OfframpWallet]

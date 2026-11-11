@@ -172,6 +172,7 @@ KNOWN_DRIFT: Set[str] = {
     "customers.bank_accounts.create_pix_safe",
     "customers.bank_accounts.create_ted",
     "customers.bank_accounts.create_sepa",
+    "customers.bank_accounts.create_faster_payments",
     "customers.bank_accounts.list",
     "customers.bank_accounts.get",
     "wallets.blockchain.create_with_address",

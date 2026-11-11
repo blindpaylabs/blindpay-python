@@ -54,6 +54,7 @@ BANK_ACCOUNT_CREATES = [
     "create_pix_safe",
     "create_ted",
     "create_sepa",
+    "create_faster_payments",
 ]
 
 

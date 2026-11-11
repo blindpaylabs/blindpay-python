@@ -1596,3 +1596,79 @@ class TestOpenApi31AndSdkFlag:
 
         assert sync.cmd_check(None) == 0
         assert sync.cmd_check(None, other) == 1
+
+
+class TestFunctionalTypedDictBases:
+    def test_keyword_wire_keys_in_a_functional_base_are_resolved(self, repo: Path):
+        write(
+            repo,
+            "src/blindpay/resources/bills.py",
+            """from typing_extensions import NotRequired, TypedDict
+
+_BillFrom = TypedDict("_BillFrom", {"from": NotRequired[str], "yield": NotRequired[int]})
+
+
+class Bill(_BillFrom):
+    id: str
+""",
+        )
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+
+        fields = sync.resolve_typeddict_fields("Bill", "src/blindpay/resources/bills.py", index)
+
+        assert fields == {"id", "from", "yield"}
+
+
+class TestApplyManyChangesToOneFile:
+    def test_enum_and_property_changes_in_one_file_all_land(self, repo: Path):
+        """Regression: every splice used the index's copy of the source taken before the run, so a later change
+        to the same file overwrote the earlier ones (two Literals and a TypedDict in sample.py here)."""
+        write(repo, "src/blindpay/__init__.py", "")
+        write(repo, "src/blindpay/types.py", FIXTURE_TYPES_PY)
+        write(
+            repo,
+            "src/blindpay/resources/sample.py",
+            FIXTURE_RESOURCE_PY.replace(
+                "class Plain(TypedDict):\n    id: str\n",
+                "class Plain(TypedDict):\n    id: str\n    status: Status\n    shade: Shade\n",
+            ).replace("\n\nclass Plain", '\nShade = Literal["light"]\n\n\nclass Plain'),
+        )
+        map_data: dict[str, Any] = {
+            "enums": [
+                {
+                    "spec": {"schema": "PlainOut", "property": "status"},
+                    "sdk": {"file": "src/blindpay/resources/sample.py", "symbol": "Status"},
+                },
+                {
+                    "spec": {"schema": "PlainOut", "property": "shade"},
+                    "sdk": {"file": "src/blindpay/resources/sample.py", "symbol": "Shade"},
+                },
+            ],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("get", "/p")))
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": ["string", "null"]},
+                        "status": {"type": "string", "enum": ["a", "b", "c"]},
+                        "shade": {"type": "string", "enum": ["light", "dark"]},
+                        "note": {"type": "string"},
+                    }
+                }
+            },
+            {"/p": {"get": op(ref_out="PlainOut")}},
+        )
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(spec))
+        sync = load_sync(repo)
+        source_before = (repo / "src/blindpay/resources/sample.py").read_text()
+        assert '"c"' not in source_before
+
+        assert sync.cmd_apply(sync.SNAPSHOT_PATH, None) == 0
+
+        source = (repo / "src/blindpay/resources/sample.py").read_text()
+        assert '"c"' in source and '"dark"' in source and "note:" in source

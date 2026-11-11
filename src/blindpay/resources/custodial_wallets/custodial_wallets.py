@@ -7,6 +7,8 @@ from ..._internal.http import RequestOptions, build_query, path_param
 from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import BlindpayApiResponse, Network, PaginationMetadata
 
+YieldStatus = Literal["disabled", "enabled", "disabling"]
+
 
 class CustodialWallet(TypedDict):
     id: str
@@ -15,6 +17,7 @@ class CustodialWallet(TypedDict):
     network: Network
     address: Optional[str]
     created_at: Optional[str]
+    yield_status: NotRequired[Optional[Union[YieldStatus, str]]]
 
 
 class CustodialWalletBalanceToken(TypedDict):

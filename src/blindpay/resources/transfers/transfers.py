@@ -32,6 +32,8 @@ class CreateTransferQuoteInput(TypedDict, total=False):
     amount_reference: AmountReference
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
+    partner_flat_fee: int
+    partner_percentage_fee: int
 
 
 class CreateTransferQuoteResponse(TypedDict):
@@ -43,6 +45,8 @@ class CreateTransferQuoteResponse(TypedDict):
     sender_amount: float
     flat_fee: float
     partner_fee_amount: Optional[float]
+    partner_flat_fee: NotRequired[int]
+    partner_percentage_fee: NotRequired[int]
 
 
 class CreateTransferInput(TypedDict):
@@ -77,6 +81,8 @@ class Transfer(TypedDict):
     legal_name: Optional[str]
     partner_fee_amount: Optional[float]
     external_id: Optional[str]
+    partner_flat_fee: NotRequired[int]
+    partner_percentage_fee: NotRequired[int]
 
 
 class CreateTransferTrackingStep(TypedDict):

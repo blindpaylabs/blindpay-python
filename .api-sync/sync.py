@@ -333,6 +333,9 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
         trees[f] = ast.parse(text, filename=str(f))
 
     known_typeddict = {"TypedDict"}
+    functional: dict[Path, list[ast.ClassDef]] = {f: functional_typeddicts(tree) for f, tree in trees.items()}
+    for defs in functional.values():
+        known_typeddict.update(d.name for d in defs)
     for _ in range(5):
         changed = False
         for tree in trees.values():
@@ -347,7 +350,7 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
 
     all_classes: dict[str, list[ClassInfo]] = {}
     for f, tree in trees.items():
-        for node in ast.walk(tree):
+        for node in [*ast.walk(tree), *functional[f]]:
             if not (isinstance(node, ast.ClassDef) and node.name in known_typeddict):
                 continue
             own_fields = {}
@@ -383,6 +386,30 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
             all_literals.setdefault(name, []).append((f, node, sources[f]))
 
     return SdkIndex(all_classes=all_classes, all_literals=all_literals, sources=sources)
+
+
+def functional_typeddicts(tree: ast.Module) -> list[ast.ClassDef]:
+    """`_X = TypedDict("_X", {"from": ..., "yield": ...})` definitions -- the only way to declare a wire key that is
+    a Python keyword -- as synthetic ClassDefs whose body holds one AnnAssign per key, so field resolution treats
+    them like class-based TypedDicts. They are only ever used as bases; nothing is spliced into them."""
+    found: list[ast.ClassDef] = []
+    for node in tree.body:
+        if not (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)):
+            continue
+        call = node.value
+        if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == "TypedDict"):
+            continue
+        if len(call.args) < 2 or not isinstance(call.args[1], ast.Dict):
+            continue
+        body: list[ast.stmt] = []
+        for key, value in zip(call.args[1].keys, call.args[1].values, strict=True):
+            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                ann = ast.AnnAssign(target=ast.Name(id=key.value), annotation=value, simple=1)
+                ast.copy_location(ann, node)
+                body.append(ann)
+        cls = ast.ClassDef(name=node.targets[0].id, bases=[], keywords=[], body=body, decorator_list=[], type_params=[])
+        found.append(ast.copy_location(cls, node))
+    return found
 
 
 def _pick_unambiguous(file_rel: Optional[str], candidates: list) -> Optional[Any]:
@@ -1400,7 +1427,15 @@ def apply_enum_change(gap: EnumGap, index: SdkIndex) -> AppliedChange:
     entry = index.find_literal(gap.symbol, gap.file)
     if entry is None:
         raise SystemExit(f"internal error: lost track of literal {gap.symbol} in {gap.file}")
-    file_path, node, source = entry
+    file_path, node, _ = entry
+    # Re-read: an earlier change in this same run may already have rewritten the file, and splicing into the
+    # index's stale copy would silently drop that change.
+    source = file_path.read_text()
+    node = next(
+        n
+        for n in ast.parse(source).body
+        if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id == gap.symbol
+    )
     new_source = splice_literal_add_members(source, node, sorted(gap.missing))
     file_path.write_text(new_source)
     return AppliedChange(
@@ -1547,7 +1582,9 @@ def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[Appli
             continue
         _, nullable = coarse_type(prop_schema)
         annotation = choose_field_annotation(info, python_type, nullable)
-        source = info.source
+        # Re-read: an earlier enum or property change in this run may have rewritten the file.
+        source = info.file.read_text()
+        info.node = _reparse_class(info.file, symbol)
         for required_name in ("NotRequired", "Optional"):
             if f"{required_name}[" in annotation:
                 updated = ensure_name_imported(source, required_name)

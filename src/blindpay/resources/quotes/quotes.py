@@ -41,6 +41,7 @@ class CreateQuoteInput(TypedDict):
     transaction_document_id: Optional[str]
     transaction_document_type: TransactionDocumentType
     refund_wallet_address: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
 
 
 class CreateQuoteResponse(TypedDict):

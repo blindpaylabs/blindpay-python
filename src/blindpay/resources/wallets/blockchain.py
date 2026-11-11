@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -19,6 +19,7 @@ class BlockchainWallet(TypedDict):
     signature_tx_hash: Optional[str]
     is_account_abstraction: Optional[bool]
     customer_id: str
+    is_self_custody: NotRequired[Optional[bool]]
 
 
 ListBlockchainWalletsResponse = List[BlockchainWallet]
@@ -31,6 +32,7 @@ class CreateBlockchainWalletWithAddressInput(TypedDict):
     name: str
     network: Network
     address: Optional[str]
+    is_self_custody: NotRequired[bool]
 
 
 class CreateBlockchainWalletWithHashInput(TypedDict):
@@ -38,6 +40,7 @@ class CreateBlockchainWalletWithHashInput(TypedDict):
     name: str
     network: Network
     signature_tx_hash: Optional[str]
+    is_self_custody: NotRequired[bool]
 
 
 class GetBlockchainWalletInput(TypedDict):

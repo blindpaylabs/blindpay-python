@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -34,6 +34,7 @@ class OfframpWallet(TypedDict):
     id: str
     network: Network
     external_id: Optional[str]
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 class BankAccount(TypedDict):
@@ -91,6 +92,17 @@ class BankAccount(TypedDict):
     ted_bank_code: Optional[str]
     ted_branch_code: Optional[str]
     ted_cpf_cnpj: Optional[str]
+    faster_payments_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    faster_payments_account_number: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_2: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_legal_name: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_beneficiary_state_province_region: NotRequired[Optional[str]]
+    faster_payments_sort_code: NotRequired[Optional[str]]
+    plaid_connected_at: NotRequired[Optional[str]]
+    swift_intermediary_bank_routing_number: NotRequired[Optional[str]]
 
 
 ListBankAccountsResponse = List[BankAccount]
@@ -302,6 +314,7 @@ class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, tota
     phone_number: Optional[str]
     tax_id: Optional[str]
     date_of_birth: Optional[str]
+    swift_intermediary_bank_routing_number: Optional[str]
 
 
 class CreateInternationalSwiftResponse(TypedDict):
@@ -412,6 +425,23 @@ class CreateSepaResponse(TypedDict):
     sepa_beneficiary_postal_code: str
     sepa_beneficiary_country: Country
     created_at: str
+
+
+class CreateFasterPaymentsInput(TypedDict):
+    """A UK bank account paid over Faster Payments (GBP)."""
+
+    customer_id: str
+    name: str
+    faster_payments_sort_code: str
+    faster_payments_account_number: str
+    faster_payments_beneficiary_legal_name: str
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_2: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_state_province_region: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_beneficiary_country: NotRequired[Optional[Country]]
+    recipient_relationship: NotRequired[Optional[RecipientRelationship]]
 
 
 class CreatePixSafeInput(TypedDict):
@@ -634,6 +664,17 @@ class BankAccountsResource:
             options=options,
         )
 
+    async def create_faster_payments(
+        self, data: CreateFasterPaymentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BankAccount]:
+        customer_id = data["customer_id"]
+        payload = {"type": "faster_payments", **{k: v for k, v in data.items() if k != "customer_id"}}
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
+
 
 class BankAccountsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -794,6 +835,17 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return self._client.post(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/plaid",
+            payload,
+            options=options,
+        )
+
+    def create_faster_payments(
+        self, data: CreateFasterPaymentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BankAccount]:
+        customer_id = data["customer_id"]
+        payload = {"type": "faster_payments", **{k: v for k, v in data.items() if k != "customer_id"}}
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
             payload,
             options=options,
         )

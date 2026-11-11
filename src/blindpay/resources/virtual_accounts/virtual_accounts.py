@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -34,6 +34,36 @@ class USBankDetails(TypedDict):
     receiving_bank: ReceivingBankInfo
 
 
+class VirtualAccountBeneficiary(TypedDict):
+    name: str
+
+
+class VirtualAccountBreBKey(TypedDict):
+    key: str
+
+
+class VirtualAccountCo(TypedDict):
+    """Colombian (Bre-B) receiving details."""
+
+    bre_b: VirtualAccountBreBKey
+    beneficiary: NotRequired[Optional[VirtualAccountBeneficiary]]
+
+
+class VirtualAccountSpei(TypedDict):
+    clabe: str
+
+
+class VirtualAccountMx(TypedDict):
+    """Mexican (SPEI) receiving details."""
+
+    spei: VirtualAccountSpei
+    beneficiary: NotRequired[Optional[VirtualAccountBeneficiary]]
+
+
+class CreateVirtualAccountBreB(TypedDict):
+    gender: Literal["male", "female"]
+
+
 class VirtualAccount(TypedDict):
     id: str
     us: USBankDetails
@@ -42,6 +72,9 @@ class VirtualAccount(TypedDict):
     banking_partner: Optional[BankingPartner]
     kyc_status: Optional[str]
     blockchain_wallet: Optional[str]
+    co: NotRequired[Optional[VirtualAccountCo]]
+    mx: NotRequired[Optional[VirtualAccountMx]]
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 class _CreateVirtualAccountInputRequired(TypedDict):
@@ -54,6 +87,8 @@ class CreateVirtualAccountInput(_CreateVirtualAccountInputRequired, total=False)
     banking_partner: BankingPartner
     sole_proprietor_doc_type: Optional[str]
     sole_proprietor_doc_file: Optional[str]
+    bre_b: Optional[CreateVirtualAccountBreB]
+    partner_fee_id: Optional[str]
 
 
 CreateVirtualAccountResponse = VirtualAccount
@@ -63,6 +98,7 @@ GetVirtualAccountResponse = VirtualAccount
 class UpdateVirtualAccountInput(TypedDict):
     blockchain_wallet_id: str
     token: StablecoinToken
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 class ListVirtualAccountsResponse(TypedDict):

@@ -1,17 +1,20 @@
 from typing import List, Literal, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions
 from ...types import (
     BlindpayApiResponse,
+    CardInstruction,
     Currency,
     CurrencyType,
     StablecoinToken,
 )
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "rtp", "ted", "international_swift", "pse", "transfers"]
+PaymentMethod = Literal[
+    "ach", "wire", "pix", "spei", "rtp", "ted", "international_swift", "pse", "transfers", "ach_pull", "card"
+]
 
 
 class PayerRules(TypedDict, total=False):
@@ -29,6 +32,7 @@ class CreatePayinQuoteInput(TypedDict, total=False):
     payer_rules: Optional[PayerRules]
     is_otc: Optional[bool]
     wallet_id: Optional[str]
+    funding_bank_account_id: Optional[str]
 
 
 class CreatePayinQuoteResponse(TypedDict):
@@ -40,6 +44,7 @@ class CreatePayinQuoteResponse(TypedDict):
     sender_amount: Optional[float]
     partner_fee_amount: Optional[float]
     flat_fee: Optional[float]
+    card_instruction: NotRequired[Optional[CardInstruction]]
 
 
 class GetPayinFxRateInput(TypedDict):

@@ -1,6 +1,6 @@
 from typing import AsyncIterator, Iterator, List, Literal, Optional, Union
 
-from typing_extensions import TypedDict, deprecated
+from typing_extensions import NotRequired, TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
@@ -100,6 +100,21 @@ class Payout(TypedDict):
     billing_fee_amount: Optional[float]
     cpn_payment_id: Optional[str]
     sender_legal_name: Optional[str]
+    faster_payments_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    bank_account_id: NotRequired[Optional[str]]
+    faster_payments_account_number: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_legal_name: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_sort_code: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_iban: NotRequired[Optional[str]]
 
 
 class ListPayoutsInput(PaginationParams, total=False):
@@ -122,6 +137,7 @@ ExportPayoutsResponse = List[Payout]
 class AuthorizeStellarTokenInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
+    wallet_id: NotRequired[str]
 
 
 class AuthorizeStellarTokenResponse(TypedDict):
@@ -132,6 +148,7 @@ class CreateStellarPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
     signed_transaction: Optional[str]
+    wallet_id: NotRequired[str]
 
 
 class CreateStellarPayoutResponse(TypedDict):
@@ -144,11 +161,13 @@ class CreateStellarPayoutResponse(TypedDict):
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
     customer_id: Optional[str]
+    payable_id: NotRequired[Optional[str]]
 
 
 class CreateEvmPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
+    wallet_id: NotRequired[str]
 
 
 class CreateEvmPayoutResponse(TypedDict):
@@ -161,11 +180,13 @@ class CreateEvmPayoutResponse(TypedDict):
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
     customer_id: Optional[str]
+    payable_id: NotRequired[Optional[str]]
 
 
 class CreateSolanaPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: str
+    wallet_id: NotRequired[str]
 
 
 class CreateSolanaPayoutResponse(TypedDict):
@@ -178,6 +199,7 @@ class CreateSolanaPayoutResponse(TypedDict):
     tracking_partner_fee: Optional[TrackingPartnerFee]
     tracking_liquidity: Optional[TrackingLiquidity]
     customer_id: Optional[str]
+    payable_id: NotRequired[Optional[str]]
 
 
 class SubmitPayoutDocumentsInput(TypedDict):

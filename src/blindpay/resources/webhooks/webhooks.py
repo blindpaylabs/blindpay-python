@@ -30,6 +30,11 @@ WebhookEvents = Literal[
     "transfer.complete",
     "wallet.new",
     "wallet.inbound",
+    "blockchainWallet.update",
+    "payable.complete",
+    "payable.new",
+    "payable.update",
+    "wallet.update",
 ]
 
 

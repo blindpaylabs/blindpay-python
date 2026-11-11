@@ -41,6 +41,11 @@ class UpdateInstanceInput(TypedDict, total=False):
     customer_invite_redirect_url: Optional[str]
     email_notifications: bool
     require_passkey: bool
+    partner_tos_terms_accepted: Literal[True]
+    accent_color: Optional[str]
+    logo_url: Optional[str]
+    partner_tos_link: Optional[str]
+    partner_tos_screenshot: Optional[str]
 
 
 class UpdateInstanceMemberRoleInput(TypedDict):

@@ -111,7 +111,18 @@ def find_typeddict_fields(src_root: Path) -> dict[tuple[str, str], set[str]]:
         except SyntaxError as e:
             raise SystemExit(f"{f}: failed to parse: {e}") from e
 
-    known_typeddict_classes = {"TypedDict"}
+    functional: dict[str, set[str]] = {}  # `_X = TypedDict("_X", {"from": ...})`: keyword wire keys
+    for f, tree in trees.items():
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
+                func = node.value.func
+                if isinstance(func, ast.Name) and func.id == "TypedDict" and len(node.value.args) >= 2:
+                    keys = node.value.args[1].keys if isinstance(node.value.args[1], ast.Dict) else []
+                    name = node.targets[0].id if isinstance(node.targets[0], ast.Name) else ""
+                    fields = {k.value for k in keys if isinstance(k, ast.Constant) and isinstance(k.value, str)}
+                    functional[f"{f.relative_to(src_root)}::{name}"] = fields
+
+    known_typeddict_classes = {"TypedDict", *(key.split("::")[1] for key in functional)}
     # Fixed-point: a class based on a class we already know is a TypedDict is also one.
     for _ in range(5):
         changed = False
@@ -140,6 +151,10 @@ def find_typeddict_fields(src_root: Path) -> dict[tuple[str, str], set[str]]:
                         fields.add(item.target.id)
                 if fields:
                     results[(rel, node.name)] = fields
+    for key, fields in functional.items():
+        rel, name = key.split("::")
+        if fields:
+            results[(rel, name)] = fields
     return results
 
 
