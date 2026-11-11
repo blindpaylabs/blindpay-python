@@ -100,3 +100,22 @@ def test_async_methods_are_coroutines(name: str, async_cls: type, sync_cls: type
             continue
         assert inspect.iscoroutinefunction(fn), f"{name}.{method} must be async"
         assert not inspect.iscoroutinefunction(getattr(sync_cls, method)), f"{name}Sync.{method} must be sync"
+
+
+def test_namespaces_expose_their_base_resource_with_types() -> None:
+    from typing_extensions import assert_type
+
+    from blindpay import BlindpayApiResponse
+    from blindpay.resources.customers.customers import CustomersResource, GetCustomerResponse
+    from blindpay.resources.instances.instances import GetInstanceMembersResponse
+    from blindpay.resources.payins.payins import Payin, PayinsResourceSync
+    from tests.http_mock import Recorder, async_client, sync_client
+
+    client = sync_client(Recorder(body={}))
+
+    # assert_type fails type checking if these resolve to Any (the old __getattr__ delegation).
+    assert_type(client.payins.get("pa_000000000000"), BlindpayApiResponse[Payin])
+    assert_type(client.customers.get("cu_000000000000"), BlindpayApiResponse[GetCustomerResponse])
+    assert_type(client.instances.get_members(), BlindpayApiResponse[GetInstanceMembersResponse])
+    assert isinstance(client.payins, PayinsResourceSync)
+    assert isinstance(async_client(Recorder(body={})).customers, CustomersResource)

@@ -176,7 +176,7 @@ class GetPayinTrackResponse(TypedDict):
     billing_fee_amount: NotRequired[Optional[float]]
 
 
-class ExportPayinsInput(TypedDict):
+class ExportPayinsInput(TypedDict, total=False):
     limit: Optional[str]
     offset: Optional[str]
     status: TransactionStatus

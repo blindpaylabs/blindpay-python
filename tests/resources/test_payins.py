@@ -313,7 +313,7 @@ class TestPayins:
             mock_request.return_value = {"data": mocked_export_payins, "error": None}
 
             with pytest.warns(DeprecationWarning, match="route the API does not have"):
-                response = await self.blindpay.payins.export(
+                response = await self.blindpay.payins.export(  # pyright: ignore[reportDeprecated]
                     {
                         "status": "processing",
                     }
@@ -810,7 +810,7 @@ class TestPayinsSync:
             mock_request.return_value = {"data": mocked_export_payins, "error": None}
 
             with pytest.warns(DeprecationWarning, match="route the API does not have"):
-                response = self.blindpay.payins.export(
+                response = self.blindpay.payins.export(  # pyright: ignore[reportDeprecated]
                     {
                         "status": "processing",
                     }

@@ -25,6 +25,9 @@ from ._internal.http import (
     success_from_response,
 )
 from ._version import __version__
+from .resources.customers.customers import CustomersResource, CustomersResourceSync
+from .resources.instances.instances import InstancesResource, InstancesResourceSync
+from .resources.payins.payins import PayinsResource, PayinsResourceSync
 from .types import BlindpayApiResponse
 from .webhooks import DEFAULT_TOLERANCE_SECONDS, verify as verify_webhook
 
@@ -35,13 +38,10 @@ if TYPE_CHECKING:
         CustodialWalletsResource,
         CustodialWalletsResourceSync,
     )
-    from blindpay.resources.customers.customers import CustomersResource, CustomersResourceSync
     from blindpay.resources.fees.fees import FeesResource, FeesResourceSync
-    from blindpay.resources.instances.instances import InstancesResource, InstancesResourceSync
     from blindpay.resources.limits.limits import LimitsResource, LimitsResourceSync
     from blindpay.resources.ownership.ownership import OwnershipResource, OwnershipResourceSync
     from blindpay.resources.partner_fees.partner_fees import PartnerFeesResource, PartnerFeesResourceSync
-    from blindpay.resources.payins.payins import PayinsResource, PayinsResourceSync
     from blindpay.resources.payins.quotes import PayinQuotesResource, PayinQuotesResourceSync
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
@@ -308,16 +308,12 @@ def _validate_settings(timeout: float, max_retries: int) -> None:
         raise BlindPayError("max_retries must be 0 (no retries) or more")
 
 
-class _InstancesNamespace:
+class _InstancesNamespace(InstancesResource):
+    """``InstancesResource`` plus its sub-resources, all visible to type checkers."""
+
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "InstancesResource":
-        from blindpay.resources.instances.instances import create_instances_resource
-
-        return create_instances_resource(self._instance_id, self._api)
 
     @cached_property
     def webhook_endpoints(self) -> "WebhookEndpointsResource":
@@ -331,20 +327,13 @@ class _InstancesNamespace:
 
         return create_terms_of_service_resource(self._instance_id, self._api)
 
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
+class _PayinsNamespace(PayinsResource):
+    """``PayinsResource`` plus its sub-resources, all visible to type checkers."""
 
-class _PayinsNamespace:
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "PayinsResource":
-        from blindpay.resources.payins.payins import create_payins_resource
-
-        return create_payins_resource(self._instance_id, self._api)
 
     @cached_property
     def quotes(self) -> "PayinQuotesResource":
@@ -352,29 +341,19 @@ class _PayinsNamespace:
 
         return create_payin_quotes_resource(self._instance_id, self._api)
 
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
+class _CustomersNamespace(CustomersResource):
+    """``CustomersResource`` plus its sub-resources, all visible to type checkers."""
 
-class _CustomersNamespace:
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "CustomersResource":
-        from blindpay.resources.customers.customers import create_customers_resource
-
-        return create_customers_resource(self._instance_id, self._api)
 
     @cached_property
     def bank_accounts(self) -> "BankAccountsResource":
         from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource
 
         return create_bank_accounts_resource(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
 
 class _WalletsNamespace:
@@ -573,16 +552,12 @@ class BlindPay:
         await self.aclose()
 
 
-class _InstancesNamespaceSync:
+class _InstancesNamespaceSync(InstancesResourceSync):
+    """``InstancesResourceSync`` plus its sub-resources, all visible to type checkers."""
+
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "InstancesResourceSync":
-        from blindpay.resources.instances.instances import create_instances_resource_sync
-
-        return create_instances_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def webhook_endpoints(self) -> "WebhookEndpointsResourceSync":
@@ -596,20 +571,13 @@ class _InstancesNamespaceSync:
 
         return create_terms_of_service_resource_sync(self._instance_id, self._api)
 
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
+class _PayinsNamespaceSync(PayinsResourceSync):
+    """``PayinsResourceSync`` plus its sub-resources, all visible to type checkers."""
 
-class _PayinsNamespaceSync:
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "PayinsResourceSync":
-        from blindpay.resources.payins.payins import create_payins_resource_sync
-
-        return create_payins_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def quotes(self) -> "PayinQuotesResourceSync":
@@ -617,29 +585,19 @@ class _PayinsNamespaceSync:
 
         return create_payin_quotes_resource_sync(self._instance_id, self._api)
 
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
+class _CustomersNamespaceSync(CustomersResourceSync):
+    """``CustomersResourceSync`` plus its sub-resources, all visible to type checkers."""
 
-class _CustomersNamespaceSync:
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "CustomersResourceSync":
-        from blindpay.resources.customers.customers import create_customers_resource_sync
-
-        return create_customers_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def bank_accounts(self) -> "BankAccountsResourceSync":
         from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource_sync
 
         return create_bank_accounts_resource_sync(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 
 
 class _WalletsNamespaceSync:
