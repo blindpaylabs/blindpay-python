@@ -9,6 +9,7 @@
 import ast
 import inspect
 import json
+import typing
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
@@ -16,9 +17,10 @@ import httpx
 import pytest
 
 from blindpay import RequestOptions
+from blindpay.types import BlindpaySuccessResponse
 from tests.http_mock import async_client, sync_client
 from tests.op_table import OPS, Op
-from tests.spec_fixtures import SPEC_DIR, load_index
+from tests.spec_fixtures import SPEC_DIR, load_index, variant_errors
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "blindpay" / "resources"
 MUTATING_VERBS = {"post", "put", "patch", "delete", "post_multipart"}
@@ -142,3 +144,90 @@ class TestOperations:
             response = await run(kind, op, Recorder(payload))
 
             assert response == {"data": payload, "error": None}, name
+
+
+def response_type(op: Op) -> Any:
+    """``T`` from the method's ``BlindpayApiResponse[T]`` return annotation."""
+    method = resolve(sync_client(Recorder()), op.method)
+    for arm in typing.get_args(typing.get_type_hints(method)["return"]):
+        if typing.get_origin(arm) is BlindpaySuccessResponse:
+            return typing.get_args(arm)[0]
+    raise AssertionError(f"{op.method} doesn't return BlindpayApiResponse[...]")
+
+
+# Response types that don't yet match their spec fixtures (C7 open enums, C8 optional/nullable fields).
+# Strict: fixing a type makes its entry fail until it's removed here. Must be empty when M3 is done.
+KNOWN_DRIFT: Set[str] = {
+    "available.get_bank_details",
+    "available.get_naics_codes",
+    "available.get_rails",
+    "customers.bank_accounts.create_pix",
+    "customers.bank_accounts.create_argentina_transfers",
+    "customers.bank_accounts.create_spei",
+    "customers.bank_accounts.create_colombia_ach",
+    "customers.bank_accounts.create_ach",
+    "customers.bank_accounts.create_wire",
+    "customers.bank_accounts.create_international_swift",
+    "customers.bank_accounts.create_rtp",
+    "customers.bank_accounts.create_pix_safe",
+    "customers.bank_accounts.create_ted",
+    "customers.bank_accounts.create_sepa",
+    "customers.bank_accounts.list",
+    "customers.bank_accounts.get",
+    "wallets.blockchain.create_with_address",
+    "wallets.blockchain.create_with_hash",
+    "wallets.blockchain.list",
+    "wallets.blockchain.get",
+    "customers.list",
+    "customers.get_limit_increase_requests",
+    "customers.get",
+    "fees.get",
+    "instances.get_members",
+    "wallets.offramp.create",
+    "wallets.offramp.list",
+    "wallets.offramp.get",
+    "partner_fees.create",
+    "partner_fees.list",
+    "partner_fees.get",
+    "payins.quotes.create",
+    "payins.quotes.get_fx_rate",
+    "payins.get_track",
+    "payins.list",
+    "payins.create_evm",
+    "payins.get",
+    "payouts.get_track",
+    "payouts.list",
+    "payouts.create_evm",
+    "payouts.create_solana",
+    "payouts.create_stellar",
+    "payouts.get",
+    "payouts.submit_documents",
+    "quotes.create",
+    "quotes.get_fx_rate",
+    "wallets.blockchain.mint_usdb_solana",
+    "wallets.blockchain.prepare_solana_delegation_transaction",
+    "transfers.create_quote",
+    "transfers.get_track",
+    "transfers.list",
+    "transfers.create",
+    "transfers.get",
+    "upload.analyze",
+    "virtual_accounts.create",
+    "virtual_accounts.list",
+    "virtual_accounts.get",
+    "wallets.custodial.create",
+    "wallets.custodial.list",
+    "wallets.custodial.get",
+    "instances.webhook_endpoints.list",
+}
+
+
+@pytest.mark.parametrize("op", OPS, ids=[op.method for op in OPS])
+def test_response_type_matches_every_fixture_variant(op: Op):
+    """The static "decode" (plan §1.2, A8): each variant of the op's fixture against the method's response type.
+    Required keys, nullability, open enums for ``unknown_enum``, decimals, and no fields the spec lacks."""
+    errors = variant_errors(response_type(op), fixture_variants(op.operation))
+    if op.method in KNOWN_DRIFT:
+        assert errors, f"{op.method} now matches the spec: remove it from KNOWN_DRIFT"
+        return
+    assert not errors, "\n".join(sorted(set(errors)))
