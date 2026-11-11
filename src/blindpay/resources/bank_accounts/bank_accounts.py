@@ -690,7 +690,6 @@ class BankAccountsResource:
     async def create_plaid_link(
         self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PlaidLink]:
-        """Starts a Plaid Link session for the customer to connect a US bank account; send them to ``url``."""
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.post(
@@ -870,7 +869,6 @@ class BankAccountsResourceSync:
     def create_plaid_link(
         self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PlaidLink]:
-        """Starts a Plaid Link session for the customer to connect a US bank account; send them to ``url``."""
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return self._client.post(

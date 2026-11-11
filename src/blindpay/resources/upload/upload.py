@@ -168,7 +168,6 @@ class UploadResource:
     async def presign(
         self, data: PresignInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PresignResponse]:
-        """Exchanges an uploaded file's ``file_url`` for a short-lived signed URL you can download it from."""
         return await self._client.post(f"/presign{self._instance_query}", data, options=options)
 
 
@@ -193,7 +192,6 @@ class UploadResourceSync:
     def presign(
         self, data: PresignInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PresignResponse]:
-        """Exchanges an uploaded file's ``file_url`` for a short-lived signed URL you can download it from."""
         return self._client.post(f"/presign{self._instance_query}", data, options=options)
 
 
