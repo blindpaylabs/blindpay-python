@@ -7,10 +7,12 @@ from ..._internal.http import RequestOptions, build_query, path_param
 from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
+    Country,
     ManualExecutionStatus,
     Network,
     PaginationMetadata,
     PaginationParams,
+    PaymentMethod,
     StablecoinToken,
     TrackingComplete,
     TrackingPartnerFee,
@@ -106,6 +108,12 @@ class Payin(TypedDict):
 class ListPayinsInput(PaginationParams, total=False):
     status: Optional[TransactionStatus]
     customer_id: Optional[str]
+    customer_name: str
+    bank_account_id: str
+    country: Country
+    payment_method: PaymentMethod
+    network: Network
+    token: StablecoinToken
 
 
 class ListPayinsResponse(TypedDict):
@@ -229,8 +237,13 @@ class PayinsResource:
         query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
-    async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return await self._client.get(f"/e/payins/{path_param(payin_id)}")
+    async def get_track(
+        self, payin_id: str, checkout_token: Optional[str] = None
+    ) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payins.get(payin_id)`` instead. ``checkout_token`` authorises a card-payin checkout page."""
+        query_string = build_query({"checkout_token": checkout_token})
+        return await self._client.get(f"/e/payins/{path_param(payin_id)}{query_string}")
 
     async def create_evm(
         self, payin_quote_id: str, options: Optional[RequestOptions] = None
@@ -257,8 +270,13 @@ class PayinsResourceSync:
     def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
         return self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
 
-    def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return self._client.get(f"/e/payins/{path_param(payin_id)}")
+    def get_track(
+        self, payin_id: str, checkout_token: Optional[str] = None
+    ) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payins.get(payin_id)`` instead. ``checkout_token`` authorises a card-payin checkout page."""
+        query_string = build_query({"checkout_token": checkout_token})
+        return self._client.get(f"/e/payins/{path_param(payin_id)}{query_string}")
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:

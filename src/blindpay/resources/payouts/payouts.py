@@ -119,6 +119,13 @@ class Payout(TypedDict):
 
 class ListPayoutsInput(PaginationParams, total=False):
     customer_id: str
+    status: TransactionStatus
+    customer_name: str
+    bank_account_id: str
+    country: Country
+    payment_method: Rail
+    network: Network
+    token: StablecoinToken
 
 
 class ListPayoutsResponse(TypedDict):
@@ -243,6 +250,8 @@ class PayoutsResource:
         return await self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     async def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payouts.get(payout_id)`` instead."""
         return await self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     async def authorize_stellar_token(
@@ -300,6 +309,8 @@ class PayoutsResourceSync:
         return self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payouts.get(payout_id)`` instead."""
         return self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     def authorize_stellar_token(

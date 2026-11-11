@@ -118,3 +118,35 @@ class TestPathAndQuery:
     def test_path_param(self):
         assert path_param("in_000000000000") == "in_000000000000"
         assert path_param("a/b c%") == "a%2Fb%20c%25"
+
+
+class TestListFilters:
+    def test_bank_account_list_filters(self):
+        recorder = Recorder(body=[])
+        client = sync_client(recorder)
+
+        client.customers.bank_accounts.list("cu_000000000000", {"status": "approved", "type": "pix", "country": "BR"})
+
+        assert recorder.last.url.query == b"status=approved&type=pix&country=BR"
+
+    @pytest.mark.asyncio
+    async def test_payin_track_sends_the_checkout_token_only_when_given(self):
+        recorder = Recorder(body={})
+        client = async_client(recorder)
+
+        await client.payins.get_track("pi_000000000000")
+        await client.payins.get_track("pi_000000000000", checkout_token="ct_1")
+
+        assert [r.url.query for r in recorder.requests] == [b"", b"checkout_token=ct_1"]
+
+    def test_transfer_and_payout_filters(self):
+        recorder = Recorder(body={"data": [], "pagination": {"has_more": False}})
+        client = sync_client(recorder)
+
+        client.transfers.list({"wallet_id": "wa_000000000000", "network": "base", "token": "USDC"})
+        client.payouts.list({"status": "completed", "payment_method": "pix", "country": "BR"})
+
+        assert [r.url.query for r in recorder.requests] == [
+            b"wallet_id=wa_000000000000&network=base&token=USDC",
+            b"status=completed&payment_method=pix&country=BR",
+        ]
