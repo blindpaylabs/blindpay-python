@@ -1,14 +1,13 @@
-import base64
-import hashlib
-import hmac
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar, Union
 
 import httpx
 
+from ._internal.api_client import MultipartFile
 from ._internal.exceptions import BlindPayError
 from ._version import __version__
 from .types import BlindpayApiResponse
+from .webhooks import DEFAULT_TOLERANCE_SECONDS, verify as verify_webhook
 
 if TYPE_CHECKING:
     from blindpay.resources.available.available import AvailableResource, AvailableResourceSync
@@ -43,11 +42,33 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
+HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
+
+
+def _to_api_response(response: httpx.Response) -> BlindpayApiResponse[Any]:
+    if response.status_code >= 400:
+        try:
+            error_data = response.json()
+            error_message = error_data.get("message", "Unknown error")
+        except Exception:
+            error_message = "Unknown error"
+
+        return {"data": None, "error": {"message": error_message}}
+
+    return {"data": response.json(), "error": None}
+
+
+def _with_legacy_v1_prefix(svix_signature: str) -> str:
+    # Earlier versions of verify_webhook_signature only matched a bare base64 signature, so working integrations
+    # strip the "v1," prefix themselves. Keep accepting that form here; blindpay.webhooks.verify stays strict.
+    return svix_signature if "," in svix_signature else f"v1,{svix_signature}"
+
 
 class ApiClientImpl:
-    def __init__(self, base_url: str, headers: Dict[str, str]):
+    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.AsyncBaseTransport] = None):
         self.base_url = base_url
         self.headers = headers
+        self._transport = transport
 
     async def get(self, path: str) -> BlindpayApiResponse[T]:
         return await self._request("GET", path)
@@ -64,32 +85,28 @@ class ApiClientImpl:
     async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return await self._request("DELETE", path, body)
 
+    async def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[T]:
+        return await self._send("POST", path, data=data, files=files)
+
     async def _request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
+        if body is not None:
+            return await self._send(method, path, json=body)
+        return await self._send(method, path)
+
+    async def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
         url = f"{self.base_url}{path}"
 
         try:
-            async with httpx.AsyncClient() as client:
-                if body is not None:
-                    response = await client.request(method=method, url=url, headers=self.headers, json=body)
-                else:
-                    response = await client.request(method=method, url=url, headers=self.headers)
-
-                if response.status_code >= 400:
-                    try:
-                        error_data = response.json()
-                        error_message = error_data.get("message", "Unknown error")
-                    except Exception:
-                        error_message = "Unknown error"
-
-                    return {"data": None, "error": {"message": error_message}}
-
-                data = response.json()
-                return {"data": data, "error": None}
+            async with httpx.AsyncClient(transport=self._transport) as client:
+                response = await client.request(method=method, url=url, headers=self.headers, **content)
+                return _to_api_response(response)
 
         except Exception as e:
             error_message = str(e) if str(e) else "Unknown error"
@@ -97,10 +114,10 @@ class ApiClientImpl:
 
 
 class ApiClientImplSync:
-    def __init__(self, base_url: str, headers: Dict[str, str]):
+    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.BaseTransport] = None):
         self.base_url = base_url
         self.headers = headers
-        self.client = httpx.Client(base_url=base_url, headers=headers)
+        self.client = httpx.Client(base_url=base_url, headers=headers, transport=transport)
 
     def get(self, path: str) -> BlindpayApiResponse[T]:
         return self._request("GET", path)
@@ -117,29 +134,25 @@ class ApiClientImplSync:
     def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
         return self._request("DELETE", path, body)
 
+    def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[T]:
+        return self._send("POST", path, data=data, files=files)
+
     def _request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"],
+        method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
     ) -> BlindpayApiResponse[T]:
+        if body is not None:
+            return self._send(method, path, json=body)
+        return self._send(method, path)
+
+    def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
         try:
-            if body is not None:
-                response = self.client.request(method=method, url=path, json=body)
-            else:
-                response = self.client.request(method=method, url=path)
-
-            if response.status_code >= 400:
-                try:
-                    error_data = response.json()
-                    error_message = error_data.get("message", "Unknown error")
-                except Exception:
-                    error_message = "Unknown error"
-
-                return {"data": None, "error": {"message": error_message}}
-
-            data = response.json()
-            return {"data": data, "error": None}
+            response = self.client.request(method=method, url=path, **content)
+            return _to_api_response(response)
 
         except Exception as e:
             error_message = str(e) if str(e) else "Unknown error"
@@ -258,8 +271,9 @@ class BlindPay:
         self._instance_id = instance_id
         self._base_url = "https://api.blindpay.com/v1"
 
+        # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
+        # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
         self._headers = {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
             "Authorization": f"Bearer {self._api_key}",
@@ -341,7 +355,7 @@ class BlindPay:
     def upload(self) -> "UploadResource":
         from blindpay.resources.upload import create_upload_resource
 
-        return create_upload_resource(self._api)
+        return create_upload_resource(self._instance_id, self._api)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResource":
@@ -350,38 +364,38 @@ class BlindPay:
         return create_terms_of_service_resource(self._instance_id, self._api)
 
     def verify_webhook_signature(
-        self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
+        self,
+        *,
+        secret: str,
+        id: str,
+        timestamp: str,
+        payload: Union[str, bytes],
+        svix_signature: str,
+        tolerance: int = DEFAULT_TOLERANCE_SECONDS,
     ) -> bool:
         """
-        Verifies the BlindPay webhook signature
+        Verifies the BlindPay webhook signature.
+
+        Deprecated: use ``blindpay.webhooks.verify``, which needs no client. Unlike it, this method also accepts the
+        legacy bare signature form (no ``v1,`` prefix) that earlier versions of the SDK required.
 
         Args:
-            secret: The webhook secret from BlindPay dashboard
+            secret: The webhook secret from BlindPay dashboard (``whsec_...``)
             id: The value of the `svix-id` header
             timestamp: The value of the `svix-timestamp` header
-            payload: The raw request body
-            svix_signature: The value of the `svix-signature` header
+            payload: The raw request body, exactly as received
+            svix_signature: The value of the `svix-signature` header (``v1,<signature>``, space-separated),
+                or a bare signature
+            tolerance: Maximum distance, in seconds, between `svix-timestamp` and now (default 300)
 
         Returns:
-            True if the signature is valid, False otherwise
+            True if a ``v1`` signature matches and the timestamp is within ``tolerance`` of now, False otherwise
         """
-        signed_content = f"{id}.{timestamp}.{payload}"
-
-        secret_parts = secret.split("_")
-        if len(secret_parts) < 2:
-            return False
-
-        try:
-            secret_bytes = base64.b64decode(secret_parts[1])
-        except Exception:
-            return False
-
-        expected_signature = base64.b64encode(
-            hmac.new(secret_bytes, signed_content.encode(), hashlib.sha256).digest()
-        ).decode()
-
-        return len(svix_signature) == len(expected_signature) and hmac.compare_digest(
-            svix_signature, expected_signature
+        return verify_webhook(
+            payload,
+            {"svix-id": id, "svix-timestamp": timestamp, "svix-signature": _with_legacy_v1_prefix(svix_signature)},
+            secret,
+            tolerance=tolerance,
         )
 
 
@@ -494,8 +508,9 @@ class BlindPaySync:
         self._instance_id = instance_id
         self._base_url = "https://api.blindpay.com/v1"
 
+        # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
+        # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
         self._headers = {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
             "Authorization": f"Bearer {self._api_key}",
@@ -577,7 +592,7 @@ class BlindPaySync:
     def upload(self) -> "UploadResourceSync":
         from blindpay.resources.upload import create_upload_resource_sync
 
-        return create_upload_resource_sync(self._api)
+        return create_upload_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def terms_of_service(self) -> "TermsOfServiceResourceSync":
@@ -586,38 +601,38 @@ class BlindPaySync:
         return create_terms_of_service_resource_sync(self._instance_id, self._api)
 
     def verify_webhook_signature(
-        self, *, secret: str, id: str, timestamp: str, payload: str, svix_signature: str
+        self,
+        *,
+        secret: str,
+        id: str,
+        timestamp: str,
+        payload: Union[str, bytes],
+        svix_signature: str,
+        tolerance: int = DEFAULT_TOLERANCE_SECONDS,
     ) -> bool:
         """
-        Verifies the BlindPay webhook signature
+        Verifies the BlindPay webhook signature.
+
+        Deprecated: use ``blindpay.webhooks.verify``, which needs no client. Unlike it, this method also accepts the
+        legacy bare signature form (no ``v1,`` prefix) that earlier versions of the SDK required.
 
         Args:
-            secret: The webhook secret from BlindPay dashboard
+            secret: The webhook secret from BlindPay dashboard (``whsec_...``)
             id: The value of the `svix-id` header
             timestamp: The value of the `svix-timestamp` header
-            payload: The raw request body
-            svix_signature: The value of the `svix-signature` header
+            payload: The raw request body, exactly as received
+            svix_signature: The value of the `svix-signature` header (``v1,<signature>``, space-separated),
+                or a bare signature
+            tolerance: Maximum distance, in seconds, between `svix-timestamp` and now (default 300)
 
         Returns:
-            True if the signature is valid, False otherwise
+            True if a ``v1`` signature matches and the timestamp is within ``tolerance`` of now, False otherwise
         """
-        signed_content = f"{id}.{timestamp}.{payload}"
-
-        secret_parts = secret.split("_")
-        if len(secret_parts) < 2:
-            return False
-
-        try:
-            secret_bytes = base64.b64decode(secret_parts[1])
-        except Exception:
-            return False
-
-        expected_signature = base64.b64encode(
-            hmac.new(secret_bytes, signed_content.encode(), hashlib.sha256).digest()
-        ).decode()
-
-        return len(svix_signature) == len(expected_signature) and hmac.compare_digest(
-            svix_signature, expected_signature
+        return verify_webhook(
+            payload,
+            {"svix-id": id, "svix-timestamp": timestamp, "svix-signature": _with_legacy_v1_prefix(svix_signature)},
+            secret,
+            tolerance=tolerance,
         )
 
     def close(self) -> None:

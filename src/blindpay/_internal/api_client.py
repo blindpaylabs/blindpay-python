@@ -1,6 +1,9 @@
-from typing import Any, Mapping, Optional, Protocol
+from typing import IO, Any, Mapping, Optional, Protocol, Tuple, Union
 
 from ..types import BlindpayApiResponse
+
+MultipartFile = Tuple[str, Union[bytes, IO[bytes]], str]
+"""A multipart file part: (filename, content, content type)."""
 
 
 class InternalApiClient(Protocol):
@@ -29,6 +32,12 @@ class InternalApiClient(Protocol):
         """Make a DELETE request"""
         ...
 
+    async def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[Any]:
+        """Make a multipart/form-data POST request"""
+        ...
+
 
 class InternalApiClientSync(Protocol):
     """Synchronous version of InternalApiClient"""
@@ -51,4 +60,10 @@ class InternalApiClientSync(Protocol):
 
     def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[Any]:
         """Make a DELETE request"""
+        ...
+
+    def post_multipart(
+        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+    ) -> BlindpayApiResponse[Any]:
+        """Make a multipart/form-data POST request"""
         ...

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from urllib.parse import urlencode
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -78,7 +78,31 @@ class Transfer(TypedDict):
     external_id: Optional[str]
 
 
-CreateTransferResponse = Transfer
+class CreateTransferTrackingStep(TypedDict):
+    step: str
+    transaction_hash: NotRequired[Optional[str]]
+    gas_fee: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
+    error_message: NotRequired[Optional[str]]
+
+
+class CreateTransferTrackingMonitoring(TypedDict):
+    step: str
+    blockchain_screening: NotRequired[Optional[float]]
+    risk_score: NotRequired[Optional[float]]
+    completed_at: NotRequired[Optional[str]]
+
+
+class CreateTransferResponse(TypedDict):
+    id: str
+    status: TransactionStatus
+    tracking_bridge_swap: CreateTransferTrackingStep
+    tracking_complete: CreateTransferTrackingStep
+    tracking_paymaster: CreateTransferTrackingStep
+    tracking_transaction_monitoring: CreateTransferTrackingMonitoring
+    tracking_partner_fee: NotRequired[Optional[CreateTransferTrackingStep]]
+
+
 GetTransferResponse = Transfer
 
 

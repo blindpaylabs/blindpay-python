@@ -3,12 +3,22 @@ from unittest.mock import patch
 import pytest
 
 from blindpay import BlindPay, BlindPaySync
+from blindpay.resources.bank_accounts import GetBankAccountResponse
+from tests.spec_fixtures import assert_matches_spec, response_variants
+
+GET_BANK_ACCOUNT = response_variants("GET /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{id}")
 
 
 class TestBankAccounts:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
+
+    def test_get_bank_account_response_matches_spec(self):
+        # Every declared key exists in BankAccountOut and every nullable one is Optional. Required-ness is not
+        # checked yet: the spec requires only id, type and name, while BankAccount still declares every key
+        # (Optional values, required keys) like the rest of the SDK's response types.
+        assert_matches_spec(GetBankAccountResponse, GET_BANK_ACCOUNT, check_required=False)
 
     @pytest.mark.asyncio
     async def test_create_pix_bank_account(self):
@@ -327,29 +337,23 @@ class TestBankAccounts:
             assert response["data"] == mocked_rtp_account
 
     @pytest.mark.asyncio
-    async def test_get_bank_account(self):
-        mocked_bank_account = {
-            "id": "ba_000000000000",
-            "customer_id": "rcv_123",
-            "account_holder_name": "Individual full name or business name",
-            "account_number": "1001001234",
-            "routing_number": "012345678",
-            "account_type": "checking",
-            "bank_name": "Bank Name",
-            "swift_code": "123456789",
-            "iban": None,
-            "is_primary": False,
-            "created_at": "2021-01-01T00:00:00Z",
-            "updated_at": "2021-01-01T00:00:00Z",
-        }
+    @pytest.mark.parametrize("variant", ["full", "required_only", "nullables_null"])
+    async def test_get_bank_account(self, variant: str):
+        mocked_bank_account = GET_BANK_ACCOUNT[variant]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_account, "error": None}
 
-            response = await self.blindpay.customers.bank_accounts.get("re_000000000000", "ba_000000000000")
+            response = await self.blindpay.customers.bank_accounts.get("cu_000000000000", "ba_000000000000")
 
+            data = response["data"]
             assert response["error"] is None
-            assert response["data"] == mocked_bank_account
+            assert data is not None
+            assert data == mocked_bank_account
+            assert data["type"] == mocked_bank_account["type"]
+            mock_request.assert_called_once_with(
+                "GET", "/instances/in_000000000000/customers/cu_000000000000/bank-accounts/ba_000000000000"
+            )
 
     @pytest.mark.asyncio
     async def test_list_bank_accounts(self):
@@ -754,28 +758,21 @@ class TestBankAccountsSync:
             assert response["data"] == mocked_rtp_account
 
     def test_get_bank_account(self):
-        mocked_bank_account = {
-            "id": "ba_000000000000",
-            "customer_id": "rcv_123",
-            "account_holder_name": "Individual full name or business name",
-            "account_number": "1001001234",
-            "routing_number": "012345678",
-            "account_type": "checking",
-            "bank_name": "Bank Name",
-            "swift_code": "123456789",
-            "iban": None,
-            "is_primary": False,
-            "created_at": "2021-01-01T00:00:00Z",
-            "updated_at": "2021-01-01T00:00:00Z",
-        }
+        mocked_bank_account = GET_BANK_ACCOUNT["full"]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_bank_account, "error": None}
 
-            response = self.blindpay.customers.bank_accounts.get("re_000000000000", "ba_000000000000")
+            response = self.blindpay.customers.bank_accounts.get("cu_000000000000", "ba_000000000000")
 
+            data = response["data"]
             assert response["error"] is None
-            assert response["data"] == mocked_bank_account
+            assert data is not None
+            assert data == mocked_bank_account
+            assert data["name"] == mocked_bank_account["name"]
+            mock_request.assert_called_once_with(
+                "GET", "/instances/in_000000000000/customers/cu_000000000000/bank-accounts/ba_000000000000"
+            )
 
     def test_list_bank_accounts(self):
         mocked_bank_accounts = [

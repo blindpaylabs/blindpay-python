@@ -3,12 +3,19 @@ from unittest.mock import patch
 import pytest
 
 from blindpay import BlindPay, BlindPaySync
+from blindpay.resources.transfers import CreateTransferResponse
+from tests.spec_fixtures import assert_matches_spec, response_variants
+
+CREATE_TRANSFER = response_variants("POST /v1/instances/{instance_id}/transfers")
 
 
 class TestTransfers:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.blindpay = BlindPay(api_key="test-key", instance_id="in_000000000000")
+
+    def test_create_transfer_response_matches_spec(self):
+        assert_matches_spec(CreateTransferResponse, CREATE_TRANSFER)
 
     @pytest.mark.asyncio
     async def test_create_transfer_quote(self):
@@ -58,45 +65,25 @@ class TestTransfers:
             )
 
     @pytest.mark.asyncio
-    async def test_create_transfer(self):
-        mocked_transfer = {
-            "id": "tr_000000000000",
-            "instance_id": "in_000000000000",
-            "status": "processing",
-            "transfer_quote_id": "tq_000000000000",
-            "wallet_id": "cw_source",
-            "sender_token": "USDC",
-            "sender_amount": 100.5,
-            "receiver_amount": 100.0,
-            "customer_token": "USDC",
-            "customer_network": "base",
-            "customer_wallet_address": "0x1234567890abcdef",
-            "customer_id": "rc_000000000000",
-            "address": "0x1234567890abcdef",
-            "network": "base",
-            "tracking_transaction_monitoring": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_paymaster": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_bridge_swap": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_complete": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_partner_fee": {"step": "pending", "estimated_time_of_arrival": None},
-            "created_at": "2025-01-01T00:00:00Z",
-            "updated_at": "2025-01-01T00:00:00Z",
-        }
+    @pytest.mark.parametrize("variant", ["full", "required_only", "nullables_null"])
+    async def test_create_transfer(self, variant: str):
+        mocked_transfer = CREATE_TRANSFER[variant]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_transfer, "error": None}
 
-            response = await self.blindpay.transfers.create({"transfer_quote_id": "tq_000000000000"})
+            response = await self.blindpay.transfers.create({"transfer_quote_id": "qu_000000000000"})
 
+            data = response["data"]
             assert response["error"] is None
-            assert response["data"] is not None
-            assert response["data"]["id"] == "tr_000000000000"
-            assert response["data"]["status"] == "processing"
-            assert response["data"]["sender_amount"] == 100.5
+            assert data is not None
+            assert data == mocked_transfer
+            assert data["status"] == mocked_transfer["status"]
+            assert data["tracking_complete"]["step"] == mocked_transfer["tracking_complete"]["step"]
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/transfers",
-                {"transfer_quote_id": "tq_000000000000"},
+                {"transfer_quote_id": "qu_000000000000"},
             )
 
     @pytest.mark.asyncio
@@ -233,42 +220,22 @@ class TestTransfersSync:
             )
 
     def test_create_transfer(self):
-        mocked_transfer = {
-            "id": "tr_000000000000",
-            "instance_id": "in_000000000000",
-            "status": "processing",
-            "transfer_quote_id": "tq_000000000000",
-            "wallet_id": "cw_source",
-            "sender_token": "USDC",
-            "sender_amount": 100.5,
-            "receiver_amount": 100.0,
-            "customer_token": "USDC",
-            "customer_network": "base",
-            "customer_wallet_address": "0x1234567890abcdef",
-            "customer_id": "rc_000000000000",
-            "address": "0x1234567890abcdef",
-            "network": "base",
-            "tracking_transaction_monitoring": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_paymaster": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_bridge_swap": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_complete": {"step": "pending", "estimated_time_of_arrival": None},
-            "tracking_partner_fee": {"step": "pending", "estimated_time_of_arrival": None},
-            "created_at": "2025-01-01T00:00:00Z",
-            "updated_at": "2025-01-01T00:00:00Z",
-        }
+        mocked_transfer = CREATE_TRANSFER["full"]
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_transfer, "error": None}
 
-            response = self.blindpay.transfers.create({"transfer_quote_id": "tq_000000000000"})
+            response = self.blindpay.transfers.create({"transfer_quote_id": "qu_000000000000"})
 
+            data = response["data"]
             assert response["error"] is None
-            assert response["data"] is not None
-            assert response["data"]["id"] == "tr_000000000000"
+            assert data is not None
+            assert data == mocked_transfer
+            assert data["tracking_transaction_monitoring"]["step"] == "processing"
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/transfers",
-                {"transfer_quote_id": "tq_000000000000"},
+                {"transfer_quote_id": "qu_000000000000"},
             )
 
     def test_get_transfer(self):

@@ -1,23 +1,5 @@
 [
   {
-    "schema": "GetBankAccountResponse",
-    "field": "account_holder_name",
-    "reason": "bank_accounts.get() models an older bank-account shape; the current spec returns rail-specific fields instead (e.g. swift_account_holder_name). Pre-existing, unrelated to the customers rename. Needs its own bank-accounts sync PR.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "is_primary",
-    "reason": "Same pre-existing bank_accounts.get() divergence as account_holder_name above; the spec's BankAccountOut has no is_primary property.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "swift_code",
-    "reason": "Same pre-existing bank_accounts.get() divergence; the spec uses swift_code_bic, not swift_code.",
-    "owner": "eric@blindpay.com"
-  },
-  {
     "schema": "Payin",
     "field": "billing_fee",
     "reason": "Pre-existing: the spec's PayinOut only has billing_fee_amount, not billing_fee. Payin already separately declares billing_fee_amount. Unrelated to the customers rename.",
@@ -168,30 +150,6 @@
     "owner": "eric@blindpay.com"
   },
   {
-    "schema": "CustodialWalletBalance",
-    "field": "usdb",
-    "reason": "Pre-existing: the spec's WalletBalanceOut uses uppercase USDB/USDC/USDT. Case-only divergence, unrelated to the customers rename.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "usdc",
-    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "usdt",
-    "reason": "Same pre-existing case divergence as CustodialWalletBalance.usdb.",
-    "owner": "eric@blindpay.com"
-  },
-  {
-    "schema": "GetBankAccountResponse",
-    "field": "iban",
-    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
-    "owner": "eric@blindpay.com"
-  },
-  {
     "schema": "IndividualWithStandardKYC",
     "field": "aiprise_validation_key",
     "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
@@ -220,5 +178,47 @@
     "field": "payout_id",
     "reason": "Path parameter (the spec names it id) modeled on the request input type for URL building; never a wire body property. Pre-existing modeling choice, unrelated to the customers rename.",
     "owner": "eric@blindpay.com"
+  },
+  {
+    "schema": "CustodialWalletBalanceToken",
+    "field": "earning_amount",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "CustodialWalletBalanceToken",
+    "field": "total_amount",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "EURC",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "CustodialWalletBalance",
+    "field": "EURB",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "CreateTransferResponse",
+    "field": "tracking_partner_fee",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2 CreateTransferOut, optional and nullable) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "UploadFile",
+    "field": "filename",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "UploadFile",
+    "field": "content_type",
+    "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "sdk-maintainers"
   }
 ]

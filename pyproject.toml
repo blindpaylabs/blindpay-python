@@ -9,7 +9,6 @@ keywords = ["blindpay", "payments", "api", "sdk", "global-payments", "payment-pr
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.23.0, <1",
-    "pydantic>=1.9.0, <3",
     "typing-extensions>=4.11, <5",
 ]
 classifiers = [
@@ -31,17 +30,14 @@ Documentation = "https://api.blindpay.com/reference"
 requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
-[tool.hatch.version]
-path = "src/blindpay/_version.py"
-
 [tool.hatch.build]
-include = ["src/*", "README.md", "LICENSE", "py.typed"]
+include = ["src/*", "README.md", "LICENSE"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blindpay"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/README.md", "/LICENSE", "/pyproject.toml", "/py.typed"]
+include = ["/src", "/README.md", "/LICENSE", "/pyproject.toml"]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"

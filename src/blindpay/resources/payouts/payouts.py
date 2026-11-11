@@ -1,7 +1,7 @@
 from typing import List, Literal, Optional
 from urllib.parse import urlencode
 
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
@@ -191,6 +191,12 @@ class SubmitPayoutDocumentsResponse(TypedDict):
     id: str
 
 
+_EXPORT_DEPRECATION = (
+    "payouts.export() calls GET /instances/{instance_id}/export/payouts, a route the API does not have, so it "
+    "always fails. It will be removed in the next major version."
+)
+
+
 class PayoutsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -204,6 +210,7 @@ class PayoutsResource:
                 query_string = f"?{urlencode(filtered_params)}"
         return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
 
+    @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
         query_string = ""
         if params:
@@ -253,6 +260,7 @@ class PayoutsResourceSync:
                 query_string = f"?{urlencode(filtered_params)}"
         return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
 
+    @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
         query_string = ""
         if params:

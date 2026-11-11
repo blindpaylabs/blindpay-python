@@ -95,20 +95,8 @@ class BankAccount(TypedDict):
 ListBankAccountsResponse = List[BankAccount]
 
 
-class GetBankAccountResponse(TypedDict):
-    id: str
-    customer_id: str
-    account_holder_name: str
-    account_number: Optional[str]
-    routing_number: Optional[str]
-    account_type: Optional[BankAccountType]
-    bank_name: str
-    swift_code: Optional[str]
-    iban: Optional[str]
-    sepa_beneficiary_bic: Optional[str]
-    is_primary: bool
-    created_at: Optional[str]
-    updated_at: str
+# GET .../bank-accounts/{id} returns the same BankAccountOut shape as list().
+GetBankAccountResponse = BankAccount
 
 
 class CreatePixInput(TypedDict):

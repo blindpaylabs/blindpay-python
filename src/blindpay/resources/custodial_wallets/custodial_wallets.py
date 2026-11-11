@@ -16,15 +16,21 @@ class CustodialWallet(TypedDict):
 
 
 class CustodialWalletBalanceToken(TypedDict):
-    amount: float
-    token: str
+    id: str
     address: str
+    symbol: str
+    amount: float
+    earning_amount: float
+    total_amount: float
 
 
 class CustodialWalletBalance(TypedDict):
-    usdc: Optional[CustodialWalletBalanceToken]
-    usdt: Optional[CustodialWalletBalanceToken]
-    usdb: Optional[CustodialWalletBalanceToken]
+    # Keyed by uppercase token symbol, as the API returns them. Amounts are whole tokens, not cents.
+    USDC: CustodialWalletBalanceToken
+    USDT: CustodialWalletBalanceToken
+    USDB: CustodialWalletBalanceToken
+    EURC: NotRequired[CustodialWalletBalanceToken]
+    EURB: NotRequired[CustodialWalletBalanceToken]
 
 
 class CreateCustodialWalletInput(TypedDict):

@@ -1,6 +1,8 @@
 from typing import List, NotRequired, Optional, TypedDict
 from urllib.parse import urlencode
 
+from typing_extensions import deprecated
+
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ...types import (
     BlindpayApiResponse,
@@ -198,6 +200,12 @@ class CreateEvmPayinResponse(TypedDict):
     billing_fee_amount: NotRequired[Optional[float]]
 
 
+_EXPORT_DEPRECATION = (
+    "payins.export() calls GET /instances/{instance_id}/export/payins, a route the API does not have, so it "
+    "always fails. It will be removed in the next major version."
+)
+
+
 class PayinsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -214,6 +222,7 @@ class PayinsResource:
     async def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
         return await self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
 
+    @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
         filtered_params = {k: v for k, v in params.items() if v is not None}
         query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
@@ -245,6 +254,7 @@ class PayinsResourceSync:
     def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
         return self._client.get(f"/e/payins/{payin_id}")
 
+    @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
         filtered_params = {k: v for k, v in params.items() if v is not None}
         query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""

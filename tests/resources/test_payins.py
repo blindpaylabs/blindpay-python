@@ -312,11 +312,12 @@ class TestPayins:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_export_payins, "error": None}
 
-            response = await self.blindpay.payins.export(
-                {
-                    "status": "processing",
-                }
-            )
+            with pytest.warns(DeprecationWarning, match="route the API does not have"):
+                response = await self.blindpay.payins.export(
+                    {
+                        "status": "processing",
+                    }
+                )
 
             assert response["error"] is None
             assert response["data"] == mocked_export_payins
@@ -808,11 +809,12 @@ class TestPayinsSync:
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_export_payins, "error": None}
 
-            response = self.blindpay.payins.export(
-                {
-                    "status": "processing",
-                }
-            )
+            with pytest.warns(DeprecationWarning, match="route the API does not have"):
+                response = self.blindpay.payins.export(
+                    {
+                        "status": "processing",
+                    }
+                )
 
             assert response["error"] is None
             assert response["data"] == mocked_export_payins

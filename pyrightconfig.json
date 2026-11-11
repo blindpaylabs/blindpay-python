@@ -15,6 +15,7 @@
     },
     {
       "root": "tests",
+      "extraPaths": ["."],
       "reportPrivateUsage": "none",
       "reportUnknownMemberType": "none",
       "reportUnknownArgumentType": "none",
