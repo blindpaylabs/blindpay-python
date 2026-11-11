@@ -61,7 +61,7 @@ class UploadAnalyzeInput(UploadFile):
 
 
 class UploadAnalyzeOutput(TypedDict):
-    approval_rate: ApprovalRate
+    approval_rate: Union[ApprovalRate, str]
     description: str
 
 

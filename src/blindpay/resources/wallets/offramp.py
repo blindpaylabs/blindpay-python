@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -13,7 +13,7 @@ class OfframpWallet(TypedDict):
     instance_id: str
     customer_id: str
     bank_account_id: str
-    network: Network
+    network: Union[Network, str]
     address: str
     created_at: Optional[str]
     updated_at: Optional[str]
@@ -39,7 +39,7 @@ class CreateOfframpWalletInput(TypedDict):
 class CreateOfframpWalletResponse(TypedDict):
     id: str
     external_id: str
-    network: Network
+    network: Union[Network, str]
     address: str
 
 

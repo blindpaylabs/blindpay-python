@@ -160,7 +160,6 @@ def response_type(op: Op) -> Any:
 KNOWN_DRIFT: Set[str] = {
     "available.get_bank_details",
     "available.get_naics_codes",
-    "available.get_rails",
     "customers.bank_accounts.create_pix",
     "customers.bank_accounts.create_argentina_transfers",
     "customers.bank_accounts.create_spei",
@@ -211,9 +210,7 @@ KNOWN_DRIFT: Set[str] = {
     "transfers.create_quote",
     "transfers.get_track",
     "transfers.list",
-    "transfers.create",
     "transfers.get",
-    "upload.analyze",
     "virtual_accounts.create",
     "virtual_accounts.list",
     "virtual_accounts.get",

@@ -65,8 +65,8 @@ class Payin(TypedDict):
     pix_code: Optional[str]
     memo_code: Optional[str]
     clabe: Optional[str]
-    status: TransactionStatus
-    manual_execution_status: Optional[ManualExecutionStatus]
+    status: Union[TransactionStatus, str]
+    manual_execution_status: Optional[Union[ManualExecutionStatus, str]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: Optional[TrackingTransaction]
@@ -83,7 +83,7 @@ class Payin(TypedDict):
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
-    token: StablecoinToken
+    token: Union[StablecoinToken, str]
     partner_fee_amount: Optional[float]
     total_fee_amount: Optional[float]
     commercial_quotation: Optional[float]
@@ -92,7 +92,7 @@ class Payin(TypedDict):
     billing_fee: float
     name: str
     address: Optional[str]
-    network: Network
+    network: Union[Network, str]
     blindpay_bank_details: Optional[BankDetails]
     is_otc: Optional[bool]
     billing_fee_amount: Optional[float]
@@ -144,7 +144,7 @@ class GetPayinTrackResponse(TypedDict):
     memo_code: Optional[str]
     clabe: Optional[str]
     status: str
-    manual_execution_status: Optional[ManualExecutionStatus]
+    manual_execution_status: Optional[Union[ManualExecutionStatus, str]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
@@ -161,7 +161,7 @@ class GetPayinTrackResponse(TypedDict):
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
-    token: StablecoinToken
+    token: Union[StablecoinToken, str]
     partner_fee_amount: Optional[float]
     total_fee_amount: Optional[float]
     commercial_quotation: Optional[float]
@@ -170,7 +170,7 @@ class GetPayinTrackResponse(TypedDict):
     billing_fee: float
     name: str
     address: Optional[str]
-    network: Network
+    network: Union[Network, str]
     blindpay_bank_details: Optional[BankDetails]
     partner_fee_id: Optional[str]
     billing_fee_amount: NotRequired[Optional[float]]
@@ -187,7 +187,7 @@ ExportPayinsResponse = List[Payin]
 
 class CreateEvmPayinResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     pix_code: Optional[str]
     memo_code: Optional[str]
     clabe: Optional[str]

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -14,7 +14,7 @@ class GetBlockchainWalletMessageResponse(TypedDict):
 class BlockchainWallet(TypedDict):
     id: str
     name: Optional[str]
-    network: Optional[Network]
+    network: Optional[Union[Network, str]]
     address: Optional[str]
     signature_tx_hash: Optional[str]
     is_account_abstraction: Optional[bool]

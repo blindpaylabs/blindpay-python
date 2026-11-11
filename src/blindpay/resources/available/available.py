@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from typing_extensions import TypedDict
 
@@ -67,14 +67,14 @@ class BankDetailItem(TypedDict):
 class BankDetail(TypedDict):
     label: str
     regex: str
-    key: BankDetailKey
+    key: Union[BankDetailKey, str]
     items: Optional[List[BankDetailItem]]
     required: bool
 
 
 class RailInfo(TypedDict):
     label: str
-    value: Rail
+    value: Union[Rail, str]
     country: str
 
 

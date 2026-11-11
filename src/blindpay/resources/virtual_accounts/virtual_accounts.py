@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
@@ -67,9 +67,9 @@ class CreateVirtualAccountBreB(TypedDict):
 class VirtualAccount(TypedDict):
     id: str
     us: USBankDetails
-    token: StablecoinToken
+    token: Union[StablecoinToken, str]
     blockchain_wallet_id: Optional[str]
-    banking_partner: Optional[BankingPartner]
+    banking_partner: Optional[Union[BankingPartner, str]]
     kyc_status: Optional[str]
     blockchain_wallet: Optional[str]
     co: NotRequired[Optional[VirtualAccountCo]]

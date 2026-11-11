@@ -637,9 +637,9 @@ class CustomerVirtualAccountPreapproval(TypedDict):
 
 class IndividualWithStandardKYC(TypedDict):
     id: str
-    type: IndividualType
-    kyc_type: StandardKycType
-    kyc_status: KycStatus
+    type: Union[IndividualType, str]
+    kyc_type: Union[StandardKycType, str]
+    kyc_status: Union[KycStatus, str]
     kyc_warnings: Optional[List[KycWarning]]
     email: str
     tax_id: Optional[str]
@@ -647,18 +647,18 @@ class IndividualWithStandardKYC(TypedDict):
     address_line_2: Optional[str]
     city: Optional[str]
     state_province_region: Optional[str]
-    country: Country
+    country: Union[Country, str]
     postal_code: Optional[str]
     ip_address: Optional[str]
     image_url: Optional[str]
     phone_number: Optional[str]
-    proof_of_address_doc_type: Optional[ProofOfAddressDocType]
+    proof_of_address_doc_type: Optional[Union[ProofOfAddressDocType, str]]
     proof_of_address_doc_file: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     date_of_birth: str
-    id_doc_country: Optional[Country]
-    id_doc_type: Optional[IdentificationDocument]
+    id_doc_country: Optional[Union[Country, str]]
+    id_doc_type: Optional[Union[IdentificationDocument, str]]
     id_doc_front_file: Optional[str]
     id_doc_back_file: Optional[str]
     aiprise_validation_key: str
@@ -670,17 +670,17 @@ class IndividualWithStandardKYC(TypedDict):
     fraud_warnings: Optional[List[FraudWarning]]
     selfie_file: Optional[str]
     is_fbo: Optional[bool]
-    account_purpose: Optional[AccountPurpose]
+    account_purpose: Optional[Union[AccountPurpose, str]]
     account_purpose_other: Optional[str]
-    business_type: Optional[CustomerBusinessType]
+    business_type: Optional[Union[CustomerBusinessType, str]]
     business_description: Optional[str]
     business_industry: Optional[BusinessIndustry]
-    estimated_annual_revenue: Optional[EstimatedAnnualRevenue]
-    source_of_wealth: Optional[SourceOfWealth]
+    estimated_annual_revenue: Optional[Union[EstimatedAnnualRevenue, str]]
+    source_of_wealth: Optional[Union[SourceOfWealth, str]]
     publicly_traded: Optional[bool]
     occupation: Optional[str]
     external_id: Optional[str]
-    aml_status: Optional[AmlStatus]
+    aml_status: Optional[Union[AmlStatus, str]]
     aml_hits: Optional[AmlHits]
     is_tos_accepted: Optional[bool]
     cnae_condition: NotRequired[Optional[CustomerCnaeCondition]]
@@ -1035,12 +1035,12 @@ class LimitIncreaseSupportingDocumentOut(TypedDict):
 class LimitIncreaseRequest(TypedDict):
     id: str
     customer_id: str
-    status: LimitIncreaseRequestStatus
+    status: Union[LimitIncreaseRequestStatus, str]
     daily: Optional[float]
     monthly: Optional[float]
     per_transaction: Optional[float]
     supporting_document_file: Optional[str]
-    supporting_document_type: Optional[LimitIncreaseRequestSupportingDocumentType]
+    supporting_document_type: Optional[Union[LimitIncreaseRequestSupportingDocumentType, str]]
     created_at: Optional[str]
     updated_at: Optional[str]
     supporting_documents: NotRequired[Optional[List[LimitIncreaseSupportingDocumentOut]]]

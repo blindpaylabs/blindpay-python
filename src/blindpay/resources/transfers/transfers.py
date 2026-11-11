@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator, List, Optional
+from typing import AsyncIterator, Iterator, List, Optional, Union
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
@@ -56,14 +56,14 @@ class CreateTransferInput(TypedDict):
 class Transfer(TypedDict):
     id: str
     instance_id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     transfer_quote_id: str
     wallet_id: str
-    sender_token: StablecoinToken
+    sender_token: Union[StablecoinToken, str]
     sender_amount: float
     receiver_amount: float
-    customer_token: StablecoinToken
-    customer_network: Network
+    customer_token: Union[StablecoinToken, str]
+    customer_network: Union[Network, str]
     customer_wallet_address: str
     customer_id: str
     address: Optional[str]
@@ -102,7 +102,7 @@ class CreateTransferTrackingMonitoring(TypedDict):
 
 class CreateTransferResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     tracking_bridge_swap: CreateTransferTrackingStep
     tracking_complete: CreateTransferTrackingStep
     tracking_paymaster: CreateTransferTrackingStep

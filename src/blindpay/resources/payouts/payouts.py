@@ -32,7 +32,7 @@ ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 class Payout(TypedDict):
     customer_id: str
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     signed_transaction: Optional[str]
     quote_id: str
@@ -48,8 +48,8 @@ class Payout(TypedDict):
     first_name: Optional[str]
     last_name: Optional[str]
     legal_name: Optional[str]
-    network: Network
-    token: StablecoinToken
+    network: Union[Network, str]
+    token: Union[StablecoinToken, str]
     description: Optional[str]
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
@@ -58,23 +58,23 @@ class Payout(TypedDict):
     blindpay_quotation: Optional[float]
     total_fee_amount: Optional[float]
     customer_local_amount: Optional[float]
-    currency: Currency  # Excluding "USDT" | "USDB"
+    currency: Union[Currency, str]  # Excluding "USDT" | "USDB"
     transaction_document_file: Optional[str]
-    transaction_document_type: Optional[TransactionDocumentType]
+    transaction_document_type: Optional[Union[TransactionDocumentType, str]]
     transaction_document_id: Optional[str]
     name: str
-    type: Rail
+    type: Union[Rail, str]
     pix_key: Optional[str]
     account_number: Optional[str]
     routing_number: Optional[str]
-    country: Optional[Country]
-    account_class: Optional[AccountClass]
+    country: Optional[Union[Country, str]]
+    account_class: Optional[Union[AccountClass, str]]
     address_line_1: Optional[str]
     address_line_2: Optional[str]
     city: Optional[str]
     state_province_region: Optional[str]
     postal_code: Optional[str]
-    account_type: Optional[BankAccountType]
+    account_type: Optional[Union[BankAccountType, str]]
     ach_cop_beneficiary_first_name: Optional[str]
     ach_cop_bank_account: Optional[str]
     ach_cop_bank_code: Optional[str]
@@ -84,14 +84,14 @@ class Payout(TypedDict):
     ach_cop_email: Optional[str]
     beneficiary_name: Optional[str]
     spei_clabe: Optional[str]
-    spei_protocol: Optional[SpeiProtocol]
+    spei_protocol: Optional[Union[SpeiProtocol, str]]
     spei_institution_code: Optional[str]
-    swift_beneficiary_country: Optional[Country]
+    swift_beneficiary_country: Optional[Union[Country, str]]
     swift_code_bic: Optional[str]
     swift_account_holder_name: Optional[str]
     swift_account_number_iban: Optional[str]
     transfers_account: Optional[str]
-    transfers_type: Optional[ArgentinaTransfers]
+    transfers_type: Optional[Union[ArgentinaTransfers, str]]
     has_virtual_account: Optional[bool]
     partner_fee_id: Optional[str]
     ted_bank_code: Optional[str]
@@ -153,7 +153,7 @@ class CreateStellarPayoutInput(TypedDict):
 
 class CreateStellarPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
@@ -172,7 +172,7 @@ class CreateEvmPayoutInput(TypedDict):
 
 class CreateEvmPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
@@ -191,7 +191,7 @@ class CreateSolanaPayoutInput(TypedDict):
 
 class CreateSolanaPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]

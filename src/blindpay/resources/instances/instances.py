@@ -30,7 +30,7 @@ class InstanceMember(TypedDict):
     last_name: str
     image_url: str
     created_at: str
-    role: InstanceMemberRole
+    role: Union[InstanceMemberRole, str]
 
 
 GetInstanceMembersResponse = List[InstanceMember]
