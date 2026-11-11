@@ -1,6 +1,6 @@
 [project]
 name = "blindpay"
-version = "3.4.1"
+version = "4.0.0"
 description = "Official Python SDK for the Blindpay API — Global payments infrastructure"
 readme = "README.md"
 authors = [{ name = "Blindpay", email = "alves@blindpay.com" }]
@@ -99,6 +99,7 @@ disallow_subclassing_any = true
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 exclude = [
+    "^examples/",
     "^\\.api-sync/",
 ]
 
