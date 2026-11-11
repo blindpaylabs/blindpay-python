@@ -1,10 +1,9 @@
 from typing import List, Optional, Union
-from urllib.parse import urlencode
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import (
     BlindpayApiResponse,
     Country,
@@ -740,11 +739,7 @@ class CustomersResource:
     async def list(
         self, params: Optional[ListCustomersInput] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
 
     async def create_individual_with_standard_kyc(
@@ -766,7 +761,7 @@ class CustomersResource:
         return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     async def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
 
     async def update(
         self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
@@ -774,19 +769,23 @@ class CustomersResource:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.put(
-            f"/instances/{self._instance_id}/customers/{customer_id}", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", payload, options=options
         )
 
     async def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}", options=options)
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
+        )
 
     async def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{customer_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
 
     async def get_limit_increase_requests(
         self, customer_id: str
     ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase"
+        )
 
     async def request_limit_increase(
         self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None
@@ -794,7 +793,9 @@ class CustomersResource:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase",
+            payload,
+            options=options,
         )
 
 
@@ -806,11 +807,7 @@ class CustomersResourceSync:
     def list(
         self, params: Optional[ListCustomersInput] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
 
     def create_individual_with_standard_kyc(
@@ -832,21 +829,25 @@ class CustomersResourceSync:
         return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
 
     def update(self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return self._client.put(f"/instances/{self._instance_id}/customers/{customer_id}", payload, options=options)
+        return self._client.put(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", payload, options=options
+        )
 
     def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}", options=options)
+        return self._client.delete(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
+        )
 
     def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/limits/customers/{customer_id}")
+        return self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
 
     def get_limit_increase_requests(self, customer_id: str) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase")
 
     def request_limit_increase(
         self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None
@@ -854,7 +855,9 @@ class CustomersResourceSync:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase",
+            payload,
+            options=options,
         )
 
 

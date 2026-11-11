@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, path_param
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -464,16 +464,21 @@ class BankAccountsResource:
         self._client = client
 
     async def list(self, customer_id: str) -> BlindpayApiResponse[ListBankAccountsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts"
+        )
 
     async def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+        )
 
     async def delete(
         self, customer_id: str, id: str, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[None]:
         return await self._client.delete(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}", options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
         )
 
     async def create_pix(
@@ -483,7 +488,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_argentina_transfers(
@@ -493,7 +500,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_spei(
@@ -503,7 +512,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_colombia_ach(
@@ -513,7 +524,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_ach(
@@ -523,7 +536,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_wire(
@@ -533,7 +548,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_international_swift(
@@ -543,7 +560,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_rtp(
@@ -553,7 +572,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_pix_safe(
@@ -563,7 +584,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_ted(
@@ -573,7 +596,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     async def create_sepa(
@@ -583,7 +608,9 @@ class BankAccountsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
 
@@ -593,14 +620,17 @@ class BankAccountsResourceSync:
         self._client = client
 
     def list(self, customer_id: str) -> BlindpayApiResponse[ListBankAccountsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts")
 
     def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+        )
 
     def delete(self, customer_id: str, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return self._client.delete(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}", options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
         )
 
     def create_pix(
@@ -610,7 +640,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_argentina_transfers(
@@ -620,7 +652,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_spei(
@@ -630,7 +664,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_colombia_ach(
@@ -640,7 +676,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_ach(
@@ -650,7 +688,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_wire(
@@ -660,7 +700,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_international_swift(
@@ -670,7 +712,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_rtp(
@@ -680,7 +724,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_pix_safe(
@@ -690,7 +736,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_ted(
@@ -700,7 +748,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
     def create_sepa(
@@ -710,7 +760,9 @@ class BankAccountsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
         )
 
 

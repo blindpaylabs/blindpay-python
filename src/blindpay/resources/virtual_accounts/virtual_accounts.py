@@ -3,7 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, path_param
 from ...types import BankingPartner, BlindpayApiResponse, StablecoinToken
 
 
@@ -75,7 +75,9 @@ class VirtualAccountsResource:
         self._client = client
 
     async def list(self, customer_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts"
+        )
 
     async def update(
         self,
@@ -85,7 +87,7 @@ class VirtualAccountsResource:
         options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[None]:
         return await self._client.put(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}",
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
             data,
             options=options,
         )
@@ -96,12 +98,14 @@ class VirtualAccountsResource:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts",
+            payload,
+            options=options,
         )
 
     async def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}"
         )
 
 
@@ -111,7 +115,7 @@ class VirtualAccountsResourceSync:
         self._client = client
 
     def list(self, customer_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts")
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts")
 
     def update(
         self,
@@ -121,7 +125,7 @@ class VirtualAccountsResourceSync:
         options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[None]:
         return self._client.put(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}",
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
             data,
             options=options,
         )
@@ -132,12 +136,14 @@ class VirtualAccountsResourceSync:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts",
+            payload,
+            options=options,
         )
 
     def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}"
         )
 
 

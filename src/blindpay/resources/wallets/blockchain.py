@@ -3,7 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse, Network
 
 
@@ -87,7 +87,9 @@ class BlockchainWalletsResource:
         self._client = client
 
     async def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets"
+        )
 
     async def create_with_address(
         self, data: CreateBlockchainWalletWithAddressInput, options: Optional[RequestOptions] = None
@@ -96,7 +98,9 @@ class BlockchainWalletsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = True
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets",
+            payload,
+            options=options,
         )
 
     async def create_with_hash(
@@ -106,18 +110,22 @@ class BlockchainWalletsResource:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = False
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets",
+            payload,
+            options=options,
         )
 
     async def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message"
         )
 
     async def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
         customer_id = data["customer_id"]
         id = data["id"]
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}"
+        )
 
     async def delete(
         self, data: DeleteBlockchainWalletInput, options: Optional[RequestOptions] = None
@@ -125,7 +133,8 @@ class BlockchainWalletsResource:
         customer_id = data["customer_id"]
         id = data["id"]
         return await self._client.delete(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}", options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}",
+            options=options,
         )
 
     async def create_asset_trustline(
@@ -157,7 +166,9 @@ class BlockchainWalletsResourceSync:
         self._client = client
 
     def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets")
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets"
+        )
 
     def create_with_address(
         self, data: CreateBlockchainWalletWithAddressInput, options: Optional[RequestOptions] = None
@@ -166,7 +177,9 @@ class BlockchainWalletsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = True
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets",
+            payload,
+            options=options,
         )
 
     def create_with_hash(
@@ -176,18 +189,22 @@ class BlockchainWalletsResourceSync:
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["is_account_abstraction"] = False
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets", payload, options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets",
+            payload,
+            options=options,
         )
 
     def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message"
         )
 
     def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
         customer_id = data["customer_id"]
         id = data["id"]
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}")
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}"
+        )
 
     def delete(
         self, data: DeleteBlockchainWalletInput, options: Optional[RequestOptions] = None
@@ -195,7 +212,8 @@ class BlockchainWalletsResourceSync:
         customer_id = data["customer_id"]
         id = data["id"]
         return self._client.delete(
-            f"/instances/{self._instance_id}/customers/{customer_id}/blockchain-wallets/{id}", options=options
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}",
+            options=options,
         )
 
     def create_asset_trustline(

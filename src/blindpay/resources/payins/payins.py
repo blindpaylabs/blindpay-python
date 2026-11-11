@@ -1,10 +1,9 @@
 from typing import List, NotRequired, Optional, TypedDict
-from urllib.parse import urlencode
 
 from typing_extensions import deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import (
     BlindpayApiResponse,
     ManualExecutionStatus,
@@ -213,24 +212,19 @@ class PayinsResource:
         self._client = client
 
     async def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
 
     async def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
-        return await self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
 
     @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-        query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
     async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return await self._client.get(f"/e/payins/{payin_id}")
+        return await self._client.get(f"/e/payins/{path_param(payin_id)}")
 
     async def create_evm(
         self, payin_quote_id: str, options: Optional[RequestOptions] = None
@@ -246,23 +240,18 @@ class PayinsResourceSync:
         self._client = client
 
     def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
 
     def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
-        return self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
+        return self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
 
     def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return self._client.get(f"/e/payins/{payin_id}")
+        return self._client.get(f"/e/payins/{path_param(payin_id)}")
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-        query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
     def create_evm(

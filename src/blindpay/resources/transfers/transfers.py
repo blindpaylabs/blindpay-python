@@ -1,10 +1,9 @@
 from typing import List, Optional
-from urllib.parse import urlencode
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import (
     BlindpayApiResponse,
     Network,
@@ -128,18 +127,14 @@ class TransfersResource:
         return await self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
     async def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
 
     async def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/transfers/{transfer_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
 
     async def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return await self._client.get(f"/e/transfers/{transfer_id}")
+        return await self._client.get(f"/e/transfers/{path_param(transfer_id)}")
 
 
 class TransfersResourceSync:
@@ -158,18 +153,14 @@ class TransfersResourceSync:
         return self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
     def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
 
     def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/transfers/{transfer_id}")
+        return self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
 
     def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return self._client.get(f"/e/transfers/{transfer_id}")
+        return self._client.get(f"/e/transfers/{path_param(transfer_id)}")
 
 
 def create_transfers_resource(instance_id: str, client: InternalApiClient) -> TransfersResource:

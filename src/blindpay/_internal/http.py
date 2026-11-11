@@ -8,6 +8,7 @@ import json
 import random
 import uuid
 from typing import Any, Dict, List, Mapping, Optional, cast
+from urllib.parse import quote, urlencode
 
 import httpx
 from typing_extensions import Literal, TypedDict
@@ -55,6 +56,30 @@ def api_root(base_url: str) -> str:
     if root.endswith("/v1"):
         root = root[: -len("/v1")]
     return f"{root}/v1"
+
+
+def path_param(value: object) -> str:
+    """Percent-encodes one path segment, so an id can never change the route (``a/b`` -> ``a%2Fb``)."""
+    return quote(str(value), safe="")
+
+
+def _query_value(value: object) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
+def build_query(params: Optional[Mapping[str, Any]]) -> str:
+    """``?key=value&...`` for the params that are set, in insertion order, or ``""`` when none are.
+
+    ``None`` and ``""`` are dropped (never sent as ``"None"``, ``"null"`` or an empty value), booleans become
+    ``true``/``false`` and numbers their decimal form (``limit=10``). The one query helper every list method and
+    auto-pager uses.
+    """
+    if not params:
+        return ""
+    pairs = [(key, _query_value(value)) for key, value in params.items() if value is not None and value != ""]
+    return f"?{urlencode(pairs)}" if pairs else ""
 
 
 def is_mutating(method: str) -> bool:

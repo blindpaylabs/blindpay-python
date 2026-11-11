@@ -3,7 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse, Network
 
 
@@ -57,7 +57,7 @@ class OfframpWalletsResource:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets"
         )
 
     async def create(
@@ -67,7 +67,7 @@ class OfframpWalletsResource:
         bank_account_id = data["bank_account_id"]
         payload = {k: v for k, v in data.items() if k not in ["customer_id", "bank_account_id"]}
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets",
             payload,
             options=options,
         )
@@ -77,7 +77,7 @@ class OfframpWalletsResource:
         bank_account_id = data["bank_account_id"]
         id = data["id"]
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
         )
 
 
@@ -90,7 +90,7 @@ class OfframpWalletsResourceSync:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets"
         )
 
     def create(
@@ -100,7 +100,7 @@ class OfframpWalletsResourceSync:
         bank_account_id = data["bank_account_id"]
         payload = {k: v for k, v in data.items() if k not in ["customer_id", "bank_account_id"]}
         return self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets",
             payload,
             options=options,
         )
@@ -110,7 +110,7 @@ class OfframpWalletsResourceSync:
         bank_account_id = data["bank_account_id"]
         id = data["id"]
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
         )
 
 

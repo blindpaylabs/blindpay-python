@@ -1,10 +1,9 @@
 from typing import List, Literal, Optional
-from urllib.parse import urlencode
 
 from typing_extensions import TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -204,27 +203,19 @@ class PayoutsResource:
         self._client = client
 
     async def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
 
     @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
 
     async def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return await self._client.get(f"/instances/{self._instance_id}/payouts/{payout_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     async def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return await self._client.get(f"/e/payouts/{payout_id}")
+        return await self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     async def authorize_stellar_token(
         self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
@@ -254,7 +245,7 @@ class PayoutsResource:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
         return await self._client.post(
-            f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload, options=options
+            f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}/documents", payload, options=options
         )
 
 
@@ -264,27 +255,19 @@ class PayoutsResourceSync:
         self._client = client
 
     def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
 
     def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return self._client.get(f"/instances/{self._instance_id}/payouts/{payout_id}")
+        return self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return self._client.get(f"/e/payouts/{payout_id}")
+        return self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     def authorize_stellar_token(
         self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
@@ -312,7 +295,7 @@ class PayoutsResourceSync:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
         return self._client.post(
-            f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload, options=options
+            f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}/documents", payload, options=options
         )
 
 

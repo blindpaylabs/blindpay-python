@@ -3,12 +3,11 @@ import mimetypes
 import os
 import warnings
 from typing import IO, Any, Dict, Mapping, Optional, Tuple, TypeVar, Union, cast, overload
-from urllib.parse import urlencode
 
 from typing_extensions import Literal, NotRequired, TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync, MultipartFile
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, build_query
 from ...types import ApprovalRate, BlindpayApiResponse
 
 UploadBucket = Literal["avatar", "onboarding", "limit_increase", "documents"]
@@ -120,7 +119,7 @@ def _analyze_request(data: UploadAnalyzeInput) -> Tuple[Dict[str, str], Dict[str
 
 def _build_instance_query(instance_id: Optional[str]) -> str:
     # API-key calls authenticate against ?instance_id=, so always send the client's own instance.
-    return f"?{urlencode({'instance_id': instance_id})}" if instance_id else ""
+    return build_query({"instance_id": instance_id})
 
 
 _ClientT = TypeVar("_ClientT")

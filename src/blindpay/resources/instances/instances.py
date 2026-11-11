@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse
 
 InstanceMemberRole = Literal["owner", "admin", "finance", "checker", "operations", "developer", "viewer"]
@@ -62,13 +62,15 @@ class InstancesResource:
     async def delete_member(
         self, member_id: str, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/members/{member_id}", options=options)
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/members/{path_param(member_id)}", options=options
+        )
 
     async def update_member_role(
         self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[None]:
         return await self._client.put(
-            f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role}, options=options
+            f"/instances/{self._instance_id}/members/{path_param(member_id)}", {"user_role": role}, options=options
         )
 
     async def migrate_ownership(
@@ -92,13 +94,13 @@ class InstancesResourceSync:
         return self._client.delete(f"/instances/{self._instance_id}", options=options)
 
     def delete_member(self, member_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/members/{member_id}", options=options)
+        return self._client.delete(f"/instances/{self._instance_id}/members/{path_param(member_id)}", options=options)
 
     def update_member_role(
         self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[None]:
         return self._client.put(
-            f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role}, options=options
+            f"/instances/{self._instance_id}/members/{path_param(member_id)}", {"user_role": role}, options=options
         )
 
     def migrate_ownership(
