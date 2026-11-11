@@ -1459,6 +1459,28 @@ def ensure_name_imported(
     return "".join(lines)
 
 
+def ensure_internal_http_import(source: str, names: set[str]) -> str:
+    """Add `names` to the module's `from ..._internal.http import ...` line, creating it after the
+    `_internal.api_client` import if absent. ruff's isort pass (run after apply) normalises the order."""
+    if not names:
+        return source
+    tree = ast.parse(source)
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "_internal.http" and node.level == 3:
+            merged = sorted({a.name for a in node.names} | names)
+            lines = source.splitlines(keepends=True)
+            assert node.end_lineno is not None
+            lines[node.lineno - 1 : node.end_lineno] = [f"from ..._internal.http import {', '.join(merged)}\n"]
+            return "".join(lines)
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "_internal.api_client" and node.level == 3:
+            lines = source.splitlines(keepends=True)
+            assert node.end_lineno is not None
+            lines.insert(node.end_lineno, f"from ..._internal.http import {', '.join(sorted(names))}\n")
+            return "".join(lines)
+    return source
+
+
 def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[AppliedChange], list[NeedsHuman]]:
     applied: list[AppliedChange] = []
     needs_human: list[NeedsHuman] = []
@@ -1572,20 +1594,30 @@ def append_method(source: str, class_name: str, method_source: str) -> str:
 
 
 def build_path_fstring(path: str, module: ResourceModule) -> str:
+    """The f-string body for an operation's path. Caller-supplied params are percent-encoded with
+    `path_param(...)` (plan C9); the instance id comes from the client config."""
     path_wo_v1 = path[3:] if path.startswith("/v1/") else path
     names = path_param_names(path)
     if module.uses_instance_id and names:
         path_wo_v1 = path_wo_v1.replace("{" + names[0] + "}", "{self._instance_id}", 1)
+        names = names[1:]
+    for name in names:
+        path_wo_v1 = path_wo_v1.replace("{" + name + "}", "{path_param(" + name + ")}", 1)
     return path_wo_v1
 
 
 def render_method(plan: OperationInsertPlan, is_sync: bool) -> str:
+    """Generated methods follow the hand-written conventions (plan §6): mutating methods take a trailing
+    `options: Optional[RequestOptions] = None` and forward it; path params go through `path_param`."""
     args = [f"{a}: str" for a in plan.path_args]
     if plan.input_type_name:
         args.append(f"data: {plan.input_type_name}")
+    mutating = plan.verb != "get"
+    if mutating:
+        args.append("options: Optional[RequestOptions] = None")
     arg_str = ", ".join(["self", *args])
     fstring = build_path_fstring(plan.path, plan.module)
-    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "")
+    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + (", options=options" if mutating else "")
     awaited = "" if is_sync else "await "
     async_kw = "" if is_sync else "async "
     client_call = f"self._client.{plan.verb}({call_args})"
@@ -1615,8 +1647,14 @@ def apply_operation_insert(plan: OperationInsertPlan, map_data: dict) -> Applied
         for kw in ("NotRequired", "Optional")
         if f"{kw}[" in f.annotation
     }
+    if plan.verb != "get":
+        needed_wrappers.add("Optional")
     for kw in sorted(needed_wrappers):
         source = ensure_name_imported(source, kw)
+    http_names = {"path_param"} if "path_param(" in build_path_fstring(plan.path, plan.module) else set()
+    if plan.verb != "get":
+        http_names.add("RequestOptions")
+    source = ensure_internal_http_import(source, http_names)
 
     for spec in (plan.input_spec, plan.output_spec):
         if spec and spec.named_schema:

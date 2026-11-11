@@ -1424,3 +1424,75 @@ class TestOperationDiscovery:
 
         methods = [(m.name, m.verb, m.template) for module in modules for m in module.methods]
         assert methods == [("create", "post", "/upload")]
+
+
+class TestGeneratedMethodConventions:
+    """Plan §6: generated methods must follow the same request-options and path-encoding rules as hand-written."""
+
+    def _plan(
+        self, sync: types.ModuleType, verb: str, path: str, path_args: list[str], input_type: Optional[str]
+    ) -> Any:
+        module = sync.ResourceModule(
+            file=Path("src/blindpay/resources/sample.py"),
+            async_class_name="SampleResource",
+            sync_class_name="SampleResourceSync",
+            factory_name=None,
+            factory_sync_name=None,
+            uses_instance_id=True,
+            methods=[],
+            prefix="Sample",
+        )
+        return sync.OperationInsertPlan(
+            path=path,
+            verb=verb,
+            module=module,
+            method_name="do_it",
+            path_args=path_args,
+            input_type_name=input_type,
+            input_spec=None,
+            output_type_name="SampleOut",
+            output_spec=None,
+        )
+
+    def test_mutating_method_takes_and_forwards_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "post", "/v1/instances/{instance_id}/things/{id}/run", ["id"], "RunIn")
+
+        source = sync.render_method(plan, is_sync=False)
+
+        assert "def do_it(self, id: str, data: RunIn, options: Optional[RequestOptions] = None)" in source
+        assert (
+            'self._client.post(f"/instances/{self._instance_id}/things/{path_param(id)}/run", data, options=options)'
+            in source
+        )
+
+    def test_body_less_delete_forwards_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "delete", "/v1/instances/{instance_id}/things/{id}", ["id"], None)
+
+        source = sync.render_method(plan, is_sync=True)
+
+        assert (
+            'return self._client.delete(f"/instances/{self._instance_id}/things/{path_param(id)}", options=options)'
+            in source
+        )
+
+    def test_get_takes_no_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "get", "/v1/instances/{instance_id}/things/{id}", ["id"], None)
+
+        source = sync.render_method(plan, is_sync=True)
+
+        assert "options" not in source
+        assert "{path_param(id)}" in source
+
+    def test_internal_http_import_is_added_or_merged(self, repo: Path):
+        sync = load_sync(repo)
+        bare = "from ..._internal.api_client import InternalApiClient\nfrom ...types import BlindpayApiResponse\n"
+        merged = "from ..._internal.http import RequestOptions\n"
+
+        added = sync.ensure_internal_http_import(bare, {"path_param", "RequestOptions"})
+        extended = sync.ensure_internal_http_import(merged, {"path_param"})
+
+        assert "from ..._internal.http import RequestOptions, path_param\n" in added
+        assert extended == "from ..._internal.http import RequestOptions, path_param\n"
