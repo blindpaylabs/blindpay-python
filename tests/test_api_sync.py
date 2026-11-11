@@ -1496,3 +1496,103 @@ class TestGeneratedMethodConventions:
 
         assert "from ..._internal.http import RequestOptions, path_param\n" in added
         assert extended == "from ..._internal.http import RequestOptions, path_param\n"
+
+
+class TestOpenApi31AndSdkFlag:
+    """Regression tests for the plan §6 fleet-wide api-sync bugs."""
+
+    def test_nullable_enum_null_is_not_a_member(self, repo: Path):
+        sync = load_sync(repo)
+        spec = base_schema({"ColorOut": {"properties": {"color": {"type": ["string", "null"], "enum": ["red", None]}}}})
+
+        assert sync.get_enum_values(spec, {"schema": "ColorOut", "property": "color"}) == {"red"}
+        assert sync.find_enum_locator({"anyOf": [{"enum": ["a", None]}, {"type": "null"}]}) == (False, ["a"])
+        assert sync.coarse_type({"type": "string", "enum": ["a", None]}) == ("string", True)
+        assert sync.coarse_type(
+            {"anyOf": [{"type": "string"}, {"type": "string", "format": "date"}, {"type": "null"}]}
+        ) == (
+            "string",
+            True,
+        )
+
+    def test_reconcile_enums_survives_a_nullable_enum(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [
+                {
+                    "spec": {"schema": "ColorOut", "property": "color"},
+                    "sdk": {"file": "src/blindpay/types.py", "symbol": "Color"},
+                }
+            ],
+            "types": [],
+            "ignore": {"schemas": []},
+        }
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema({"ColorOut": {"properties": {"color": {"enum": ["red", "green", None]}}}})
+
+        gaps = sync.reconcile_enums(spec, map_data, [], index)
+
+        assert [g.missing for g in gaps] == [["green"]]
+
+    def test_operations_marked_x_sdk_false_are_never_generated(self, repo: Path):
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        excluded = {**op(), "x-sdk": False}
+        spec = base_schema({}, {"/yield": {"get": excluded}})
+
+        plans, problems = sync.reconcile_operations(spec, {"types": [], "enums": [], "ignore": {"schemas": []}})
+
+        assert plans == [] and problems == []
+
+    def test_schemas_only_reachable_from_excluded_ops_are_not_reachable(self, repo: Path):
+        sync = load_sync(repo)
+        spec = base_schema(
+            {"YieldOut": {"properties": {}}, "PayoutOut": {"properties": {}}},
+            {
+                "/yield": {"get": {**op(ref_out="YieldOut"), "x-sdk": False}},
+                "/payouts": {"get": op(ref_out="PayoutOut")},
+            },
+        )
+
+        assert sync.compute_reachable_schemas(spec) == {"PayoutOut"}
+
+    def test_operation_coverage_is_method_aware(self, repo: Path):
+        write(
+            repo,
+            "src/blindpay/resources/things.py",
+            """class ThingsResource:
+    def __init__(self, instance_id, client):
+        self._client = client
+
+    async def get(self, id):
+        return await self._client.get(f"/things/{id}")
+
+    async def bad(self):
+        return await self._client.get("/yield")
+""",
+        )
+        sync = load_sync(repo)
+        spec = base_schema(
+            {},
+            {
+                "/things/{id}": {"get": op(), "put": op()},
+                "/yield": {"get": {**op(), "x-sdk": False}},
+            },
+        )
+
+        missing, forbidden, total = sync.operation_coverage(
+            spec, sync.discover_resource_modules(repo / "src" / "blindpay")
+        )
+
+        assert (missing, forbidden, total) == (["PUT /things/{id}"], ["GET /yield"], 2)
+
+    def test_check_accepts_an_explicit_spec(self, repo: Path):
+        _write_fixture_repo(repo)
+        _write_map_and_unmodeled(repo, {"types": [], "enums": [], "ignore": {"schemas": []}})
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(base_schema({})))
+        other = write(repo, "other.json", json.dumps(base_schema({}, {"/new": {"get": op()}})))
+        sync = load_sync(repo)
+
+        assert sync.cmd_check(None) == 0
+        assert sync.cmd_check(None, other) == 1

@@ -123,11 +123,16 @@ def find_refs(node: object, out: set[str]) -> None:
 
 
 def compute_reachable_schemas(spec: dict) -> set[str]:
-    """Transitive $ref closure from paths + webhooks. Anything outside this
+    """Transitive $ref closure from SDK paths (`x-sdk` not false) + webhooks. Anything outside this
     set does not exist for this tool: not mappable, not a coverage gap, not
     reconciled -- skipped by construction, never by a hand-maintained list."""
     schemas = spec.get("components", {}).get("schemas", {})
-    roots = {"paths": spec.get("paths", {}), "webhooks": spec.get("webhooks", {})}
+    sdk_paths = {
+        path: {verb: op for verb, op in item.items() if not isinstance(op, dict) or is_sdk_operation(op)}
+        for path, item in spec.get("paths", {}).items()
+        if isinstance(item, dict)
+    }
+    roots = {"paths": sdk_paths, "webhooks": spec.get("webhooks", {})}
     reachable: set[str] = set()
     find_refs(roots, reachable)
     changed = True
@@ -187,7 +192,13 @@ def get_enum_values(spec: dict, locator: dict) -> Optional[set[str]]:
     enum = prop.get("enum")
     if enum is None:
         return None
-    return set(enum)
+    return enum_strings(enum)
+
+
+def enum_strings(values: list) -> set[str]:
+    """The string members of a spec enum. OpenAPI 3.1 writes a nullable enum as `enum: [..., null]`; the `null`
+    is nullability, not a member (it would crash sorting and never matches a Literal)."""
+    return {v for v in values if v is not None}
 
 
 def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
@@ -198,10 +209,10 @@ def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
     if not isinstance(prop_schema, dict):
         return None
     if "enum" in prop_schema:
-        return False, prop_schema["enum"]
+        return False, sorted(enum_strings(prop_schema["enum"]))
     items = prop_schema.get("items")
     if isinstance(items, dict) and "enum" in items:
-        return True, items["enum"]
+        return True, sorted(enum_strings(items["enum"]))
     for key in ("anyOf", "oneOf"):
         variants = prop_schema.get(key)
         if not isinstance(variants, list):
@@ -210,10 +221,10 @@ def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
             if not isinstance(variant, dict):
                 continue
             if "enum" in variant:
-                return False, variant["enum"]
+                return False, sorted(enum_strings(variant["enum"]))
             v_items = variant.get("items")
             if isinstance(v_items, dict) and "enum" in v_items:
-                return True, v_items["enum"]
+                return True, sorted(enum_strings(v_items["enum"]))
     return None
 
 
@@ -246,6 +257,16 @@ def coarse_type(prop_schema: dict) -> tuple[Optional[str], bool]:
     else:
         types = []
         nullable = False
+    if None in (prop_schema.get("enum") or []):
+        nullable = True  # OpenAPI 3.1 nullable enum: `enum: [..., null]`
+    for key in ("anyOf", "oneOf"):
+        variants = prop_schema.get(key)
+        if not types and isinstance(variants, list):
+            non_null = [v for v in variants if isinstance(v, dict) and v.get("type") != "null"]
+            nullable = nullable or len(non_null) < len(variants)
+            kinds = {v.get("type") for v in non_null}
+            if len(kinds) == 1 and isinstance(next(iter(kinds)), str):
+                types = [next(iter(kinds))]
     if len(types) != 1:
         return None, nullable
     return types[0], nullable
@@ -1296,6 +1317,12 @@ def unmodeled_operation_allowed(unmodeled: list[dict], verb: str, path: str) -> 
     return any(e.get("kind") == "operation" and e["method"].lower() == verb and e["path"] == path for e in unmodeled)
 
 
+def is_sdk_operation(op: dict) -> bool:
+    """Public ops marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators)
+    must never be implemented by an SDK. Specs that predate the flag carry no `x-sdk` at all: treat those as SDK ops."""
+    return op.get("x-sdk") is not False
+
+
 def reconcile_operations(
     spec: dict,
     map_data: dict,
@@ -1313,6 +1340,8 @@ def reconcile_operations(
             continue
         for verb, op in sorted(item.items()):
             if verb not in HTTP_VERBS or not isinstance(op, dict):
+                continue
+            if not is_sdk_operation(op):
                 continue
             if (verb, normalize_spec_path(path)) in covered:
                 continue
@@ -1750,13 +1779,13 @@ def cmd_validate_map() -> int:
     return 0
 
 
-def cmd_check(report_path: Optional[Path]) -> int:
+def cmd_check(report_path: Optional[Path], spec_path: Optional[Path] = None) -> int:
     index = build_sdk_index(SRC_ROOT)
     map_data = load_map()
     unmodeled = load_unmodeled()
 
     map_errors = validate_map(map_data, index)
-    spec = load_json(SNAPSHOT_PATH)
+    spec = load_json(spec_path or SNAPSHOT_PATH)
     enum_gaps = reconcile_enums(spec, map_data, unmodeled, index) if not map_errors else []
     prop_gaps = reconcile_types(spec, map_data, unmodeled, index) if not map_errors else []
     enum_coverage_gaps = reconcile_enum_coverage(spec, map_data, unmodeled, index) if not map_errors else []
@@ -1903,17 +1932,46 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
     return 0
 
 
+def operation_coverage(spec: dict, modules: list[ResourceModule]) -> tuple[list[str], list[str], int]:
+    """METHOD+path coverage: (SDK ops with no method, `x-sdk: false` ops that have one, SDK op count).
+    Matching is per HTTP method, so a GET method never counts as covering a PUT on the same path."""
+    covered = covered_operations(modules)
+    missing: list[str] = []
+    forbidden: list[str] = []
+    total = 0
+    for path, item in sorted(spec.get("paths", {}).items()):
+        if not isinstance(item, dict):
+            continue
+        for verb, op in sorted(item.items()):
+            if verb not in HTTP_VERBS or not isinstance(op, dict):
+                continue
+            implemented = (verb, normalize_spec_path(path)) in covered
+            if is_sdk_operation(op):
+                total += 1
+                if not implemented:
+                    missing.append(f"{verb.upper()} {path}")
+            elif implemented:
+                forbidden.append(f"{verb.upper()} {path}")
+    return missing, forbidden, total
+
+
 def cmd_coverage(spec_path: Path) -> int:
     map_data = load_map()
     spec = load_json(spec_path) if spec_path.exists() else load_json(SNAPSHOT_PATH)
+    missing, forbidden, total = operation_coverage(spec, discover_resource_modules(SRC_ROOT))
+    print(f"Operations: {total - len(missing)}/{total} SDK operations have a method.")
+    for label in missing:
+        print(f"  MISSING: {label}")
+    for label in forbidden:
+        print(f"  NOT AN SDK OPERATION (x-sdk: false) but implemented: {label}")
     gaps = coverage_report(spec, map_data)
     if not gaps:
-        print("Coverage: no known gaps.")
-        return 0
-    print(f"Coverage report ({len(gaps)} known gap(s), non-blocking):")
-    for g in gaps:
-        print(f"  {g['method']} {g['path']}  ({', '.join(g['schemas'])}): {g['reason']}")
-    return 0
+        print("Schemas: no known gaps.")
+    else:
+        print(f"Schemas ({len(gaps)} known gap(s), informational):")
+        for g in gaps:
+            print(f"  {g['method']} {g['path']}  ({', '.join(g['schemas'])}): {g['reason']}")
+    return 1 if missing or forbidden else 0
 
 
 # --------------------------------------------------------------------------- #
@@ -2083,20 +2141,25 @@ def main() -> int:
     mode.add_argument("--validate-map", action="store_true")
     mode.add_argument("--coverage", action="store_true")
     mode.add_argument("--audit-types", action="store_true")
-    parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC_PATH)
+    parser.add_argument(
+        "--spec",
+        type=Path,
+        default=None,
+        help="spec to compare against (--apply: default spec-current.json; --check: default the snapshot)",
+    )
     parser.add_argument("--report", type=Path, default=None)
     args = parser.parse_args()
 
     if args.validate_map:
         return cmd_validate_map()
     if args.check:
-        return cmd_check(args.report)
+        return cmd_check(args.report, args.spec)
     if args.apply:
-        return cmd_apply(args.spec, args.report)
+        return cmd_apply(args.spec or DEFAULT_SPEC_PATH, args.report)
     if args.coverage:
-        return cmd_coverage(args.spec)
+        return cmd_coverage(args.spec or DEFAULT_SPEC_PATH)
     if args.audit_types:
-        return cmd_audit_types(args.spec)
+        return cmd_audit_types(args.spec or DEFAULT_SPEC_PATH)
     return 1
 
 

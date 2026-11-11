@@ -166,7 +166,7 @@ def find_spec_webhook_events(spec: dict) -> set[str]:
             continue
         enum = events.get("items", {}).get("enum")
         if enum:
-            return set(enum)
+            return {value for value in enum if value is not None}  # OpenAPI 3.1 nullable enums list null
     raise SystemExit("could not locate the webhook events enum in the spec snapshot")
 
 
