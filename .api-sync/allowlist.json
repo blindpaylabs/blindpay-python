@@ -180,36 +180,6 @@
     "owner": "eric@blindpay.com"
   },
   {
-    "schema": "CustodialWalletBalanceToken",
-    "field": "earning_amount",
-    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "sdk-maintainers"
-  },
-  {
-    "schema": "CustodialWalletBalanceToken",
-    "field": "total_amount",
-    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletTokenOut, required) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "sdk-maintainers"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "EURC",
-    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "sdk-maintainers"
-  },
-  {
-    "schema": "CustodialWalletBalance",
-    "field": "EURB",
-    "reason": "In the reference spec (blindpay-v2@66144f3b2 WalletBalanceOut, optional: EURC on Base, EURB on Base Sepolia) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "sdk-maintainers"
-  },
-  {
-    "schema": "CreateTransferResponse",
-    "field": "tracking_partner_fee",
-    "reason": "In the reference spec (blindpay-v2@66144f3b2 CreateTransferOut, optional and nullable) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
-    "owner": "sdk-maintainers"
-  },
-  {
     "schema": "UploadFile",
     "field": "filename",
     "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
@@ -219,6 +189,30 @@
     "schema": "UploadFile",
     "field": "content_type",
     "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "RequestOptions",
+    "field": "headers",
+    "reason": "SDK-side per-request option (RequestOptions), not a wire field: extra HTTP headers for one call.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "RequestOptions",
+    "field": "timeout",
+    "reason": "SDK-side per-request option (RequestOptions), not a wire field: per-attempt timeout in seconds.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "ErrorResponse",
+    "field": "request_id",
+    "reason": "SDK-side error metadata, not an error-body field: read from the X-Request-Id response header.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "ErrorResponse",
+    "field": "retryable",
+    "reason": "SDK-side error metadata, not an error-body field: computed by the SDK from the plan's retry table (status, code, idempotency_key_in_flight).",
     "owner": "sdk-maintainers"
   }
 ]

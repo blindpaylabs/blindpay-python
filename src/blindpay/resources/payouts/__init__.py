@@ -1,4 +1,5 @@
 from .payouts import (
+    ArgentinaTransfers,
     AuthorizeStellarTokenInput,
     AuthorizeStellarTokenResponse,
     CreateEvmPayoutInput,
@@ -14,6 +15,8 @@ from .payouts import (
     Payout,
     PayoutsResource,
     PayoutsResourceSync,
+    SubmitPayoutDocumentsInput,
+    SubmitPayoutDocumentsResponse,
     create_payouts_resource,
     create_payouts_resource_sync,
 )
@@ -36,4 +39,7 @@ __all__ = [
     "CreateSolanaPayoutResponse",
     "CreateEvmPayoutInput",
     "CreateEvmPayoutResponse",
+    "ArgentinaTransfers",
+    "SubmitPayoutDocumentsInput",
+    "SubmitPayoutDocumentsResponse",
 ]

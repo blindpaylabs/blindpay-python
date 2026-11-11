@@ -1,8 +1,9 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import build_query, path_param
 from ...types import BlindpayApiResponse, Rail
 
 BankDetailKey = Literal[
@@ -66,14 +67,14 @@ class BankDetailItem(TypedDict):
 class BankDetail(TypedDict):
     label: str
     regex: str
-    key: BankDetailKey
-    items: Optional[List[BankDetailItem]]
-    required: bool
+    key: Union[BankDetailKey, str]
+    items: NotRequired[Optional[List[BankDetailItem]]]
+    required: NotRequired[Optional[bool]]
 
 
 class RailInfo(TypedDict):
     label: str
-    value: Rail
+    value: Union[Rail, str]
     country: str
 
 
@@ -96,8 +97,8 @@ GetSwiftCodeBankDetailsResponse = List[SwiftCodeBankDetail]
 
 
 class NaicsCode(TypedDict):
-    code: str
-    title: str
+    code: NotRequired[str]
+    title: NotRequired[str]
 
 
 GetNaicsCodesResponse = List[NaicsCode]
@@ -108,13 +109,13 @@ class AvailableResource:
         self._client = client
 
     async def get_bank_details(self, rail: Rail) -> BlindpayApiResponse[GetBankDetailsResponse]:
-        return await self._client.get(f"/available/bank-details?rail={rail}")
+        return await self._client.get(f"/available/bank-details{build_query({'rail': rail})}")
 
     async def get_rails(self) -> BlindpayApiResponse[GetRailsResponse]:
         return await self._client.get("/available/rails")
 
     async def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
-        return await self._client.get(f"/available/swift/{swift}")
+        return await self._client.get(f"/available/swift/{path_param(swift)}")
 
     async def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
         return await self._client.get("/available/naics")
@@ -127,13 +128,13 @@ class AvailableResourceSync:
         self._client = client
 
     def get_bank_details(self, rail: Rail) -> BlindpayApiResponse[GetBankDetailsResponse]:
-        return self._client.get(f"/available/bank-details?rail={rail}")
+        return self._client.get(f"/available/bank-details{build_query({'rail': rail})}")
 
     def get_rails(self) -> BlindpayApiResponse[GetRailsResponse]:
         return self._client.get("/available/rails")
 
     def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
-        return self._client.get(f"/available/swift/{swift}")
+        return self._client.get(f"/available/swift/{path_param(swift)}")
 
     def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
         return self._client.get("/available/naics")

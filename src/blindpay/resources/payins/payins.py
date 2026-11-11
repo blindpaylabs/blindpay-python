@@ -1,15 +1,18 @@
-from typing import List, NotRequired, Optional, TypedDict
-from urllib.parse import urlencode
+from typing import Any, AsyncIterator, Dict, Iterator, List, NotRequired, Optional, TypedDict, Union
 
 from typing_extensions import deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
+    Country,
     ManualExecutionStatus,
     Network,
     PaginationMetadata,
     PaginationParams,
+    PaymentMethod,
     StablecoinToken,
     TrackingComplete,
     TrackingPartnerFee,
@@ -35,25 +38,25 @@ class RtpDetails(TypedDict):
 
 
 class BeneficiaryDetails(TypedDict):
-    name: str
-    address_line_1: str
-    address_line_2: Optional[str]
+    name: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
 
 
 class ReceivingBankDetails(TypedDict):
-    name: str
-    address_line_1: str
-    address_line_2: Optional[str]
+    name: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
 
 
 class BankDetails(TypedDict):
-    routing_number: str
-    account_number: str
-    account_type: str
-    swift_bic_code: str
-    ach: AchDetails
-    wire: WireDetails
-    rtp: RtpDetails
+    routing_number: NotRequired[str]
+    account_number: NotRequired[str]
+    account_type: NotRequired[str]
+    swift_bic_code: NotRequired[Optional[str]]
+    ach: NotRequired[Optional[AchDetails]]
+    wire: NotRequired[Optional[WireDetails]]
+    rtp: NotRequired[Optional[RtpDetails]]
     beneficiary: BeneficiaryDetails
     receiving_bank: ReceivingBankDetails
 
@@ -61,50 +64,62 @@ class BankDetails(TypedDict):
 class Payin(TypedDict):
     customer_id: str
     id: str
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
-    status: TransactionStatus
-    manual_execution_status: Optional[ManualExecutionStatus]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
+    status: Union[TransactionStatus, str]
+    manual_execution_status: NotRequired[Optional[Union[ManualExecutionStatus, str]]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: Optional[TrackingTransaction]
     tracking_payment: Optional[TrackingPayment]
     tracking_complete: Optional[TrackingComplete]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
     type: str
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
-    token: StablecoinToken
-    partner_fee_amount: Optional[float]
-    total_fee_amount: Optional[float]
+    token: Union[StablecoinToken, str]
+    partner_fee_amount: NotRequired[Optional[float]]
+    total_fee_amount: NotRequired[Optional[float]]
     commercial_quotation: Optional[float]
     blindpay_quotation: Optional[float]
     currency: str
-    billing_fee: float
+    billing_fee: NotRequired[float]
+    """Deprecated: not returned by the API; use ``billing_fee_amount``. Removed in the next major."""
     name: str
-    address: Optional[str]
-    network: Network
-    blindpay_bank_details: Optional[BankDetails]
-    is_otc: Optional[bool]
-    billing_fee_amount: Optional[float]
-    pse_document_type: Optional[str]
-    pse_full_name: Optional[str]
-    pse_payment_link: Optional[str]
-    pse_tax_id: Optional[str]
-    partner_fee_id: Optional[str]
+    address: NotRequired[Optional[str]]
+    network: Union[Network, str]
+    blindpay_bank_details: NotRequired[Optional[BankDetails]]
+    is_otc: NotRequired[Optional[bool]]
+    billing_fee_amount: NotRequired[Optional[float]]
+    pse_document_type: NotRequired[Optional[str]]
+    pse_full_name: NotRequired[Optional[str]]
+    pse_payment_link: NotRequired[Optional[str]]
+    pse_tax_id: NotRequired[Optional[str]]
+    partner_fee_id: NotRequired[Optional[str]]
+    manual_concluded_at: NotRequired[Any]  # an ISO date-time string; the spec declares no type for it
+    manual_concluded_by: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    payer_rules: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
-class ListPayinsInput(PaginationParams):
+class ListPayinsInput(PaginationParams, total=False):
     status: Optional[TransactionStatus]
     customer_id: Optional[str]
+    customer_name: str
+    bank_account_id: str
+    country: Country
+    payment_method: PaymentMethod
+    network: Network
+    token: StablecoinToken
 
 
 class ListPayinsResponse(TypedDict):
@@ -113,13 +128,14 @@ class ListPayinsResponse(TypedDict):
 
 
 class CreatePayinInput(TypedDict):
-    quote_id: str
-    sender_address: str
-    receiver_address: str
-    amount: float
-    token: StablecoinToken
-    network: Network
-    description: Optional[str]
+    quote_id: NotRequired[str]
+    sender_address: NotRequired[str]
+    receiver_address: NotRequired[str]
+    amount: NotRequired[float]
+    token: NotRequired[StablecoinToken]
+    network: NotRequired[Network]
+    description: NotRequired[Optional[str]]
+    payin_quote_id: str
 
 
 class GetPayinTrackingTransaction(TypedDict):
@@ -139,43 +155,49 @@ class GetPayinTrackingTransaction(TypedDict):
 class GetPayinTrackResponse(TypedDict):
     customer_id: str
     id: str
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
     status: str
-    manual_execution_status: Optional[ManualExecutionStatus]
+    manual_execution_status: NotRequired[Optional[Union[ManualExecutionStatus, str]]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
     tracking_payment: TrackingPayment
     tracking_complete: TrackingComplete
-    tracking_partner_fee: TrackingPartnerFee
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
+    tracking_partner_fee: NotRequired[TrackingPartnerFee]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
     type: str
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
-    token: StablecoinToken
-    partner_fee_amount: Optional[float]
-    total_fee_amount: Optional[float]
+    token: Union[StablecoinToken, str]
+    partner_fee_amount: NotRequired[Optional[float]]
+    total_fee_amount: NotRequired[Optional[float]]
     commercial_quotation: Optional[float]
     blindpay_quotation: Optional[float]
     currency: str
-    billing_fee: float
+    billing_fee: NotRequired[float]
+    """Deprecated: not returned by the API; use ``billing_fee_amount``. Removed in the next major."""
     name: str
-    address: Optional[str]
-    network: Network
-    blindpay_bank_details: Optional[BankDetails]
-    partner_fee_id: Optional[str]
+    address: NotRequired[Optional[str]]
+    network: Union[Network, str]
+    blindpay_bank_details: NotRequired[Optional[BankDetails]]
+    partner_fee_id: NotRequired[Optional[str]]
     billing_fee_amount: NotRequired[Optional[float]]
+    manual_concluded_at: NotRequired[Any]  # an ISO date-time string; the spec declares no type for it
+    manual_concluded_by: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    payer_rules: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
-class ExportPayinsInput(TypedDict):
+class ExportPayinsInput(TypedDict, total=False):
     limit: Optional[str]
     offset: Optional[str]
     status: TransactionStatus
@@ -186,18 +208,22 @@ ExportPayinsResponse = List[Payin]
 
 class CreateEvmPayinResponse(TypedDict):
     id: str
-    status: TransactionStatus
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
+    status: Union[TransactionStatus, str]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
     blindpay_bank_details: BankDetails
-    customer_id: Optional[str]
-    receiver_amount: Optional[float]
+    customer_id: NotRequired[Optional[str]]
+    receiver_amount: NotRequired[Optional[float]]
     billing_fee_amount: NotRequired[Optional[float]]
+    payment_method: NotRequired[Optional[Union[PaymentMethod, str]]]
+    partner_fee: NotRequired[int]
+    sender_amount: NotRequired[Optional[float]]
+    transaction_fee_amount: NotRequired[Optional[float]]
 
 
 _EXPORT_DEPRECATION = (
@@ -211,28 +237,37 @@ class PayinsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    async def list(
+        self, params: Optional[ListPayinsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayinsResponse, List[Payin]]]:
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
 
+    def list_auto_paging(self, params: Optional[ListPayinsInput] = None) -> AsyncIterator[Payin]:
+        return async_auto_paging_iter(self.list, params)
+
     async def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
-        return await self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
 
     @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-        query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
-    async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return await self._client.get(f"/e/payins/{payin_id}")
+    async def get_track(
+        self, payin_id: str, checkout_token: Optional[str] = None
+    ) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payins.get(payin_id)`` instead. ``checkout_token`` authorises a card-payin checkout page."""
+        query_string = build_query({"checkout_token": checkout_token})
+        return await self._client.get(f"/e/payins/{path_param(payin_id)}{query_string}")
 
-    async def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
+    async def create_evm(
+        self, payin_quote_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayinResponse]:
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id}, options=options
+        )
 
 
 class PayinsResourceSync:
@@ -240,28 +275,37 @@ class PayinsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    def list(
+        self, params: Optional[ListPayinsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayinsResponse, List[Payin]]]:
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
 
-    def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
-        return self._client.get(f"/instances/{self._instance_id}/payins/{payin_id}")
+    def list_auto_paging(self, params: Optional[ListPayinsInput] = None) -> Iterator[Payin]:
+        return auto_paging_iter(self.list, params)
 
-    def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
-        return self._client.get(f"/e/payins/{payin_id}")
+    def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
+        return self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
+
+    def get_track(
+        self, payin_id: str, checkout_token: Optional[str] = None
+    ) -> BlindpayApiResponse[GetPayinTrackResponse]:
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payins.get(payin_id)`` instead. ``checkout_token`` authorises a card-payin checkout page."""
+        query_string = build_query({"checkout_token": checkout_token})
+        return self._client.get(f"/e/payins/{path_param(payin_id)}{query_string}")
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: ExportPayinsInput) -> BlindpayApiResponse[ExportPayinsResponse]:
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-        query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
-    def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
+    def create_evm(
+        self, payin_quote_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayinResponse]:
+        return self._client.post(
+            f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id}, options=options
+        )
 
 
 def create_payins_resource(instance_id: str, client: InternalApiClient) -> PayinsResource:

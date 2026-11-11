@@ -1,9 +1,10 @@
-from typing import List, Literal, Optional
-from urllib.parse import urlencode
+from typing import Any, AsyncIterator, Dict, Iterator, List, Literal, Optional, Union
 
-from typing_extensions import TypedDict, deprecated
+from typing_extensions import NotRequired, TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -31,78 +32,106 @@ ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
 class Payout(TypedDict):
     customer_id: str
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
-    signed_transaction: Optional[str]
+    signed_transaction: NotRequired[Optional[str]]
     quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
     tracking_payment: TrackingPayment
-    tracking_liquidity: Optional[TrackingLiquidity]
+    tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
     tracking_complete: TrackingComplete
-    tracking_partner_fee: TrackingPartnerFee
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
-    network: Network
-    token: StablecoinToken
-    description: Optional[str]
+    tracking_partner_fee: NotRequired[TrackingPartnerFee]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
+    network: Union[Network, str]
+    token: Union[StablecoinToken, str]
+    description: NotRequired[Optional[str]]
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
-    partner_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
     commercial_quotation: Optional[float]
     blindpay_quotation: Optional[float]
-    total_fee_amount: Optional[float]
-    customer_local_amount: Optional[float]
-    currency: Currency  # Excluding "USDT" | "USDB"
-    transaction_document_file: Optional[str]
-    transaction_document_type: Optional[TransactionDocumentType]
-    transaction_document_id: Optional[str]
-    name: str
-    type: Rail
-    pix_key: Optional[str]
-    account_number: Optional[str]
-    routing_number: Optional[str]
-    country: Optional[Country]
-    account_class: Optional[AccountClass]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    postal_code: Optional[str]
-    account_type: Optional[BankAccountType]
-    ach_cop_beneficiary_first_name: Optional[str]
-    ach_cop_bank_account: Optional[str]
-    ach_cop_bank_code: Optional[str]
-    ach_cop_beneficiary_last_name: Optional[str]
-    ach_cop_document_id: Optional[str]
-    ach_cop_document_type: Optional[str]
-    ach_cop_email: Optional[str]
-    beneficiary_name: Optional[str]
-    spei_clabe: Optional[str]
-    spei_protocol: Optional[SpeiProtocol]
-    spei_institution_code: Optional[str]
-    swift_beneficiary_country: Optional[Country]
-    swift_code_bic: Optional[str]
-    swift_account_holder_name: Optional[str]
-    swift_account_number_iban: Optional[str]
-    transfers_account: Optional[str]
-    transfers_type: Optional[ArgentinaTransfers]
-    has_virtual_account: Optional[bool]
-    partner_fee_id: Optional[str]
-    ted_bank_code: Optional[str]
-    ted_branch_code: Optional[str]
-    ted_cpf_cnpj: Optional[str]
-    billing_fee_amount: Optional[float]
-    cpn_payment_id: Optional[str]
-    sender_legal_name: Optional[str]
+    total_fee_amount: NotRequired[Optional[float]]
+    customer_local_amount: NotRequired[Optional[float]]
+    currency: Union[Currency, str]  # Excluding "USDT" | "USDB"
+    transaction_document_file: NotRequired[Optional[str]]
+    transaction_document_type: NotRequired[Optional[Union[TransactionDocumentType, str]]]
+    transaction_document_id: NotRequired[Optional[str]]
+    name: NotRequired[Optional[str]]
+    type: NotRequired[Optional[Union[Rail, str]]]
+    pix_key: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    postal_code: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[str]]
+    ach_cop_email: NotRequired[Optional[str]]
+    beneficiary_name: NotRequired[Optional[str]]
+    spei_clabe: NotRequired[Optional[str]]
+    spei_protocol: NotRequired[Optional[Union[SpeiProtocol, str]]]
+    spei_institution_code: NotRequired[Optional[str]]
+    swift_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    swift_code_bic: NotRequired[Optional[str]]
+    swift_account_holder_name: NotRequired[Optional[str]]
+    swift_account_number_iban: NotRequired[Optional[str]]
+    transfers_account: NotRequired[Optional[str]]
+    transfers_type: NotRequired[Optional[Union[ArgentinaTransfers, str]]]
+    has_virtual_account: NotRequired[Optional[bool]]
+    partner_fee_id: NotRequired[Optional[str]]
+    ted_bank_code: NotRequired[Optional[str]]
+    ted_branch_code: NotRequired[Optional[str]]
+    ted_cpf_cnpj: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[float]]
+    cpn_payment_id: NotRequired[Optional[str]]
+    sender_legal_name: NotRequired[Optional[str]]
+    faster_payments_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    bank_account_id: NotRequired[Optional[str]]
+    faster_payments_account_number: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_legal_name: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_sort_code: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_iban: NotRequired[Optional[str]]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    partner_fee: NotRequired[int]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    transaction_fee_amount: NotRequired[Optional[float]]
 
 
 class ListPayoutsInput(PaginationParams, total=False):
     customer_id: str
+    status: TransactionStatus
+    customer_name: str
+    bank_account_id: str
+    country: Country
+    payment_method: Rail
+    network: Network
+    token: StablecoinToken
 
 
 class ListPayoutsResponse(TypedDict):
@@ -120,7 +149,8 @@ ExportPayoutsResponse = List[Payout]
 
 class AuthorizeStellarTokenInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
+    wallet_id: NotRequired[str]
 
 
 class AuthorizeStellarTokenResponse(TypedDict):
@@ -129,54 +159,79 @@ class AuthorizeStellarTokenResponse(TypedDict):
 
 class CreateStellarPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
-    signed_transaction: Optional[str]
+    sender_wallet_address: NotRequired[str]
+    signed_transaction: NotRequired[Optional[str]]
+    wallet_id: NotRequired[str]
 
 
 class CreateStellarPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
+    tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
+    customer_id: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class CreateEvmPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
+    wallet_id: NotRequired[str]
 
 
 class CreateEvmPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
+    tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
+    customer_id: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class CreateSolanaPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
+    wallet_id: NotRequired[str]
+    signed_transaction: NotRequired[Optional[str]]
 
 
 class CreateSolanaPayoutResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     sender_wallet_address: str
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    tracking_liquidity: Optional[TrackingLiquidity]
-    customer_id: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
+    tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
+    customer_id: NotRequired[Optional[str]]
+    payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class SubmitPayoutDocumentsInput(TypedDict):
@@ -184,11 +239,11 @@ class SubmitPayoutDocumentsInput(TypedDict):
     transaction_document_type: TransactionDocumentType
     transaction_document_id: str
     transaction_document_file: str
-    description: Optional[str]
+    description: NotRequired[Optional[str]]
 
 
 class SubmitPayoutDocumentsResponse(TypedDict):
-    id: str
+    id: NotRequired[str]
 
 
 _EXPORT_DEPRECATION = (
@@ -202,49 +257,58 @@ class PayoutsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    async def list(
+        self, params: Optional[ListPayoutsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> AsyncIterator[Payout]:
+        return async_auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
 
     async def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return await self._client.get(f"/instances/{self._instance_id}/payouts/{payout_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     async def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return await self._client.get(f"/e/payouts/{payout_id}")
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payouts.get(payout_id)`` instead."""
+        return await self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     async def authorize_stellar_token(
-        self, data: AuthorizeStellarTokenInput
+        self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[AuthorizeStellarTokenResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payouts/stellar/authorize", data, options=options
+        )
 
-    async def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+    async def create_stellar(
+        self, data: CreateStellarPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data, options=options)
 
-    async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+    async def create_evm(
+        self, data: CreateEvmPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data, options=options)
 
-    async def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+    async def create_solana(
+        self, data: CreateSolanaPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data, options=options)
 
     async def submit_documents(
-        self, data: SubmitPayoutDocumentsInput
+        self, data: SubmitPayoutDocumentsInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}/documents", payload, options=options
+        )
 
 
 class PayoutsResourceSync:
@@ -252,47 +316,56 @@ class PayoutsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    def list(
+        self, params: Optional[ListPayoutsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> Iterator[Payout]:
+        return auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
 
     def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return self._client.get(f"/instances/{self._instance_id}/payouts/{payout_id}")
+        return self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
 
     def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return self._client.get(f"/e/payouts/{payout_id}")
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``payouts.get(payout_id)`` instead."""
+        return self._client.get(f"/e/payouts/{path_param(payout_id)}")
 
     def authorize_stellar_token(
-        self, data: AuthorizeStellarTokenInput
+        self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[AuthorizeStellarTokenResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data)
+        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data, options=options)
 
-    def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+    def create_stellar(
+        self, data: CreateStellarPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data, options=options)
 
-    def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+    def create_evm(
+        self, data: CreateEvmPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data, options=options)
 
-    def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+    def create_solana(
+        self, data: CreateSolanaPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data, options=options)
 
-    def submit_documents(self, data: SubmitPayoutDocumentsInput) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
+    def submit_documents(
+        self, data: SubmitPayoutDocumentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
-        return self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}/documents", payload, options=options
+        )
 
 
 def create_payouts_resource(instance_id: str, client: InternalApiClient) -> PayoutsResource:

@@ -5,8 +5,12 @@ from .available import (
     BankDetailItem,
     BankDetailKey,
     GetBankDetailsResponse,
+    GetNaicsCodesResponse,
     GetRailsResponse,
+    GetSwiftCodeBankDetailsResponse,
+    NaicsCode,
     RailInfo,
+    SwiftCodeBankDetail,
     create_available_resource,
     create_available_resource_sync,
 )
@@ -22,4 +26,8 @@ __all__ = [
     "RailInfo",
     "GetBankDetailsResponse",
     "GetRailsResponse",
+    "GetNaicsCodesResponse",
+    "GetSwiftCodeBankDetailsResponse",
+    "NaicsCode",
+    "SwiftCodeBankDetail",
 ]

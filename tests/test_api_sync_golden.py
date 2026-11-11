@@ -94,9 +94,11 @@ def delete_get_secret(webhooks_py: Path) -> None:
     src = webhooks_py.read_text()
     for pattern in (
         "\n    async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
-        '        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")\n',
+        "        return await self._client.get("
+        'f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")\n',
         "\n    def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
-        '        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")\n',
+        "        return self._client.get("
+        'f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")\n',
         "\n\nclass GetWebhookEndpointSecretResponse(TypedDict):\n    key: str\n",
     ):
         assert pattern in src, f"fixture assumption broken, pattern not found:\n{pattern}"
@@ -110,12 +112,16 @@ def delete_create(webhooks_py: Path) -> None:
     and its TypedDicts."""
     src = webhooks_py.read_text()
     for pattern in (
-        "\n    async def create(self, data: CreateWebhookEndpointInput) -> "
-        "BlindpayApiResponse[CreateWebhookEndpointResponse]:\n"
-        '        return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)\n',
-        "\n    def create(self, data: CreateWebhookEndpointInput) -> "
-        "BlindpayApiResponse[CreateWebhookEndpointResponse]:\n"
-        '        return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)\n',
+        "\n    async def create(\n"
+        "        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None\n"
+        "    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:\n"
+        "        return await self._client.post("
+        'f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)\n',
+        "\n    def create(\n"
+        "        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None\n"
+        "    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:\n"
+        "        return self._client.post("
+        'f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)\n',
         "\n\nclass CreateWebhookEndpointInput(TypedDict):\n    url: str\n    events: List[WebhookEvents]\n",
         "\n\nclass CreateWebhookEndpointResponse(TypedDict):\n    id: str\n",
     ):
@@ -170,17 +176,18 @@ class TestGoldenRegeneration:
     def test_regenerated_get_secret_matches_original_route_verb_and_types(self, golden_repo: Path) -> None:
         src = (golden_repo / "src/blindpay/resources/webhooks/webhooks.py").read_text()
         assert "async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:" in src
-        assert 'self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")' in src
+        assert 'self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")' in src
         assert "class GetWebhookEndpointSecretResponse(TypedDict):" in src
         assert "    key: str" in src
 
     def test_regenerated_create_matches_original_route_verb_and_types(self, golden_repo: Path) -> None:
         src = (golden_repo / "src/blindpay/resources/webhooks/webhooks.py").read_text()
         assert (
-            "async def create(self, data: CreateWebhookEndpointInput) -> "
-            "BlindpayApiResponse[CreateWebhookEndpointResponse]:" in src
+            "async def create(\n        self, data: CreateWebhookEndpointInput, "
+            "options: Optional[RequestOptions] = None\n"
+            "    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:" in src
         )
-        assert 'self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)' in src
+        assert 'self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)' in src
         assert "class CreateWebhookEndpointInput(TypedDict):" in src
         assert "    url: str" in src
         assert "    events: List[WebhookEvents]" in src

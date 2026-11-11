@@ -6,7 +6,6 @@ from typing import Any, Callable, List, Optional
 import httpx
 
 from blindpay import BlindPay, BlindPaySync
-from blindpay.client import ApiClientImpl, ApiClientImplSync
 
 API_KEY = "test_key"
 INSTANCE_ID = "in_000000000000"
@@ -32,14 +31,11 @@ class Recorder:
 Handler = Callable[[httpx.Request], httpx.Response]
 
 
-def async_client(handler: Handler) -> BlindPay:
-    client = BlindPay(api_key=API_KEY, instance_id=INSTANCE_ID)
-    client._api = ApiClientImpl(client._base_url, client._headers, transport=httpx.MockTransport(handler))
-    return client
+def async_client(handler: Handler, **settings: Any) -> BlindPay:
+    http_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    return BlindPay(api_key=API_KEY, instance_id=INSTANCE_ID, http_client=http_client, **settings)
 
 
-def sync_client(handler: Handler) -> BlindPaySync:
-    client = BlindPaySync(api_key=API_KEY, instance_id=INSTANCE_ID)
-    client.close()
-    client._api = ApiClientImplSync(client._base_url, client._headers, transport=httpx.MockTransport(handler))
-    return client
+def sync_client(handler: Handler, **settings: Any) -> BlindPaySync:
+    http_client = httpx.Client(transport=httpx.MockTransport(handler))
+    return BlindPaySync(api_key=API_KEY, instance_id=INSTANCE_ID, http_client=http_client, **settings)

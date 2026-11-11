@@ -1,8 +1,9 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -31,65 +32,99 @@ TedType = Literal["ted"]
 class OfframpWallet(TypedDict):
     address: str
     id: str
-    network: Network
+    network: Union[Network, str]
     external_id: Optional[str]
+    partner_fee_id: NotRequired[Optional[str]]
+
+
+BankAccountStatus = Literal["verifying", "approved", "rejected", "deprecated"]
 
 
 class BankAccount(TypedDict):
     id: str
-    type: Rail
+    type: Union[Rail, str]
     name: str
-    pix_key: Optional[str]
-    beneficiary_name: Optional[str]
-    routing_number: Optional[str]
-    account_number: Optional[str]
-    account_type: Optional[BankAccountType]
-    account_class: Optional[AccountClass]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Country]
-    postal_code: Optional[str]
-    spei_protocol: Optional[str]
-    spei_institution_code: Optional[str]
-    spei_clabe: Optional[str]
-    sepa_beneficiary_bic: Optional[str]
-    transfers_type: Optional[ArgentinaTransfers]
-    transfers_account: Optional[str]
-    ach_cop_beneficiary_first_name: Optional[str]
-    ach_cop_beneficiary_last_name: Optional[str]
-    ach_cop_document_id: Optional[str]
-    ach_cop_document_type: Optional[AchCopDocument]
-    ach_cop_email: Optional[str]
-    ach_cop_bank_code: Optional[str]
-    ach_cop_bank_account: Optional[str]
-    swift_code_bic: Optional[str]
-    swift_account_holder_name: Optional[str]
-    swift_account_number_iban: Optional[str]
-    swift_beneficiary_address_line_1: Optional[str]
-    swift_beneficiary_address_line_2: Optional[str]
-    swift_beneficiary_country: Optional[Country]
-    swift_beneficiary_city: Optional[str]
-    swift_beneficiary_state_province_region: Optional[str]
-    swift_beneficiary_postal_code: Optional[str]
-    swift_bank_name: Optional[str]
-    swift_bank_address_line_1: Optional[str]
-    swift_bank_address_line_2: Optional[str]
-    swift_bank_country: Optional[Country]
-    swift_bank_city: Optional[str]
-    swift_bank_state_province_region: Optional[str]
-    swift_bank_postal_code: Optional[str]
-    swift_intermediary_bank_swift_code_bic: Optional[str]
-    swift_intermediary_bank_account_number_iban: Optional[str]
-    swift_intermediary_bank_name: Optional[str]
-    swift_intermediary_bank_country: Optional[Country]
-    tron_wallet_hash: Optional[str]
-    offramp_wallets: Optional[List[OfframpWallet]]
-    created_at: Optional[str]
-    ted_bank_code: Optional[str]
-    ted_branch_code: Optional[str]
-    ted_cpf_cnpj: Optional[str]
+    pix_key: NotRequired[Optional[str]]
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    spei_protocol: NotRequired[Optional[str]]
+    spei_institution_code: NotRequired[Optional[str]]
+    spei_clabe: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    transfers_type: NotRequired[Optional[Union[ArgentinaTransfers, str]]]
+    transfers_account: NotRequired[Optional[str]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    swift_code_bic: NotRequired[Optional[str]]
+    swift_account_holder_name: NotRequired[Optional[str]]
+    swift_account_number_iban: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_1: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_2: NotRequired[Optional[str]]
+    swift_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    swift_beneficiary_city: NotRequired[Optional[str]]
+    swift_beneficiary_state_province_region: NotRequired[Optional[str]]
+    swift_beneficiary_postal_code: NotRequired[Optional[str]]
+    swift_bank_name: NotRequired[Optional[str]]
+    swift_bank_address_line_1: NotRequired[Optional[str]]
+    swift_bank_address_line_2: NotRequired[Optional[str]]
+    swift_bank_country: NotRequired[Optional[Union[Country, str]]]
+    swift_bank_city: NotRequired[Optional[str]]
+    swift_bank_state_province_region: NotRequired[Optional[str]]
+    swift_bank_postal_code: NotRequired[Optional[str]]
+    swift_intermediary_bank_swift_code_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_account_number_iban: NotRequired[Optional[str]]
+    swift_intermediary_bank_name: NotRequired[Optional[str]]
+    swift_intermediary_bank_country: NotRequired[Optional[Union[Country, str]]]
+    tron_wallet_hash: NotRequired[Optional[str]]
+    offramp_wallets: NotRequired[Optional[List[OfframpWallet]]]
+    created_at: NotRequired[Optional[str]]
+    ted_bank_code: NotRequired[Optional[str]]
+    ted_branch_code: NotRequired[Optional[str]]
+    ted_cpf_cnpj: NotRequired[Optional[str]]
+    faster_payments_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    faster_payments_account_number: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_2: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_legal_name: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_beneficiary_state_province_region: NotRequired[Optional[str]]
+    faster_payments_sort_code: NotRequired[Optional[str]]
+    plaid_connected_at: NotRequired[Optional[str]]
+    swift_intermediary_bank_routing_number: NotRequired[Optional[str]]
+    business_industry: NotRequired[Optional[str]]
+    recipient_relationship: NotRequired[Optional[Union[RecipientRelationship, str]]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    status: NotRequired[Optional[Union[BankAccountStatus, str]]]
+    swift_payment_code: NotRequired[Optional[str]]
+    date_of_birth: NotRequired[Optional[str]]
+    phone_number: NotRequired[Optional[str]]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_2: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_state_province_region: NotRequired[Optional[str]]
+    sepa_iban: NotRequired[Optional[str]]
+    swift_ifsc_branch_code: NotRequired[Optional[str]]
+    tax_id: NotRequired[Optional[str]]
 
 
 ListBankAccountsResponse = List[BankAccount]
@@ -103,14 +138,15 @@ class CreatePixInput(TypedDict):
     customer_id: str
     name: str
     pix_key: Optional[str]
+    force_cpf_cnpj: NotRequired[Optional[bool]]
 
 
 class CreatePixResponse(TypedDict):
     id: str
-    type: PixType
+    type: Union[PixType, str]
     name: str
-    pix_key: str
-    created_at: str
+    pix_key: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateArgentinaTransfersInput(TypedDict):
@@ -123,12 +159,12 @@ class CreateArgentinaTransfersInput(TypedDict):
 
 class CreateArgentinaTransfersResponse(TypedDict):
     id: str
-    type: TransfersBitsoType
+    type: Union[TransfersBitsoType, str]
     name: str
-    beneficiary_name: str
-    transfers_type: ArgentinaTransfers
-    transfers_account: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    transfers_type: NotRequired[Optional[Union[ArgentinaTransfers, str]]]
+    transfers_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateSpeiInput(TypedDict):
@@ -142,13 +178,13 @@ class CreateSpeiInput(TypedDict):
 
 class CreateSpeiResponse(TypedDict):
     id: str
-    type: SpeiBitsoType
+    type: Union[SpeiBitsoType, str]
     name: str
-    beneficiary_name: str
-    spei_protocol: SpeiProtocol
-    spei_institution_code: str
-    spei_clabe: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    spei_protocol: NotRequired[Optional[Union[SpeiProtocol, str]]]
+    spei_institution_code: NotRequired[Optional[str]]
+    spei_clabe: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateColombiaAchInput(TypedDict):
@@ -166,17 +202,17 @@ class CreateColombiaAchInput(TypedDict):
 
 class CreateColombiaAchResponse(TypedDict):
     id: str
-    type: AchCopBitsoType
+    type: Union[AchCopBitsoType, str]
     name: str
-    account_type: BankAccountType
-    ach_cop_beneficiary_first_name: str
-    ach_cop_beneficiary_last_name: str
-    ach_cop_document_id: str
-    ach_cop_document_type: AchCopDocument
-    ach_cop_email: str
-    ach_cop_bank_code: str
-    ach_cop_bank_account: str
-    created_at: str
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateAchInputRequired(TypedDict):
@@ -184,7 +220,7 @@ class _CreateAchInputRequired(TypedDict):
 
 
 class CreateAchInput(_CreateAchInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     account_number: Optional[str]
     account_type: Optional[BankAccountType]
@@ -205,27 +241,27 @@ class CreateAchInput(_CreateAchInputRequired, total=False):
 
 class CreateAchResponse(TypedDict):
     id: str
-    type: AchType
+    type: Union[AchType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    account_type: BankAccountType
-    account_class: AccountClass
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Country]
-    postal_code: Optional[str]
-    ach_cop_beneficiary_first_name: Optional[str]
-    ach_cop_beneficiary_last_name: Optional[str]
-    ach_cop_document_id: Optional[str]
-    ach_cop_document_type: Optional[AchCopDocument]
-    ach_cop_email: Optional[str]
-    ach_cop_bank_code: Optional[str]
-    ach_cop_bank_account: Optional[str]
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateWireInputRequired(TypedDict):
@@ -233,7 +269,7 @@ class _CreateWireInputRequired(TypedDict):
 
 
 class CreateWireInput(_CreateWireInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_number: Optional[str]
     account_class: Optional[AccountClass]
     beneficiary_name: Optional[str]
@@ -253,18 +289,18 @@ class CreateWireInput(_CreateWireInputRequired, total=False):
 
 class CreateWireResponse(TypedDict):
     id: str
-    type: WireType
+    type: Union[WireType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
-    state_province_region: str
-    country: Country
-    postal_code: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateInternationalSwiftInputRequired(TypedDict):
@@ -272,7 +308,7 @@ class _CreateInternationalSwiftInputRequired(TypedDict):
 
 
 class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     recipient_relationship: Optional[RecipientRelationship]
     swift_account_holder_name: Optional[str]
@@ -301,41 +337,43 @@ class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, tota
     phone_number: Optional[str]
     tax_id: Optional[str]
     date_of_birth: Optional[str]
+    swift_intermediary_bank_routing_number: Optional[str]
+    swift_ifsc_branch_code: Optional[str]
 
 
 class CreateInternationalSwiftResponse(TypedDict):
     id: str
-    type: InternationalSwiftType
+    type: Union[InternationalSwiftType, str]
     name: str
-    beneficiary_name: Optional[str]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Country]
-    postal_code: Optional[str]
-    swift_code_bic: str
-    swift_account_holder_name: str
-    swift_account_number_iban: str
-    swift_beneficiary_address_line_1: str
-    swift_beneficiary_address_line_2: Optional[str]
-    swift_beneficiary_country: Country
-    swift_beneficiary_city: str
-    swift_beneficiary_state_province_region: str
-    swift_beneficiary_postal_code: str
-    swift_bank_name: str
-    swift_bank_address_line_1: str
-    swift_bank_address_line_2: Optional[str]
-    swift_bank_country: Country
-    swift_bank_city: str
-    swift_bank_state_province_region: str
-    swift_bank_postal_code: str
-    sepa_beneficiary_bic: Optional[str]
-    swift_intermediary_bank_swift_code_bic: Optional[str]
-    swift_intermediary_bank_account_number_iban: Optional[str]
-    swift_intermediary_bank_name: Optional[str]
-    swift_intermediary_bank_country: Optional[Country]
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    swift_code_bic: NotRequired[Optional[str]]
+    swift_account_holder_name: NotRequired[Optional[str]]
+    swift_account_number_iban: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_1: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_2: NotRequired[Optional[str]]
+    swift_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    swift_beneficiary_city: NotRequired[Optional[str]]
+    swift_beneficiary_state_province_region: NotRequired[Optional[str]]
+    swift_beneficiary_postal_code: NotRequired[Optional[str]]
+    swift_bank_name: NotRequired[Optional[str]]
+    swift_bank_address_line_1: NotRequired[Optional[str]]
+    swift_bank_address_line_2: NotRequired[Optional[str]]
+    swift_bank_country: NotRequired[Optional[Union[Country, str]]]
+    swift_bank_city: NotRequired[Optional[str]]
+    swift_bank_state_province_region: NotRequired[Optional[str]]
+    swift_bank_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_swift_code_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_account_number_iban: NotRequired[Optional[str]]
+    swift_intermediary_bank_name: NotRequired[Optional[str]]
+    swift_intermediary_bank_country: NotRequired[Optional[Union[Country, str]]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateRtpInputRequired(TypedDict):
@@ -343,7 +381,7 @@ class _CreateRtpInputRequired(TypedDict):
 
 
 class CreateRtpInput(_CreateRtpInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     beneficiary_name: Optional[str]
     routing_number: Optional[str]
@@ -363,18 +401,18 @@ class CreateRtpInput(_CreateRtpInputRequired, total=False):
 
 class CreateRtpResponse(TypedDict):
     id: str
-    type: RtpType
+    type: Union[RtpType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
-    state_province_region: str
-    country: Country
-    postal_code: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateSepaInputRequired(TypedDict):
@@ -397,20 +435,37 @@ class CreateSepaInput(_CreateSepaInputRequired, total=False):
 
 class CreateSepaResponse(TypedDict):
     id: str
-    type: Literal["sepa"]
+    type: Union[Literal["sepa"], str]
     name: str
-    account_class: AccountClass
-    recipient_relationship: Optional[RecipientRelationship]
-    sepa_iban: str
-    sepa_beneficiary_bic: str
-    sepa_beneficiary_legal_name: str
-    sepa_beneficiary_address_line_1: str
-    sepa_beneficiary_address_line_2: Optional[str]
-    sepa_beneficiary_city: str
-    sepa_beneficiary_state_province_region: Optional[str]
-    sepa_beneficiary_postal_code: str
-    sepa_beneficiary_country: Country
-    created_at: str
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    recipient_relationship: NotRequired[Optional[Union[RecipientRelationship, str]]]
+    sepa_iban: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_2: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_state_province_region: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    created_at: NotRequired[Optional[str]]
+
+
+class CreateFasterPaymentsInput(TypedDict):
+    """A UK bank account paid over Faster Payments (GBP)."""
+
+    customer_id: str
+    name: str
+    faster_payments_sort_code: str
+    faster_payments_account_number: str
+    faster_payments_beneficiary_legal_name: str
+    faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
+    faster_payments_beneficiary_address_line_2: NotRequired[Optional[str]]
+    faster_payments_beneficiary_city: NotRequired[Optional[str]]
+    faster_payments_beneficiary_state_province_region: NotRequired[Optional[str]]
+    faster_payments_beneficiary_postal_code: NotRequired[Optional[str]]
+    faster_payments_beneficiary_country: NotRequired[Optional[Country]]
+    recipient_relationship: NotRequired[Optional[RecipientRelationship]]
 
 
 class CreatePixSafeInput(TypedDict):
@@ -425,14 +480,14 @@ class CreatePixSafeInput(TypedDict):
 
 class CreatePixSafeResponse(TypedDict):
     id: str
-    type: PixSafeType
+    type: Union[PixSafeType, str]
     name: str
-    account_number: str
-    account_type: BankAccountType
-    pix_safe_bank_code: str
-    pix_safe_branch_code: str
-    pix_safe_cpf_cnpj: str
-    created_at: str
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateTedInput(TypedDict):
@@ -447,14 +502,31 @@ class CreateTedInput(TypedDict):
 
 class CreateTedResponse(TypedDict):
     id: str
-    type: TedType
+    type: Union[TedType, str]
     name: str
-    account_number: str
-    account_type: BankAccountType
-    ted_bank_code: str
-    ted_branch_code: str
-    ted_cpf_cnpj: str
-    created_at: str
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    ted_bank_code: NotRequired[Optional[str]]
+    ted_branch_code: NotRequired[Optional[str]]
+    ted_cpf_cnpj: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
+
+
+class CreatePlaidLinkInput(TypedDict):
+    customer_id: str
+    redirect_url: NotRequired[Optional[str]]
+
+
+class PlaidLink(TypedDict):
+    url: str
+
+
+class ListBankAccountsInput(TypedDict, total=False):
+    status: Literal["verifying", "approved", "rejected", "deprecated"]
+    type: Rail
+    name: str
+    bank_account_id: str
+    country: Country
 
 
 class BankAccountsResource:
@@ -462,84 +534,180 @@ class BankAccountsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, customer_id: str) -> BlindpayApiResponse[ListBankAccountsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts")
+    async def list(
+        self, customer_id: str, params: Optional[ListBankAccountsInput] = None
+    ) -> BlindpayApiResponse[ListBankAccountsResponse]:
+        query_string = build_query(params)
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}"
+        )
 
     async def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+        )
 
-    async def delete(self, customer_id: str, id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+    async def delete(
+        self, customer_id: str, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
+        )
 
-    async def create_pix(self, data: CreatePixInput) -> BlindpayApiResponse[CreatePixResponse]:
+    async def create_pix(
+        self, data: CreatePixInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
     async def create_argentina_transfers(
-        self, data: CreateArgentinaTransfersInput
+        self, data: CreateArgentinaTransfersInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateArgentinaTransfersResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_spei(self, data: CreateSpeiInput) -> BlindpayApiResponse[CreateSpeiResponse]:
+    async def create_spei(
+        self, data: CreateSpeiInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSpeiResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_colombia_ach(self, data: CreateColombiaAchInput) -> BlindpayApiResponse[CreateColombiaAchResponse]:
+    async def create_colombia_ach(
+        self, data: CreateColombiaAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateColombiaAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_ach(self, data: CreateAchInput) -> BlindpayApiResponse[CreateAchResponse]:
+    async def create_ach(
+        self, data: CreateAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_wire(self, data: CreateWireInput) -> BlindpayApiResponse[CreateWireResponse]:
+    async def create_wire(
+        self, data: CreateWireInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWireResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
     async def create_international_swift(
-        self, data: CreateInternationalSwiftInput
+        self, data: CreateInternationalSwiftInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_rtp(self, data: CreateRtpInput) -> BlindpayApiResponse[CreateRtpResponse]:
+    async def create_rtp(
+        self, data: CreateRtpInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateRtpResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+    async def create_pix_safe(
+        self, data: CreatePixSafeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixSafeResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+    async def create_ted(
+        self, data: CreateTedInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTedResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    async def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+    async def create_sepa(
+        self, data: CreateSepaInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSepaResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
+
+    async def create_plaid_link(
+        self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PlaidLink]:
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/plaid",
+            payload,
+            options=options,
+        )
+
+    async def create_faster_payments(
+        self, data: CreateFasterPaymentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BankAccount]:
+        customer_id = data["customer_id"]
+        payload = {"type": "faster_payments", **{k: v for k, v in data.items() if k != "customer_id"}}
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
 
 class BankAccountsResourceSync:
@@ -547,84 +715,178 @@ class BankAccountsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, customer_id: str) -> BlindpayApiResponse[ListBankAccountsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts")
+    def list(
+        self, customer_id: str, params: Optional[ListBankAccountsInput] = None
+    ) -> BlindpayApiResponse[ListBankAccountsResponse]:
+        query_string = build_query(params)
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}"
+        )
 
     def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+        )
 
-    def delete(self, customer_id: str, id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+    def delete(self, customer_id: str, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
+        )
 
-    def create_pix(self, data: CreatePixInput) -> BlindpayApiResponse[CreatePixResponse]:
+    def create_pix(
+        self, data: CreatePixInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
     def create_argentina_transfers(
-        self, data: CreateArgentinaTransfersInput
+        self, data: CreateArgentinaTransfersInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateArgentinaTransfersResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_spei(self, data: CreateSpeiInput) -> BlindpayApiResponse[CreateSpeiResponse]:
+    def create_spei(
+        self, data: CreateSpeiInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSpeiResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_colombia_ach(self, data: CreateColombiaAchInput) -> BlindpayApiResponse[CreateColombiaAchResponse]:
+    def create_colombia_ach(
+        self, data: CreateColombiaAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateColombiaAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_ach(self, data: CreateAchInput) -> BlindpayApiResponse[CreateAchResponse]:
+    def create_ach(
+        self, data: CreateAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_wire(self, data: CreateWireInput) -> BlindpayApiResponse[CreateWireResponse]:
+    def create_wire(
+        self, data: CreateWireInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWireResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
     def create_international_swift(
-        self, data: CreateInternationalSwiftInput
+        self, data: CreateInternationalSwiftInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_rtp(self, data: CreateRtpInput) -> BlindpayApiResponse[CreateRtpResponse]:
+    def create_rtp(
+        self, data: CreateRtpInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateRtpResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+    def create_pix_safe(
+        self, data: CreatePixSafeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixSafeResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+    def create_ted(
+        self, data: CreateTedInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTedResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
-    def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+    def create_sepa(
+        self, data: CreateSepaInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSepaResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
+
+    def create_plaid_link(
+        self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PlaidLink]:
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/plaid",
+            payload,
+            options=options,
+        )
+
+    def create_faster_payments(
+        self, data: CreateFasterPaymentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BankAccount]:
+        customer_id = data["customer_id"]
+        payload = {"type": "faster_payments", **{k: v for k, v in data.items() if k != "customer_id"}}
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
 
 
 def create_bank_accounts_resource(instance_id: str, client: InternalApiClient) -> BankAccountsResource:

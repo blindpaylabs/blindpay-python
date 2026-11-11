@@ -32,6 +32,11 @@ WEBHOOKS_LITERAL_NAME = "WebhookEvents"
 
 REQUIRED_ALLOWLIST_KEYS = {"schema", "field", "reason", "owner"}
 
+# Modules generated from the spec itself; their gate is the generator's own --check mode
+# (`gen_webhook_events.py --check --spec <spec>`), so Direction A would only double-check them against an
+# older snapshot.
+GENERATED_FILES = {"webhook_events.py"}
+
 
 def load_snapshot() -> dict:
     with SNAPSHOT_PATH.open() as f:
@@ -106,7 +111,18 @@ def find_typeddict_fields(src_root: Path) -> dict[tuple[str, str], set[str]]:
         except SyntaxError as e:
             raise SystemExit(f"{f}: failed to parse: {e}") from e
 
-    known_typeddict_classes = {"TypedDict"}
+    functional: dict[str, set[str]] = {}  # `_X = TypedDict("_X", {"from": ...})`: keyword wire keys
+    for f, tree in trees.items():
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
+                func = node.value.func
+                if isinstance(func, ast.Name) and func.id == "TypedDict" and len(node.value.args) >= 2:
+                    keys = node.value.args[1].keys if isinstance(node.value.args[1], ast.Dict) else []
+                    name = node.targets[0].id if isinstance(node.targets[0], ast.Name) else ""
+                    fields = {k.value for k in keys if isinstance(k, ast.Constant) and isinstance(k.value, str)}
+                    functional[f"{f.relative_to(src_root)}::{name}"] = fields
+
+    known_typeddict_classes = {"TypedDict", *(key.split("::")[1] for key in functional)}
     # Fixed-point: a class based on a class we already know is a TypedDict is also one.
     for _ in range(5):
         changed = False
@@ -135,6 +151,10 @@ def find_typeddict_fields(src_root: Path) -> dict[tuple[str, str], set[str]]:
                         fields.add(item.target.id)
                 if fields:
                     results[(rel, node.name)] = fields
+    for key, fields in functional.items():
+        rel, name = key.split("::")
+        if fields:
+            results[(rel, name)] = fields
     return results
 
 
@@ -161,7 +181,7 @@ def find_spec_webhook_events(spec: dict) -> set[str]:
             continue
         enum = events.get("items", {}).get("enum")
         if enum:
-            return set(enum)
+            return {value for value in enum if value is not None}  # OpenAPI 3.1 nullable enums list null
     raise SystemExit("could not locate the webhook events enum in the spec snapshot")
 
 
@@ -171,7 +191,9 @@ def main() -> int:
     allowset = {(e["schema"], e["field"]) for e in allowlist}
 
     known = collect_known_property_names(spec) | collect_param_names(spec)
-    typeddict_fields = find_typeddict_fields(SRC_ROOT)
+    typeddict_fields = {
+        key: fields for key, fields in find_typeddict_fields(SRC_ROOT).items() if key[0] not in GENERATED_FILES
+    }
 
     failures: list[str] = []
     for (rel_file, class_name), fields in typeddict_fields.items():

@@ -14,7 +14,7 @@ helpers check a TypedDict's annotations against the fixture variants instead:
 import json
 import types
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, List, Union, cast, get_args, get_origin, get_type_hints
+from typing import Any, Dict, FrozenSet, List, Literal, Union, cast, get_args, get_origin, get_type_hints
 
 from typing_extensions import is_typeddict
 
@@ -105,3 +105,91 @@ def assert_matches_spec(typed_dict: Any, variants: Dict[str, Any], *, check_requ
     errors += shape_errors(typed_dict, variants["required_only"], check_required=check_required)
     errors += shape_errors(typed_dict, variants["nullables_null"], check_required=check_required)
     assert not errors, "\n".join(errors)
+
+
+UNKNOWN_ENUM = "zz_unknown_value_from_future_api"
+
+
+def _union_args(hint: Any) -> List[Any]:
+    return list(get_args(hint)) if get_origin(hint) in (Union, types.UnionType) else [hint]
+
+
+def value_errors(hint: Any, value: Any, path: str = "$") -> List[str]:
+    """Static "decode": every mismatch between a type hint and a JSON value, recursively.
+
+    TypedDicts: required keys present, ``None`` only where the hint is ``Optional``. Strings: a closed ``Literal``
+    must contain the value, and ``zz_unknown_value_from_future_api`` (the ``unknown_enum`` variant) needs a hint
+    that admits ``str`` (response enums must accept values added later).
+    Numbers: a non-integral value needs ``float``. Unions pass if any arm does.
+    """
+    if hint is Any:
+        return []
+    arms = _union_args(hint)
+    if len(arms) > 1:
+        if value is None:
+            return [] if type(None) in arms else [f"{path}: null but the type doesn't allow None"]
+        results = [value_errors(arm, value, path) for arm in arms if arm is not type(None)]
+        return min(results, key=len) if all(results) else []
+    if value is None:
+        return [f"{path}: null but the type doesn't allow None"]
+    origin = get_origin(hint)
+    if origin is Literal:
+        if value in get_args(hint):
+            return []
+        if value == UNKNOWN_ENUM:
+            return [f"{path}: closed Literal can't hold an unknown enum value (C7: admit str)"]
+        return [f"{path}: {value!r} is not in {get_args(hint)}"]
+    if is_typeddict(hint):
+        if not isinstance(value, dict):
+            return [f"{path}: expected an object for {hint.__name__}"]
+        obj = cast(Dict[str, Any], value)
+        errors: List[str] = []
+        required: FrozenSet[str] = getattr(hint, "__required_keys__", frozenset())
+        for key, field_hint in get_type_hints(hint).items():
+            if key not in obj:
+                if key in required:
+                    errors.append(f"{path}.{key}: required by {hint.__name__} but absent")
+                continue
+            errors.extend(value_errors(field_hint, obj[key], f"{path}.{key}"))
+        return errors
+    if origin in (list, List):
+        if not isinstance(value, list):
+            return [f"{path}: expected a list"]
+        (item_hint,) = get_args(hint) or (Any,)
+        return [
+            e for i, item in enumerate(cast(List[Any], value)) for e in value_errors(item_hint, item, f"{path}[{i}]")
+        ]
+    if origin in (dict, Dict):
+        return [] if isinstance(value, dict) else [f"{path}: expected an object"]
+    if hint is str:
+        return [] if isinstance(value, str) else [f"{path}: expected str, got {type(value).__name__}"]
+    if hint is bool:
+        return [] if isinstance(value, bool) else [f"{path}: expected bool, got {type(value).__name__}"]
+    if hint is int:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return [f"{path}: expected int, got {type(value).__name__}"]
+        return [] if float(value).is_integer() else [f"{path}: {value} is not an integer (decimal field typed int)"]
+    if hint is float:
+        ok = isinstance(value, (int, float)) and not isinstance(value, bool)
+        return [] if ok else [f"{path}: expected float, got {type(value).__name__}"]
+    return []
+
+
+def declared_errors(typed_dict: Any, value: Any, path: str = "$") -> List[str]:
+    """Keys a TypedDict declares that the spec's ``full`` variant doesn't have (misnamed or legacy fields)."""
+    if not is_typeddict(typed_dict) or not isinstance(value, dict):
+        return []
+    return shape_errors(typed_dict, cast(Dict[str, Any], value), check_declared=True, check_required=False, path=path)
+
+
+def variant_errors(hint: Any, variants: Dict[str, Any]) -> List[str]:
+    """``value_errors`` for every variant, plus ``declared_errors`` on ``full``. List results pick the arm that
+    matches each variant's shape (``{data, pagination}`` envelope or bare array)."""
+    errors: List[str] = []
+    for name, payload in sorted(variants.items()):
+        errors.extend(f"[{name}] {e}" for e in value_errors(hint, payload))
+        dict_arms = [arm for arm in _union_args(hint) if is_typeddict(arm)]
+        if name.split(".")[0] == "full" and dict_arms and isinstance(payload, dict):
+            best = min((declared_errors(arm, payload) for arm in dict_arms), key=len)
+            errors.extend(f"[{name}] {e}" for e in best)
+    return errors

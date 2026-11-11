@@ -1,6 +1,14 @@
 {
-  "include": ["src", "tests"],
-  "exclude": [".venv", ".git", "examples/**", "**/__pycache__"],
+  "include": [
+    "src",
+    "tests",
+    "examples"
+  ],
+  "exclude": [
+    ".venv",
+    ".git",
+    "**/__pycache__"
+  ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.12",
   "executionEnvironments": [
@@ -14,8 +22,16 @@
       "root": "src/blindpay"
     },
     {
+      "root": "examples",
+      "extraPaths": [
+        "src"
+      ]
+    },
+    {
       "root": "tests",
-      "extraPaths": ["."],
+      "extraPaths": [
+        "."
+      ],
       "reportPrivateUsage": "none",
       "reportUnknownMemberType": "none",
       "reportUnknownArgumentType": "none",

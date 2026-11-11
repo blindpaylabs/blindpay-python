@@ -3,6 +3,7 @@
 import json
 import tomllib
 from pathlib import Path
+from typing import List
 
 import blindpay
 from blindpay import BlindPay, BlindPaySync
@@ -33,3 +34,42 @@ class TestPackaging:
         assert async_client._headers["User-Agent"] == expected
         assert sync_client._headers["User-Agent"] == expected
         sync_client.close()
+
+
+# Names defined in more than one resource module: the root exports the other module's copy.
+_ROOT_EXPORTS_ANOTHER_COPY = {
+    ("ArgentinaTransfers", "payouts/payouts.py"),
+    ("OfframpWallet", "bank_accounts/bank_accounts.py"),
+    ("PayinLimit", "limits/limits.py"),
+    ("PayoutLimit", "limits/limits.py"),
+    ("GetCustomerLimitsResponse", "limits/limits.py"),
+    ("MigrateInstanceOwnershipInput", "ownership/ownership.py"),
+    ("MigrateInstanceOwnershipResponse", "ownership/ownership.py"),
+    ("PaymentMethod", "payins/quotes.py"),
+}
+
+
+def test_every_public_resource_type_is_importable_from_the_package_root():
+    """Inputs, outputs, enums and resource classes are all importable as ``from blindpay import X``."""
+    import ast
+
+    resources = Path(blindpay.__file__).parent / "resources"
+    missing: List[str] = []
+    for module in sorted(resources.rglob("*.py")):
+        if module.name == "__init__.py":
+            continue
+        rel = str(module.relative_to(resources))
+        for node in ast.parse(module.read_text()).body:
+            if isinstance(node, ast.ClassDef):
+                name = node.name
+            elif isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
+                name = node.targets[0].id
+            else:
+                continue
+            if name.startswith("_") or (name, rel) in _ROOT_EXPORTS_ANOTHER_COPY:
+                continue
+            if name not in blindpay.__all__ or not hasattr(blindpay, name):
+                missing.append(f"{rel}:{name}")
+
+    assert not missing, missing
+    assert len(blindpay.__all__) == len(set(blindpay.__all__))

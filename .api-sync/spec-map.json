@@ -1112,6 +1112,267 @@
         "file": "src/blindpay/resources/webhooks/webhooks.py",
         "symbol": "WebhookEvents"
       }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "faster_payments_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreateBankAccountIn",
+        "property": "faster_payments_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "faster_payments_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayoutOut",
+        "property": "sepa_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayableIn",
+        "property": "currency"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Currency"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayableOut",
+        "property": "currency"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Currency"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayableOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/payables/payables.py",
+        "symbol": "PayableStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayableOut",
+        "property": "last_attempt_status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/payables/payables.py",
+        "symbol": "PayableLastAttemptStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "PayableBankAccount",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/payables/payables.py",
+        "symbol": "PayableBankAccountType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "RetrieveInstanceOut",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/instances/instances.py",
+        "symbol": "InstanceType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "RetrieveInstanceOut",
+        "property": "onboarding_step"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/instances/instances.py",
+        "symbol": "InstanceOnboardingStep"
+      }
+    },
+    {
+      "spec": {
+        "schema": "Rfi",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/rfi/rfi.py",
+        "symbol": "RfiStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "InstanceRfi",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/rfi/rfi.py",
+        "symbol": "RfiStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "Rfi",
+        "property": "customer_type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/rfi/rfi.py",
+        "symbol": "RfiCustomerType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WalletDepositOut",
+        "property": "network"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Network"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WalletDepositOut",
+        "property": "token"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+        "symbol": "WalletDepositToken"
+      }
+    },
+    {
+      "spec": {
+        "schema": "WalletDepositOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+        "symbol": "WalletDepositStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "LimitIncreaseSupportingDocument",
+        "property": "type"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "LimitIncreaseRequestSupportingDocumentType"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerCnaeCondition",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "CustomerCnaeConditionStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerVirtualAccountPreapproval",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "VirtualAccountPreapprovalStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CustomerVirtualAccountPreapproval",
+        "property": "banking_partners",
+        "items": true
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/customers/customers.py",
+        "symbol": "VirtualAccountPreapprovalBankingPartner"
+      }
+    },
+    {
+      "spec": {
+        "schema": "UpdateInstanceMemberIn",
+        "property": "user_role"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/instances/instances.py",
+        "symbol": "InstanceMemberRole"
+      }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinOut",
+        "property": "payment_method"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "PaymentMethod"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "BankAccountStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "sepa_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "recipient_relationship"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "RecipientRelationship"
+      }
     }
   ],
   "types": [
@@ -1220,6 +1481,10 @@
         {
           "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
           "symbol": "CreateTedInput"
+        },
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreateFasterPaymentsInput"
         }
       ],
       "note": "the 11-rail discriminator fan-out on the request side (design doc's headline case); `type` is injected by each create_* method, never a field on these TypedDicts"
@@ -1954,6 +2219,248 @@
         }
       ],
       "note": "no gaps: payin-side tracking_complete (3 properties) is a subset of the SDK's 4-field TrackingComplete"
+    },
+    {
+      "spec": "PayableOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payables/payables.py",
+          "symbol": "Payable"
+        }
+      ]
+    },
+    {
+      "spec": "CreatePayableIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payables/payables.py",
+          "symbol": "CreatePayableInput"
+        }
+      ]
+    },
+    {
+      "spec": "PayableParty",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payables/payables.py",
+          "symbol": "PayableParty"
+        }
+      ]
+    },
+    {
+      "spec": "PayableLineItem",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payables/payables.py",
+          "symbol": "PayableLineItem"
+        }
+      ]
+    },
+    {
+      "spec": "PayableBankAccount",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/payables/payables.py",
+          "symbol": "PayableBankAccount"
+        }
+      ]
+    },
+    {
+      "spec": "CreatePlaidLinkIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "CreatePlaidLinkInput"
+        }
+      ]
+    },
+    {
+      "spec": "PlaidLinkOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+          "symbol": "PlaidLink"
+        }
+      ]
+    },
+    {
+      "spec": "PresignIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "PresignInput"
+        }
+      ]
+    },
+    {
+      "spec": "PresignOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/upload/upload.py",
+          "symbol": "PresignResponse"
+        }
+      ]
+    },
+    {
+      "spec": "RetrieveInstanceOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/instances/instances.py",
+          "symbol": "Instance"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateBlockchainWalletIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/wallets/blockchain.py",
+          "symbol": "SetSelfCustodyInput"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateOfframpWalletIn",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/wallets/offramp.py",
+          "symbol": "UpdateOfframpWalletInput"
+        }
+      ]
+    },
+    {
+      "spec": "WalletDepositOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "WalletDeposit"
+        }
+      ]
+    },
+    {
+      "spec": "WalletDepositsOut",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/custodial_wallets/custodial_wallets.py",
+          "symbol": "ListWalletDepositsResponse"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerCnaeCondition",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CustomerCnaeCondition"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerVirtualAccountPreapproval",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CustomerVirtualAccountPreapproval"
+        }
+      ]
+    },
+    {
+      "spec": "LimitIncreaseSupportingDocument",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "LimitIncreaseSupportingDocument"
+        },
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "LimitIncreaseSupportingDocumentOut"
+        }
+      ]
+    },
+    {
+      "spec": "YieldFee",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/fees/fees.py",
+          "symbol": "YieldFee"
+        }
+      ]
+    },
+    {
+      "spec": "Rfi",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/rfi/rfi.py",
+          "symbol": "CustomerRfi"
+        }
+      ]
+    },
+    {
+      "spec": "InstanceRfi",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/rfi/rfi.py",
+          "symbol": "InstanceRfi"
+        }
+      ]
+    },
+    {
+      "spec": "RfiSection",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/rfi/rfi.py",
+          "symbol": "RfiSection"
+        }
+      ]
+    },
+    {
+      "spec": "RfiField",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/rfi/rfi.py",
+          "symbol": "RfiField"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerCnaeCondition",
+      "specPath": "cnae_at_approval",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CustomerCnaeSet"
+        }
+      ]
+    },
+    {
+      "spec": "RfiField",
+      "specPath": "items.items",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/rfi/rfi.py",
+          "symbol": "RfiFieldItem"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerCnaeCondition",
+      "specPath": "cnae_at_approval.primary",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CustomerCnaeCode"
+        }
+      ]
+    },
+    {
+      "spec": "CustomerCnaeCondition",
+      "specPath": "cnae_at_approval.secondary.items",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CustomerCnaeCode"
+        }
+      ]
     }
   ],
   "ignore": {
@@ -1961,22 +2468,6 @@
       {
         "schema": "LedgerOperation",
         "reason": "unreferenced by any public operation (0 $ref anywhere in the filtered public spec) -- unreachable orphan, not modeled by any SDK. This is where funding_end_to_end_id and payer_tax_id live; both stay unmodeled because the schema itself is unreachable."
-      },
-      {
-        "schema": "Rfi",
-        "reason": "the RFI (request-for-information) resource family is entirely unmodeled by this SDK: no resource file, no client method. GET /v1/instances/{instance_id}/rfi and GET .../customers/{customer_id}/rfi are real, reachable operations with zero SDK coverage. Adding it is additive, non-breaking, human-scoped work (Phase C per the design doc), not a field-level patch."
-      },
-      {
-        "schema": "RfiField",
-        "reason": "nested under Rfi/InstanceRfi/RfiSection; same Rfi-family gap as Rfi."
-      },
-      {
-        "schema": "RfiSection",
-        "reason": "nested under Rfi/InstanceRfi; same Rfi-family gap as Rfi."
-      },
-      {
-        "schema": "InstanceRfi",
-        "reason": "instance-level counterpart of Rfi (GET /v1/instances/{instance_id}/rfi); same Rfi-family gap."
       },
       {
         "schema": "CreateRfiBody",
@@ -2061,6 +2552,62 @@
       {
         "schema": "PayinPartnerFeeWebhookOut",
         "reason": "webhook envelope; same split treatment as PayinNewWebhookOut above."
+      },
+      {
+        "schema": "BlockchainWalletUpdateWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "PayableCompleteWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "PayableNewWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "PayableUpdateWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "TransferCompleteWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "TransferNewWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "TransferUpdateWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "VirtualAccountCompleteWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "VirtualAccountNewWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "WalletInboundTokenOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "WalletInboundWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "WalletNewWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "WalletUpdateWebhookOut",
+        "reason": "Webhook payload envelope: typed in src/blindpay/webhook_events.py, generated from the spec's webhooks section and gated by `gen_webhook_events.py --check`."
+      },
+      {
+        "schema": "YieldStatus",
+        "reason": "A bare string-enum schema ($ref'd by WalletOut.yield_status), modelled as the YieldStatus Literal in custodial_wallets.py; it has no properties to map."
       }
     ]
   }

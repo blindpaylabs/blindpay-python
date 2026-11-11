@@ -7,6 +7,12 @@ BlindPay delivers webhooks through Svix. Verify each delivery against the raw re
     if not webhooks.verify(request_body, request.headers, secret):
         return 400
 
+Or verify and parse in one step into a typed event, narrowed on ``webhook_event``::
+
+    event = webhooks.construct_event(request_body, request.headers, secret)
+    if event["webhook_event"] == "payout.complete":
+        ...
+
 No API key or client is needed. Never log the ``whsec_`` secret, and deduplicate deliveries on ``svix-id``.
 """
 
@@ -14,11 +20,15 @@ import base64
 import binascii
 import hashlib
 import hmac
+import json
 import re
 import time
-from typing import Mapping, Optional, Union
+from typing import Any, Dict, Mapping, Optional, Union, cast
 
-__all__ = ["DEFAULT_TOLERANCE_SECONDS", "verify"]
+from ._internal.exceptions import BlindPayError
+from .webhook_events import WEBHOOK_EVENT_TYPES, WebhookEvent
+
+__all__ = ["DEFAULT_TOLERANCE_SECONDS", "WEBHOOK_EVENT_TYPES", "WebhookVerificationError", "construct_event", "verify"]
 
 DEFAULT_TOLERANCE_SECONDS = 300
 """How far, in seconds, a delivery's ``svix-timestamp`` may be from the current time (replay protection)."""
@@ -97,3 +107,36 @@ def verify(
         return False
     except Exception:
         return False
+
+
+class WebhookVerificationError(BlindPayError):
+    """``construct_event`` was given a delivery whose signature or timestamp doesn't verify."""
+
+
+def construct_event(
+    payload: Union[str, bytes],
+    headers: Mapping[str, str],
+    secret: str,
+    *,
+    tolerance: int = DEFAULT_TOLERANCE_SECONDS,
+    now: Optional[float] = None,
+) -> WebhookEvent:
+    """Verify a webhook delivery (see ``verify``) and parse it into a typed event.
+
+    Narrow the result on ``event["webhook_event"]``. An event this SDK version doesn't model yet is returned as-is
+    (an ``UnknownWebhookEvent`` carrying every key), so new events never fail here. A failed payout can arrive as
+    ``payout.update`` or ``payout.complete``: branch on ``status``, not on the event name.
+
+    Raises:
+        WebhookVerificationError: the signature or timestamp doesn't verify.
+        BlindPayError: the verified body isn't a JSON object with a ``webhook_event`` string.
+    """
+    if not verify(payload, headers, secret, tolerance=tolerance, now=now):
+        raise WebhookVerificationError("webhook signature verification failed")
+    try:
+        body: Any = json.loads(payload)
+    except ValueError as error:
+        raise BlindPayError("webhook payload is not valid JSON") from error
+    if not isinstance(body, dict) or not isinstance(cast(Dict[str, Any], body).get("webhook_event"), str):
+        raise BlindPayError("webhook payload has no webhook_event")
+    return cast(WebhookEvent, body)

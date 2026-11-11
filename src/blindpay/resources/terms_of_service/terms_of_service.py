@@ -1,13 +1,16 @@
-from typing_extensions import Optional, TypedDict
+from typing import Optional
+
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 
 class InitiateInput(TypedDict):
     idempotency_key: str
-    customer_id: Optional[str]
-    redirect_url: Optional[str]
+    customer_id: NotRequired[Optional[str]]
+    redirect_url: NotRequired[Optional[str]]
 
 
 class InitiateResponse(TypedDict):
@@ -19,8 +22,10 @@ class TermsOfServiceResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def initiate(self, data: InitiateInput) -> BlindpayApiResponse[InitiateResponse]:
-        return await self._client.post(f"/e/instances/{self._instance_id}/tos", data)
+    async def initiate(
+        self, data: InitiateInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[InitiateResponse]:
+        return await self._client.post(f"/e/instances/{self._instance_id}/tos", data, options=options)
 
 
 class TermsOfServiceResourceSync:
@@ -28,8 +33,10 @@ class TermsOfServiceResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def initiate(self, data: InitiateInput) -> BlindpayApiResponse[InitiateResponse]:
-        return self._client.post(f"/e/instances/{self._instance_id}/tos", data)
+    def initiate(
+        self, data: InitiateInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[InitiateResponse]:
+        return self._client.post(f"/e/instances/{self._instance_id}/tos", data, options=options)
 
 
 def create_terms_of_service_resource(instance_id: str, client: InternalApiClient) -> TermsOfServiceResource:

@@ -16,15 +16,19 @@ blindpay-python/
     __init__.py                           # Public re-exports (types + clients + webhooks module)
     _version.py                           # __version__ (x-release-please-version marker; used in User-Agent)
     py.typed                              # PEP 561 marker (must stay inside the package)
-    webhooks.py                           # Standalone Svix verifier: webhooks.verify(payload, headers, secret)
+    webhooks.py                           # Standalone Svix verifier: webhooks.verify / webhooks.construct_event
+    webhook_events.py                     # GENERATED typed webhook payloads (.api-sync/gen_webhook_events.py)
     client.py                             # BlindPay (async) and BlindPaySync classes,
-                                          #   ApiClientImpl / ApiClientImplSync (HTTP layer),
+                                          #   ApiClientImpl / ApiClientImplSync (HTTP layer + retry loop),
                                           #   _*Namespace / _*NamespaceSync classes (sub-resources)
     types.py                              # Shared Literal types and TypedDicts used across resources
     _internal/
       api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync,
                                           #   MultipartFile (get/post/put/patch/delete/post_multipart)
-      exceptions.py                       # BlindPayError exception class
+      http.py                             # RequestOptions, retry decision table, error mapping,
+                                          #   path_param() and build_query() helpers. Pure, no I/O
+      pagination.py                       # auto_paging_iter / async_auto_paging_iter (list_auto_paging)
+      exceptions.py                       # BlindPayError, BlindPayApiError
     resources/
       __init__.py                         # Barrel re-exports of all create_*_resource factory functions
       <resource_name>/
@@ -37,7 +41,14 @@ blindpay-python/
     spec_fixtures.py                      # Loads fixtures; assert_matches_spec(TypedDict, variants)
     http_mock.py                          # Wire-level seam: clients backed by httpx.MockTransport + Recorder
     test_webhooks.py                      # The 14 vectors through webhooks.verify and both client wrappers
+    test_webhook_events.py                # construct_event + generated event types vs the webhook fixtures
     test_http.py                          # HTTP-layer behaviour shared by all resources
+    test_retries.py                       # Retry table, idempotency keys, error shape (both clients)
+    test_pagination.py                    # list envelopes and list_auto_paging (both clients)
+    op_table.py                           # Every SDK method -> spec operation, minimal args, exact path
+    test_operations.py                    # Options guard + op coverage, driven by op_table.py
+    test_client_parity.py                 # Every resource method exists in both clients; namespaces are typed
+    test_request_types.py                 # Request inputs' required keys vs the spec (via spec-map.json)
     test_packaging.py                     # py.typed placement, version single source, User-Agent
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
@@ -100,7 +111,8 @@ resources/custodial_wallets/
 - Use `Optional[X]` from `typing`, not `X | None`.
 - Use `List[X]` from `typing`, not `list[X]`.
 - Use `Literal[...]` from `typing_extensions` for resource-local literals, or from `typing` if already imported.
-- No docstrings on resource methods (the verify_webhook_signature method is an exception).
+- Docstrings on resource methods only where the signature can't say it: units, "exactly one of" inputs, a `None`
+  result, the `/e/*` tracking endpoints' production 401, one-time settings.
 - All methods return `BlindpayApiResponse[T]` where T is the response TypedDict.
 - Double quotes for strings.
 - Imports: standard library first, then third-party, then relative. Sorted by ruff isort.
@@ -157,6 +169,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse
 
 
@@ -192,13 +205,17 @@ class {EntityName}Resource:
         return await self._client.get(f"/instances/{self._instance_id}/{api_path}")
 
     async def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return await self._client.get(f"/instances/{self._instance_id}/{api_path}/{{{id_param}}}")
+        return await self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
 
-    async def create(self, data: Create{EntityName}Input) -> BlindpayApiResponse[Create{EntityName}Response]:
-        return await self._client.post(f"/instances/{self._instance_id}/{api_path}", data)
+    async def create(
+        self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Create{EntityName}Response]:
+        return await self._client.post(f"/instances/{self._instance_id}/{api_path}", data, options=options)
 
-    async def delete(self, {id_param}: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/{api_path}/{{{id_param}}}")
+    async def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
 
 # --- Sync resource ---
@@ -212,13 +229,17 @@ class {EntityName}ResourceSync:
         return self._client.get(f"/instances/{self._instance_id}/{api_path}")
 
     def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return self._client.get(f"/instances/{self._instance_id}/{api_path}/{{{id_param}}}")
+        return self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
 
-    def create(self, data: Create{EntityName}Input) -> BlindpayApiResponse[Create{EntityName}Response]:
-        return self._client.post(f"/instances/{self._instance_id}/{api_path}", data)
+    def create(
+        self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Create{EntityName}Response]:
+        return self._client.post(f"/instances/{self._instance_id}/{api_path}", data, options=options)
 
-    def delete(self, {id_param}: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/{api_path}/{{{id_param}}}")
+    def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
 
 # --- Factory functions ---
@@ -230,6 +251,14 @@ def create_{snake_name}_resource(instance_id: str, client: InternalApiClient) ->
 def create_{snake_name}_resource_sync(instance_id: str, client: InternalApiClientSync) -> {EntityName}ResourceSync:
     return {EntityName}ResourceSync(instance_id, client)
 ```
+
+Rules every method follows (enforced by `tests/test_operations.py` and `tests/test_client_parity.py`):
+- Every mutating method (POST/PUT/PATCH/DELETE, incl. `post_multipart`) takes a trailing
+  `options: Optional[RequestOptions] = None` and passes `options=options` to the client call.
+- Every caller-supplied path segment goes through `path_param(...)` inside the f-string (`a/b` -> `a%2Fb`).
+  `self._instance_id` is client config and stays raw. Keep the path a literal f-string: api-sync reads it.
+- Every query string comes from `build_query(params)` (drops `None`/`""`, booleans as `true`/`false`).
+- Add the method to `tests/op_table.py` (operation, accessor, minimal call, exact path).
 
 CRITICAL: The sync class is identical to the async class except:
 - Methods are NOT `async def`, they are plain `def`.
@@ -245,7 +274,7 @@ Add the import and `__all__` entry:
 from .{resource_name} import create_{snake_name}_resource
 ```
 
-Also add the sync factory if not already following the pattern (note: the barrel `__init__` only exports async factories currently; check existing pattern).
+Export both the async and the sync factory (`create_{snake_name}_resource` and `create_{snake_name}_resource_sync`).
 
 ### Step 3: Wire into `client.py`
 
@@ -337,27 +366,35 @@ Testing pattern:
 Add TypedDicts above the resource classes in the same file:
 ```python
 class NewActionInput(TypedDict):
-    field_a: str
-    field_b: Optional[str]
+    field_a: str  # required by the spec
+    field_b: NotRequired[Optional[str]]  # optional and nullable in the spec
 
 
 class NewActionResponse(TypedDict):
     id: str
-    status: str
+    status: Union[NewActionStatus, str]  # response enum: known values + str
 ```
 
 ### Step 2: Add the method to BOTH resource classes
 
 **Async (in `{EntityName}Resource`):**
 ```python
-async def new_action(self, data: NewActionInput) -> BlindpayApiResponse[NewActionResponse]:
-    return await self._client.post(f"/instances/{self._instance_id}/{api_path}/action", data)
+async def new_action(
+    self, entity_id: str, data: NewActionInput, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[NewActionResponse]:
+    return await self._client.post(
+        f"/instances/{self._instance_id}/{api_path}/{path_param(entity_id)}/action", data, options=options
+    )
 ```
 
 **Sync (in `{EntityName}ResourceSync`):**
 ```python
-def new_action(self, data: NewActionInput) -> BlindpayApiResponse[NewActionResponse]:
-    return self._client.post(f"/instances/{self._instance_id}/{api_path}/action", data)
+def new_action(
+    self, entity_id: str, data: NewActionInput, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[NewActionResponse]:
+    return self._client.post(
+        f"/instances/{self._instance_id}/{api_path}/{path_param(entity_id)}/action", data, options=options
+    )
 ```
 
 ### Step 3: Export from `__init__.py`
@@ -371,41 +408,68 @@ Add the new TypedDicts to both the import and `__all__` list in the resource's `
 **GET with query params:**
 ```python
 async def list(self, params: Optional[ListInput] = None) -> BlindpayApiResponse[ListResponse]:
-    query_string = ""
-    if params:
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-        if filtered_params:
-            query_string = f"?{urlencode(filtered_params)}"
+    query_string = build_query(params)
     return await self._client.get(f"/instances/{self._instance_id}/{path}{query_string}")
+```
+
+**Auto-pager** (for every list whose spec accepts `starting_after`). A plain `def` in BOTH classes, returning
+`AsyncIterator[T]` (async class) or `Iterator[T]` (sync class), so bad params raise at the call:
+```python
+def list_auto_paging(self, params: Optional[ListInput] = None) -> AsyncIterator[Entity]:
+    return async_auto_paging_iter(self.list, params)  # sync class: auto_paging_iter(self.list, params)
 ```
 
 **POST with body:**
 ```python
-async def create(self, data: CreateInput) -> BlindpayApiResponse[CreateResponse]:
-    return await self._client.post(f"/instances/{self._instance_id}/{path}", data)
+async def create(self, data: CreateInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[CreateResponse]:
+    return await self._client.post(f"/instances/{self._instance_id}/{path}", data, options=options)
 ```
 
 **Method that extracts an ID from input to build the URL:**
 ```python
-async def update(self, data: UpdateInput) -> BlindpayApiResponse[None]:
+async def update(self, data: UpdateInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
     entity_id = data["entity_id"]
     payload = {k: v for k, v in data.items() if k != "entity_id"}
-    return await self._client.put(f"/instances/{self._instance_id}/{path}/{entity_id}", payload)
+    return await self._client.put(
+        f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}", payload, options=options
+    )
 ```
 
 **GET with path param:**
 ```python
 async def get(self, entity_id: str) -> BlindpayApiResponse[Entity]:
-    return await self._client.get(f"/instances/{self._instance_id}/{path}/{entity_id}")
+    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}")
 ```
 
 ---
 
 ## 5. How to modify types
 
+### Typing rules (checked against the spec)
+
+`tests/test_operations.py::test_response_type_matches_every_fixture_variant` checks every method's response type
+against every variant of its shared fixture, and `tests/test_request_types.py` checks inputs. The rules they enforce:
+
+| Where | Spec says | Python annotation |
+|---|---|---|
+| Response field | not in `required` | `NotRequired[...]` |
+| Response field | nullable | `Optional[...]` |
+| Response field | string enum | `Union[<Literal alias>, str]` (known values, and new API values still type-check) |
+| Request field | in `required` | required key (in a `total=False` class: `Required[...]`) |
+| Request field | not in `required` | `NotRequired[...]` (or a `total=False` class) |
+| Either | wire key is a Python keyword (`from`, `yield`) | declare it in a functional base: `_X = TypedDict("_X", {"from": ...})`, then `class X(_X)` |
+
+Request enums stay closed Literals. Exception: the per-rail bank-account helpers and the two blockchain-wallet create
+helpers require fields the merged spec schema marks optional, because the route validates each variant with its own
+schema (`PER_VARIANT_HELPERS` in `tests/test_request_types.py`). Amount fields in cents are `int`; decimal fields
+(quotations, whole-token amounts) are `float`.
+
+Every public name in a resource module must also be exported from `src/blindpay/__init__.py` (the "Resource types"
+block) and from its package `__init__.py`; `tests/test_packaging.py` fails otherwise.
+
 ### Add a field to a TypedDict
 
-Simply add the new field. Use `Optional[X]` if the field can be null in API responses.
+Add the field following the typing rules above (`NotRequired`/`Optional`/`Union[Literal, str]` from the spec).
 
 ```python
 class Payout(TypedDict):
@@ -456,7 +520,9 @@ LocalType = Literal["option_a", "option_b"]
 
 ## 7. How to add a sub-resource (namespace pattern)
 
-Sub-resources are accessed like `client.payins.quotes.create(...)`. This uses a namespace class with `__getattr__` delegation.
+Sub-resources are accessed like `client.payins.quotes.create(...)`. The namespace class **subclasses** the parent
+resource, so `client.payins.list()` keeps its real signature for type checkers (the old `__getattr__ -> Any`
+delegation hid every method; `tests/test_client_parity.py` asserts the types with `assert_type`).
 
 ### Step 1: Create the sub-resource module
 
@@ -471,53 +537,23 @@ Add imports from the new sub-resource module.
 
 ### Step 3: Create namespace classes in `client.py`
 
-**Async namespace:**
+The parent resource classes are imported at module level in `client.py` (a subclass needs its base at runtime);
+the sub-resources stay lazy:
+
 ```python
-class _{ParentName}Namespace:
+class _{ParentName}Namespace({ParentName}Resource):
     def __init__(self, instance_id: str, api_client: ApiClientImpl) -> None:
-        self._instance_id = instance_id
+        super().__init__(instance_id, api_client)
         self._api = api_client
-
-    @cached_property
-    def _base(self) -> "{ParentName}Resource":
-        from blindpay.resources.{parent}.{parent} import create_{parent}_resource
-
-        return create_{parent}_resource(self._instance_id, self._api)
 
     @cached_property
     def {sub_resource}(self) -> "{SubResourceName}Resource":
         from blindpay.resources.{parent}.{sub_resource} import create_{sub_resource}_resource
 
         return create_{sub_resource}_resource(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
 ```
 
-**Sync namespace:**
-```python
-class _{ParentName}NamespaceSync:
-    def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
-        self._instance_id = instance_id
-        self._api = api_client
-
-    @cached_property
-    def _base(self) -> "{ParentName}ResourceSync":
-        from blindpay.resources.{parent}.{parent} import create_{parent}_resource_sync
-
-        return create_{parent}_resource_sync(self._instance_id, self._api)
-
-    @cached_property
-    def {sub_resource}(self) -> "{SubResourceName}ResourceSync":
-        from blindpay.resources.{parent}.{sub_resource} import create_{sub_resource}_resource_sync
-
-        return create_{sub_resource}_resource_sync(self._instance_id, self._api)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._base, name)
-```
-
-The `__getattr__` method delegates unknown attribute access to `_base`, so `client.payins.list()` works -- it forwards to `PayinsResource.list()`. Meanwhile `client.payins.quotes.create()` hits the explicit `quotes` cached_property.
+The sync twin is `_{ParentName}NamespaceSync({ParentName}ResourceSync)` with `ApiClientImplSync`.
 
 ### Step 4: Update the client class
 
@@ -537,7 +573,7 @@ Add the sub-resource types to the `TYPE_CHECKING` block in `client.py`.
 
 ### Namespace without a base resource (wallets pattern)
 
-The `_WalletsNamespace` has no `_base` and no `__getattr__`. It is purely a grouping:
+The `_WalletsNamespace` has no base resource. It is purely a grouping:
 
 ```python
 class _WalletsNamespace:
@@ -572,7 +608,11 @@ Note: `custodial` imports from `custodial_wallets` package (not from `wallets/`)
 
 ### Run tests
 
+Always pass `--python 3.13` to uv (otherwise uv may pick a newer interpreter and rewrite `uv.lock`):
+
 ```bash
+uv run --python 3.13 pytest -q
+
 # All tests
 pytest tests/ -v
 
@@ -698,11 +738,12 @@ refactor(client): simplify namespace initialization
 | Integer property | `field: int` |
 | Boolean property | `field: bool` |
 | Nullable property | `field: Optional[str]` |
-| String enum | `MyEnum = Literal["a", "b", "c"]` |
+| Property not in `required` (response) | `field: NotRequired[...]` |
+| String enum | `MyEnum = Literal["a", "b", "c"]`; response fields use `Union[MyEnum, str]` |
 | Array of objects | `List[MyType]` |
 | Nested object | Separate TypedDict, referenced by name |
-| Optional input field | Use `total=False` on the TypedDict or `Optional[X]` per field |
-| Paginated list response | TypedDict with `data: List[Entity]` + `pagination: PaginationMetadata` |
+| Optional input field | `NotRequired[X]` (or a `total=False` TypedDict); `Optional[X]` only if null is a valid value |
+| Paginated list response | `List{Name}Response` (`data` + `pagination`); the method returns `Union[List{Name}Response, List[Entity]]` when the API sends a bare array without pagination params |
 | Request body | `{Action}Input(TypedDict)` |
 | Response body | `{Action}Response(TypedDict)` |
 
@@ -760,6 +801,28 @@ async def method(self, data: MyInput) -> BlindpayApiResponse[MyResponse]:
 `blindpay.webhooks.verify(payload, headers, secret, *, tolerance=300, now=None)` is the one verifier (native
 Svix algorithm, `hmac` + `hashlib`, no `svix` dependency). It never raises. The clients'
 `verify_webhook_signature` methods delegate to it; don't duplicate the algorithm.
+`webhooks.construct_event(...)` (root alias `construct_webhook_event`) verifies, then returns the parsed body typed
+as `WebhookEvent`.
+
+`src/blindpay/webhook_events.py` is generated; never edit it by hand. Regenerate it from the spec and check it:
+
+```bash
+python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json          # write
+python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check  # CI gate
+```
+
+Nested types are named `{Event}WebhookEvent{Property}`, enums are typed `str`, and provider-named fields
+(`circle_*`, `checkbook_*`, `onemoney_*`, `aiprise_*`, `infinitus_*`, `jpm_*`) are skipped (provider names stay out of the public SDK surface).
+`check_contract.py` skips this module (`GENERATED_FILES`).
+
+### HTTP layer and retries
+
+`_internal/http.py` holds every transport rule as pure functions shared by both clients: the retry decision table
+(GETs retry on connection errors/408/429/5xx; mutations only without a response, on 429 and on
+409 `idempotency_key_in_flight`, never on 5xx), auto idempotency keys (UUIDv4 before the first attempt for every
+non-multipart mutation when `max_retries > 0`), and the `ErrorResponse` mapping. The clients only run the loop:
+`time.sleep` in `ApiClientImplSync`, `asyncio.sleep` in `ApiClientImpl` (`_sleep` is the test seam). Never retry a
+mutation on 5xx: the API releases the idempotency key, so a retry re-executes it.
 
 ### Deprecations
 
@@ -770,7 +833,22 @@ of removing them outside a major release. Tests call them inside `pytest.warns(D
 
 `.api-sync/allowlist.json` (SDK fields the spec snapshot doesn't know) and `.api-sync/unmodeled.json` (spec
 fields/enums the SDK doesn't model) must stay true. When a fix makes an entry false, delete it in the same commit.
-`python3 .api-sync/sync.py --check` and `python3 .api-sync/check_contract.py` gate CI.
+Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_*`, `aiprise_*`, `jpm_*`, ...) are never modelled:
+record them in `unmodeled.json` with reason "provider-named field; pending blindpay-v2 decision".
+
+`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@66144f3b2` (94 SDK operations). CI gates:
+
+```bash
+python3 .api-sync/sync.py --validate-map
+python3 .api-sync/sync.py --check [--spec <openapi.json>]   # state reconciliation (default: the snapshot)
+python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json   # METHOD+path: every x-sdk op has a method
+python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
+python3 .api-sync/check_contract.py
+```
+
+Operations marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators) must never
+get a method; `--coverage` fails if one does. `--apply` generates enum members, simple fields and standard operations
+(with `options` and `path_param`); anything it can't infer is NEEDS_HUMAN and blocks the whole apply.
 
 ---
 

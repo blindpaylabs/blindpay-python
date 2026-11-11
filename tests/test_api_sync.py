@@ -1424,3 +1424,276 @@ class TestOperationDiscovery:
 
         methods = [(m.name, m.verb, m.template) for module in modules for m in module.methods]
         assert methods == [("create", "post", "/upload")]
+
+
+class TestGeneratedMethodConventions:
+    """Generated methods must follow the same request-options and path-encoding rules as hand-written."""
+
+    def _plan(
+        self, sync: types.ModuleType, verb: str, path: str, path_args: list[str], input_type: Optional[str]
+    ) -> Any:
+        module = sync.ResourceModule(
+            file=Path("src/blindpay/resources/sample.py"),
+            async_class_name="SampleResource",
+            sync_class_name="SampleResourceSync",
+            factory_name=None,
+            factory_sync_name=None,
+            uses_instance_id=True,
+            methods=[],
+            prefix="Sample",
+        )
+        return sync.OperationInsertPlan(
+            path=path,
+            verb=verb,
+            module=module,
+            method_name="do_it",
+            path_args=path_args,
+            input_type_name=input_type,
+            input_spec=None,
+            output_type_name="SampleOut",
+            output_spec=None,
+        )
+
+    def test_mutating_method_takes_and_forwards_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "post", "/v1/instances/{instance_id}/things/{id}/run", ["id"], "RunIn")
+
+        source = sync.render_method(plan, is_sync=False)
+
+        assert "def do_it(self, id: str, data: RunIn, options: Optional[RequestOptions] = None)" in source
+        assert (
+            'self._client.post(f"/instances/{self._instance_id}/things/{path_param(id)}/run", data, options=options)'
+            in source
+        )
+
+    def test_body_less_delete_forwards_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "delete", "/v1/instances/{instance_id}/things/{id}", ["id"], None)
+
+        source = sync.render_method(plan, is_sync=True)
+
+        assert (
+            'return self._client.delete(f"/instances/{self._instance_id}/things/{path_param(id)}", options=options)'
+            in source
+        )
+
+    def test_get_takes_no_options(self, repo: Path):
+        sync = load_sync(repo)
+        plan = self._plan(sync, "get", "/v1/instances/{instance_id}/things/{id}", ["id"], None)
+
+        source = sync.render_method(plan, is_sync=True)
+
+        assert "options" not in source
+        assert "{path_param(id)}" in source
+
+    def test_internal_http_import_is_added_or_merged(self, repo: Path):
+        sync = load_sync(repo)
+        bare = "from ..._internal.api_client import InternalApiClient\nfrom ...types import BlindpayApiResponse\n"
+        merged = "from ..._internal.http import RequestOptions\n"
+
+        added = sync.ensure_internal_http_import(bare, {"path_param", "RequestOptions"})
+        extended = sync.ensure_internal_http_import(merged, {"path_param"})
+
+        assert "from ..._internal.http import RequestOptions, path_param\n" in added
+        assert extended == "from ..._internal.http import RequestOptions, path_param\n"
+
+
+class TestOpenApi31AndSdkFlag:
+    """Regression tests: OpenAPI 3.1 nullable enums, x-sdk: false operations, METHOD+path coverage."""
+
+    def test_nullable_enum_null_is_not_a_member(self, repo: Path):
+        sync = load_sync(repo)
+        spec = base_schema({"ColorOut": {"properties": {"color": {"type": ["string", "null"], "enum": ["red", None]}}}})
+
+        assert sync.get_enum_values(spec, {"schema": "ColorOut", "property": "color"}) == {"red"}
+        assert sync.find_enum_locator({"anyOf": [{"enum": ["a", None]}, {"type": "null"}]}) == (False, ["a"])
+        assert sync.coarse_type({"type": "string", "enum": ["a", None]}) == ("string", True)
+        assert sync.coarse_type(
+            {"anyOf": [{"type": "string"}, {"type": "string", "format": "date"}, {"type": "null"}]}
+        ) == (
+            "string",
+            True,
+        )
+
+    def test_reconcile_enums_survives_a_nullable_enum(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [
+                {
+                    "spec": {"schema": "ColorOut", "property": "color"},
+                    "sdk": {"file": "src/blindpay/types.py", "symbol": "Color"},
+                }
+            ],
+            "types": [],
+            "ignore": {"schemas": []},
+        }
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+        spec = base_schema({"ColorOut": {"properties": {"color": {"enum": ["red", "green", None]}}}})
+
+        gaps = sync.reconcile_enums(spec, map_data, [], index)
+
+        assert [g.missing for g in gaps] == [["green"]]
+
+    def test_operations_marked_x_sdk_false_are_never_generated(self, repo: Path):
+        _write_fixture_repo(repo)
+        sync = load_sync(repo)
+        excluded = {**op(), "x-sdk": False}
+        spec = base_schema({}, {"/yield": {"get": excluded}})
+
+        plans, problems = sync.reconcile_operations(spec, {"types": [], "enums": [], "ignore": {"schemas": []}})
+
+        assert plans == [] and problems == []
+
+    def test_schemas_only_reachable_from_excluded_ops_are_not_reachable(self, repo: Path):
+        sync = load_sync(repo)
+        spec = base_schema(
+            {"YieldOut": {"properties": {}}, "PayoutOut": {"properties": {}}},
+            {
+                "/yield": {"get": {**op(ref_out="YieldOut"), "x-sdk": False}},
+                "/payouts": {"get": op(ref_out="PayoutOut")},
+            },
+        )
+
+        assert sync.compute_reachable_schemas(spec) == {"PayoutOut"}
+
+    def test_operation_coverage_is_method_aware(self, repo: Path):
+        write(
+            repo,
+            "src/blindpay/resources/things.py",
+            """class ThingsResource:
+    def __init__(self, instance_id, client):
+        self._client = client
+
+    async def get(self, id):
+        return await self._client.get(f"/things/{id}")
+
+    async def bad(self):
+        return await self._client.get("/yield")
+""",
+        )
+        sync = load_sync(repo)
+        spec = base_schema(
+            {},
+            {
+                "/things/{id}": {"get": op(), "put": op()},
+                "/yield": {"get": {**op(), "x-sdk": False}},
+            },
+        )
+
+        missing, forbidden, total = sync.operation_coverage(
+            spec, sync.discover_resource_modules(repo / "src" / "blindpay")
+        )
+
+        assert (missing, forbidden, total) == (["PUT /things/{id}"], ["GET /yield"], 2)
+
+    def test_check_accepts_an_explicit_spec(self, repo: Path):
+        _write_fixture_repo(repo)
+        _write_map_and_unmodeled(repo, {"types": [], "enums": [], "ignore": {"schemas": []}})
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(base_schema({})))
+        other = write(repo, "other.json", json.dumps(base_schema({}, {"/new": {"get": op()}})))
+        sync = load_sync(repo)
+
+        assert sync.cmd_check(None) == 0
+        assert sync.cmd_check(None, other) == 1
+
+
+class TestFunctionalTypedDictBases:
+    def test_keyword_wire_keys_in_a_functional_base_are_resolved(self, repo: Path):
+        write(
+            repo,
+            "src/blindpay/resources/bills.py",
+            """from typing_extensions import NotRequired, TypedDict
+
+_BillFrom = TypedDict("_BillFrom", {"from": NotRequired[str], "yield": NotRequired[int]})
+
+
+class Bill(_BillFrom):
+    id: str
+""",
+        )
+        sync = load_sync(repo)
+        index = sync.build_sdk_index(sync.SRC_ROOT)
+
+        fields = sync.resolve_typeddict_fields("Bill", "src/blindpay/resources/bills.py", index)
+
+        assert fields == {"id", "from", "yield"}
+
+
+class TestApplyManyChangesToOneFile:
+    def test_enum_and_property_changes_in_one_file_all_land(self, repo: Path):
+        """Regression: every splice used the index's copy of the source taken before the run, so a later change
+        to the same file overwrote the earlier ones (two Literals and a TypedDict in sample.py here)."""
+        write(repo, "src/blindpay/__init__.py", "")
+        write(repo, "src/blindpay/types.py", FIXTURE_TYPES_PY)
+        write(
+            repo,
+            "src/blindpay/resources/sample.py",
+            FIXTURE_RESOURCE_PY.replace(
+                "class Plain(TypedDict):\n    id: str\n",
+                "class Plain(TypedDict):\n    id: str\n    status: Status\n    shade: Shade\n",
+            ).replace("\n\nclass Plain", '\nShade = Literal["light"]\n\n\nclass Plain'),
+        )
+        map_data: dict[str, Any] = {
+            "enums": [
+                {
+                    "spec": {"schema": "PlainOut", "property": "status"},
+                    "sdk": {"file": "src/blindpay/resources/sample.py", "symbol": "Status"},
+                },
+                {
+                    "spec": {"schema": "PlainOut", "property": "shade"},
+                    "sdk": {"file": "src/blindpay/resources/sample.py", "symbol": "Shade"},
+                },
+            ],
+            "types": [{"spec": "PlainOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]}],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("get", "/p")))
+        spec = base_schema(
+            {
+                "PlainOut": {
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": ["string", "null"]},
+                        "status": {"type": "string", "enum": ["a", "b", "c"]},
+                        "shade": {"type": "string", "enum": ["light", "dark"]},
+                        "note": {"type": "string"},
+                    }
+                }
+            },
+            {"/p": {"get": op(ref_out="PlainOut")}},
+        )
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(spec))
+        sync = load_sync(repo)
+        source_before = (repo / "src/blindpay/resources/sample.py").read_text()
+        assert '"c"' not in source_before
+
+        assert sync.cmd_apply(sync.SNAPSHOT_PATH, None) == 0
+
+        source = (repo / "src/blindpay/resources/sample.py").read_text()
+        assert '"c"' in source and '"dark"' in source and "note:" in source
+
+
+class TestSharedTargetClass:
+    def test_two_map_entries_on_one_class_add_a_field_once(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [
+                {"spec": "AOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]},
+                {"spec": "BOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]},
+            ],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("get", "/a"), ("get", "/b")))
+        props = {"id": {"type": "string"}, "name": {"type": ["string", "null"]}, "note": {"type": "string"}}
+        spec = base_schema(
+            {"AOut": {"properties": props}, "BOut": {"properties": props}},
+            {"/a": {"get": op(ref_out="AOut")}, "/b": {"get": op(ref_out="BOut")}},
+        )
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(spec))
+        sync = load_sync(repo)
+
+        assert sync.cmd_apply(sync.SNAPSHOT_PATH, None) == 0
+
+        assert (repo / "src/blindpay/resources/sample.py").read_text().count("note:") == 1

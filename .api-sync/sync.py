@@ -123,11 +123,16 @@ def find_refs(node: object, out: set[str]) -> None:
 
 
 def compute_reachable_schemas(spec: dict) -> set[str]:
-    """Transitive $ref closure from paths + webhooks. Anything outside this
+    """Transitive $ref closure from SDK paths (`x-sdk` not false) + webhooks. Anything outside this
     set does not exist for this tool: not mappable, not a coverage gap, not
     reconciled -- skipped by construction, never by a hand-maintained list."""
     schemas = spec.get("components", {}).get("schemas", {})
-    roots = {"paths": spec.get("paths", {}), "webhooks": spec.get("webhooks", {})}
+    sdk_paths = {
+        path: {verb: op for verb, op in item.items() if not isinstance(op, dict) or is_sdk_operation(op)}
+        for path, item in spec.get("paths", {}).items()
+        if isinstance(item, dict)
+    }
+    roots = {"paths": sdk_paths, "webhooks": spec.get("webhooks", {})}
     reachable: set[str] = set()
     find_refs(roots, reachable)
     changed = True
@@ -187,7 +192,13 @@ def get_enum_values(spec: dict, locator: dict) -> Optional[set[str]]:
     enum = prop.get("enum")
     if enum is None:
         return None
-    return set(enum)
+    return enum_strings(enum)
+
+
+def enum_strings(values: list) -> set[str]:
+    """The string members of a spec enum. OpenAPI 3.1 writes a nullable enum as `enum: [..., null]`; the `null`
+    is nullability, not a member (it would crash sorting and never matches a Literal)."""
+    return {v for v in values if v is not None}
 
 
 def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
@@ -198,10 +209,10 @@ def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
     if not isinstance(prop_schema, dict):
         return None
     if "enum" in prop_schema:
-        return False, prop_schema["enum"]
+        return False, sorted(enum_strings(prop_schema["enum"]))
     items = prop_schema.get("items")
     if isinstance(items, dict) and "enum" in items:
-        return True, items["enum"]
+        return True, sorted(enum_strings(items["enum"]))
     for key in ("anyOf", "oneOf"):
         variants = prop_schema.get(key)
         if not isinstance(variants, list):
@@ -210,10 +221,10 @@ def find_enum_locator(prop_schema: dict) -> Optional[tuple[bool, list]]:
             if not isinstance(variant, dict):
                 continue
             if "enum" in variant:
-                return False, variant["enum"]
+                return False, sorted(enum_strings(variant["enum"]))
             v_items = variant.get("items")
             if isinstance(v_items, dict) and "enum" in v_items:
-                return True, v_items["enum"]
+                return True, sorted(enum_strings(v_items["enum"]))
     return None
 
 
@@ -246,6 +257,16 @@ def coarse_type(prop_schema: dict) -> tuple[Optional[str], bool]:
     else:
         types = []
         nullable = False
+    if None in (prop_schema.get("enum") or []):
+        nullable = True  # OpenAPI 3.1 nullable enum: `enum: [..., null]`
+    for key in ("anyOf", "oneOf"):
+        variants = prop_schema.get(key)
+        if not types and isinstance(variants, list):
+            non_null = [v for v in variants if isinstance(v, dict) and v.get("type") != "null"]
+            nullable = nullable or len(non_null) < len(variants)
+            kinds = {v.get("type") for v in non_null}
+            if len(kinds) == 1 and isinstance(next(iter(kinds)), str):
+                types = [next(iter(kinds))]
     if len(types) != 1:
         return None, nullable
     return types[0], nullable
@@ -312,6 +333,9 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
         trees[f] = ast.parse(text, filename=str(f))
 
     known_typeddict = {"TypedDict"}
+    functional: dict[Path, list[ast.ClassDef]] = {f: functional_typeddicts(tree) for f, tree in trees.items()}
+    for defs in functional.values():
+        known_typeddict.update(d.name for d in defs)
     for _ in range(5):
         changed = False
         for tree in trees.values():
@@ -326,7 +350,7 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
 
     all_classes: dict[str, list[ClassInfo]] = {}
     for f, tree in trees.items():
-        for node in ast.walk(tree):
+        for node in [*ast.walk(tree), *functional[f]]:
             if not (isinstance(node, ast.ClassDef) and node.name in known_typeddict):
                 continue
             own_fields = {}
@@ -362,6 +386,30 @@ def build_sdk_index(src_root: Path = SRC_ROOT) -> SdkIndex:
             all_literals.setdefault(name, []).append((f, node, sources[f]))
 
     return SdkIndex(all_classes=all_classes, all_literals=all_literals, sources=sources)
+
+
+def functional_typeddicts(tree: ast.Module) -> list[ast.ClassDef]:
+    """`_X = TypedDict("_X", {"from": ..., "yield": ...})` definitions -- the only way to declare a wire key that is
+    a Python keyword -- as synthetic ClassDefs whose body holds one AnnAssign per key, so field resolution treats
+    them like class-based TypedDicts. They are only ever used as bases; nothing is spliced into them."""
+    found: list[ast.ClassDef] = []
+    for node in tree.body:
+        if not (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)):
+            continue
+        call = node.value
+        if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == "TypedDict"):
+            continue
+        if len(call.args) < 2 or not isinstance(call.args[1], ast.Dict):
+            continue
+        body: list[ast.stmt] = []
+        for key, value in zip(call.args[1].keys, call.args[1].values, strict=True):
+            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                ann = ast.AnnAssign(target=ast.Name(id=key.value), annotation=value, simple=1)
+                ast.copy_location(ann, node)
+                body.append(ann)
+        cls = ast.ClassDef(name=node.targets[0].id, bases=[], keywords=[], body=body, decorator_list=[], type_params=[])
+        found.append(ast.copy_location(cls, node))
+    return found
 
 
 def _pick_unambiguous(file_rel: Optional[str], candidates: list) -> Optional[Any]:
@@ -1296,6 +1344,12 @@ def unmodeled_operation_allowed(unmodeled: list[dict], verb: str, path: str) -> 
     return any(e.get("kind") == "operation" and e["method"].lower() == verb and e["path"] == path for e in unmodeled)
 
 
+def is_sdk_operation(op: dict) -> bool:
+    """Public ops marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators)
+    must never be implemented by an SDK. Specs that predate the flag carry no `x-sdk` at all: treat those as SDK ops."""
+    return op.get("x-sdk") is not False
+
+
 def reconcile_operations(
     spec: dict,
     map_data: dict,
@@ -1313,6 +1367,8 @@ def reconcile_operations(
             continue
         for verb, op in sorted(item.items()):
             if verb not in HTTP_VERBS or not isinstance(op, dict):
+                continue
+            if not is_sdk_operation(op):
                 continue
             if (verb, normalize_spec_path(path)) in covered:
                 continue
@@ -1371,7 +1427,15 @@ def apply_enum_change(gap: EnumGap, index: SdkIndex) -> AppliedChange:
     entry = index.find_literal(gap.symbol, gap.file)
     if entry is None:
         raise SystemExit(f"internal error: lost track of literal {gap.symbol} in {gap.file}")
-    file_path, node, source = entry
+    file_path, node, _ = entry
+    # Re-read: an earlier change in this same run may already have rewritten the file, and splicing into the
+    # index's stale copy would silently drop that change.
+    source = file_path.read_text()
+    node = next(
+        n
+        for n in ast.parse(source).body
+        if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id == gap.symbol
+    )
     new_source = splice_literal_add_members(source, node, sorted(gap.missing))
     file_path.write_text(new_source)
     return AppliedChange(
@@ -1459,6 +1523,28 @@ def ensure_name_imported(
     return "".join(lines)
 
 
+def ensure_internal_http_import(source: str, names: set[str]) -> str:
+    """Add `names` to the module's `from ..._internal.http import ...` line, creating it after the
+    `_internal.api_client` import if absent. ruff's isort pass (run after apply) normalises the order."""
+    if not names:
+        return source
+    tree = ast.parse(source)
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "_internal.http" and node.level == 3:
+            merged = sorted({a.name for a in node.names} | names)
+            lines = source.splitlines(keepends=True)
+            assert node.end_lineno is not None
+            lines[node.lineno - 1 : node.end_lineno] = [f"from ..._internal.http import {', '.join(merged)}\n"]
+            return "".join(lines)
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "_internal.api_client" and node.level == 3:
+            lines = source.splitlines(keepends=True)
+            assert node.end_lineno is not None
+            lines.insert(node.end_lineno, f"from ..._internal.http import {', '.join(sorted(names))}\n")
+            return "".join(lines)
+    return source
+
+
 def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[AppliedChange], list[NeedsHuman]]:
     applied: list[AppliedChange] = []
     needs_human: list[NeedsHuman] = []
@@ -1496,7 +1582,14 @@ def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[Appli
             continue
         _, nullable = coarse_type(prop_schema)
         annotation = choose_field_annotation(info, python_type, nullable)
-        source = info.source
+        # Re-read: an earlier enum or property change in this run may have rewritten the file.
+        source = info.file.read_text()
+        info.node = _reparse_class(info.file, symbol)
+        if any(
+            isinstance(i, ast.AnnAssign) and isinstance(i.target, ast.Name) and i.target.id == name
+            for i in info.node.body
+        ):
+            continue  # another map entry sharing this class already added it in this run
         for required_name in ("NotRequired", "Optional"):
             if f"{required_name}[" in annotation:
                 updated = ensure_name_imported(source, required_name)
@@ -1572,20 +1665,30 @@ def append_method(source: str, class_name: str, method_source: str) -> str:
 
 
 def build_path_fstring(path: str, module: ResourceModule) -> str:
+    """The f-string body for an operation's path. Caller-supplied params are percent-encoded with
+    `path_param(...)`; the instance id comes from the client config."""
     path_wo_v1 = path[3:] if path.startswith("/v1/") else path
     names = path_param_names(path)
     if module.uses_instance_id and names:
         path_wo_v1 = path_wo_v1.replace("{" + names[0] + "}", "{self._instance_id}", 1)
+        names = names[1:]
+    for name in names:
+        path_wo_v1 = path_wo_v1.replace("{" + name + "}", "{path_param(" + name + ")}", 1)
     return path_wo_v1
 
 
 def render_method(plan: OperationInsertPlan, is_sync: bool) -> str:
+    """Generated methods follow the hand-written conventions: mutating methods take a trailing
+    `options: Optional[RequestOptions] = None` and forward it; path params go through `path_param`."""
     args = [f"{a}: str" for a in plan.path_args]
     if plan.input_type_name:
         args.append(f"data: {plan.input_type_name}")
+    mutating = plan.verb != "get"
+    if mutating:
+        args.append("options: Optional[RequestOptions] = None")
     arg_str = ", ".join(["self", *args])
     fstring = build_path_fstring(plan.path, plan.module)
-    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "")
+    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + (", options=options" if mutating else "")
     awaited = "" if is_sync else "await "
     async_kw = "" if is_sync else "async "
     client_call = f"self._client.{plan.verb}({call_args})"
@@ -1615,8 +1718,14 @@ def apply_operation_insert(plan: OperationInsertPlan, map_data: dict) -> Applied
         for kw in ("NotRequired", "Optional")
         if f"{kw}[" in f.annotation
     }
+    if plan.verb != "get":
+        needed_wrappers.add("Optional")
     for kw in sorted(needed_wrappers):
         source = ensure_name_imported(source, kw)
+    http_names = {"path_param"} if "path_param(" in build_path_fstring(plan.path, plan.module) else set()
+    if plan.verb != "get":
+        http_names.add("RequestOptions")
+    source = ensure_internal_http_import(source, http_names)
 
     for spec in (plan.input_spec, plan.output_spec):
         if spec and spec.named_schema:
@@ -1712,13 +1821,13 @@ def cmd_validate_map() -> int:
     return 0
 
 
-def cmd_check(report_path: Optional[Path]) -> int:
+def cmd_check(report_path: Optional[Path], spec_path: Optional[Path] = None) -> int:
     index = build_sdk_index(SRC_ROOT)
     map_data = load_map()
     unmodeled = load_unmodeled()
 
     map_errors = validate_map(map_data, index)
-    spec = load_json(SNAPSHOT_PATH)
+    spec = load_json(spec_path or SNAPSHOT_PATH)
     enum_gaps = reconcile_enums(spec, map_data, unmodeled, index) if not map_errors else []
     prop_gaps = reconcile_types(spec, map_data, unmodeled, index) if not map_errors else []
     enum_coverage_gaps = reconcile_enum_coverage(spec, map_data, unmodeled, index) if not map_errors else []
@@ -1865,17 +1974,46 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
     return 0
 
 
+def operation_coverage(spec: dict, modules: list[ResourceModule]) -> tuple[list[str], list[str], int]:
+    """METHOD+path coverage: (SDK ops with no method, `x-sdk: false` ops that have one, SDK op count).
+    Matching is per HTTP method, so a GET method never counts as covering a PUT on the same path."""
+    covered = covered_operations(modules)
+    missing: list[str] = []
+    forbidden: list[str] = []
+    total = 0
+    for path, item in sorted(spec.get("paths", {}).items()):
+        if not isinstance(item, dict):
+            continue
+        for verb, op in sorted(item.items()):
+            if verb not in HTTP_VERBS or not isinstance(op, dict):
+                continue
+            implemented = (verb, normalize_spec_path(path)) in covered
+            if is_sdk_operation(op):
+                total += 1
+                if not implemented:
+                    missing.append(f"{verb.upper()} {path}")
+            elif implemented:
+                forbidden.append(f"{verb.upper()} {path}")
+    return missing, forbidden, total
+
+
 def cmd_coverage(spec_path: Path) -> int:
     map_data = load_map()
     spec = load_json(spec_path) if spec_path.exists() else load_json(SNAPSHOT_PATH)
+    missing, forbidden, total = operation_coverage(spec, discover_resource_modules(SRC_ROOT))
+    print(f"Operations: {total - len(missing)}/{total} SDK operations have a method.")
+    for label in missing:
+        print(f"  MISSING: {label}")
+    for label in forbidden:
+        print(f"  NOT AN SDK OPERATION (x-sdk: false) but implemented: {label}")
     gaps = coverage_report(spec, map_data)
     if not gaps:
-        print("Coverage: no known gaps.")
-        return 0
-    print(f"Coverage report ({len(gaps)} known gap(s), non-blocking):")
-    for g in gaps:
-        print(f"  {g['method']} {g['path']}  ({', '.join(g['schemas'])}): {g['reason']}")
-    return 0
+        print("Schemas: no known gaps.")
+    else:
+        print(f"Schemas ({len(gaps)} known gap(s), informational):")
+        for g in gaps:
+            print(f"  {g['method']} {g['path']}  ({', '.join(g['schemas'])}): {g['reason']}")
+    return 1 if missing or forbidden else 0
 
 
 # --------------------------------------------------------------------------- #
@@ -2045,20 +2183,25 @@ def main() -> int:
     mode.add_argument("--validate-map", action="store_true")
     mode.add_argument("--coverage", action="store_true")
     mode.add_argument("--audit-types", action="store_true")
-    parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC_PATH)
+    parser.add_argument(
+        "--spec",
+        type=Path,
+        default=None,
+        help="spec to compare against (--apply: default spec-current.json; --check: default the snapshot)",
+    )
     parser.add_argument("--report", type=Path, default=None)
     args = parser.parse_args()
 
     if args.validate_map:
         return cmd_validate_map()
     if args.check:
-        return cmd_check(args.report)
+        return cmd_check(args.report, args.spec)
     if args.apply:
-        return cmd_apply(args.spec, args.report)
+        return cmd_apply(args.spec or DEFAULT_SPEC_PATH, args.report)
     if args.coverage:
-        return cmd_coverage(args.spec)
+        return cmd_coverage(args.spec or DEFAULT_SPEC_PATH)
     if args.audit_types:
-        return cmd_audit_types(args.spec)
+        return cmd_audit_types(args.spec or DEFAULT_SPEC_PATH)
     return 1
 
 

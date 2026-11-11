@@ -99,7 +99,6 @@ disallow_subclassing_any = true
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 exclude = [
-    "^examples/",
     "^\\.api-sync/",
 ]
 

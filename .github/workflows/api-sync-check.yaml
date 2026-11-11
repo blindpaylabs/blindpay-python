@@ -21,6 +21,12 @@ jobs:
       - name: State reconciliation (--check)
         run: python3 .api-sync/sync.py --check
 
+      - name: Typed webhook events match the spec
+        run: python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
+
+      - name: Operation coverage (every x-sdk op has a method, no x-sdk:false op does)
+        run: python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json
+
       - name: Determinism proof
         run: |
           set -e
@@ -37,10 +43,6 @@ jobs:
           (cd /tmp/api-sync-proof-b && python3 .api-sync/sync.py --apply --spec .api-sync/spec-snapshot.json)
           diff -rq /tmp/api-sync-proof-a /tmp/api-sync-proof-b
           diff -rq . /tmp/api-sync-proof-a
-
-      - name: Coverage report (non-blocking)
-        continue-on-error: true
-        run: python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json
 
       - name: Type audit (non-blocking)
         continue-on-error: true

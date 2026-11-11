@@ -85,6 +85,10 @@ jobs:
         continue-on-error: true
         run: python3 .api-sync/sync.py --apply --report /tmp/api-sync-report.json
 
+      - name: Regenerate the typed webhook events
+        if: steps.patch.outcome == 'success'
+        run: python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json
+
       - name: Show report
         if: always()
         run: |

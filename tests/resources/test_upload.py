@@ -126,7 +126,12 @@ class TestUpload:
         response = await client.upload.create({"bucket": "avatar", "file": b"plain text"})
 
         assert response["data"] is None
-        assert response["error"] == {"message": "file_type_not_allowed"}
+        error = response["error"]
+        assert error is not None
+        assert error["message"] == "file_type_not_allowed"
+        assert error.get("status") == 400
+        assert error.get("retryable") is False
+        assert error.get("idempotency_key") is None  # multipart uploads never carry one
         assert_multipart(recorder.last, "/v1/upload", {"bucket": "avatar"}, "file", "application/octet-stream")
 
 

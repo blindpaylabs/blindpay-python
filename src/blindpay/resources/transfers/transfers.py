@@ -1,9 +1,10 @@
-from typing import List, Optional
-from urllib.parse import urlencode
+from typing import AsyncIterator, Iterator, List, Optional, Union
 
-from typing_extensions import Literal, NotRequired, TypedDict
+from typing_extensions import Literal, NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
     Network,
@@ -18,19 +19,21 @@ AmountReference = Literal["sender", "receiver"]
 
 class TransferTrackingStep(TypedDict):
     step: str
-    estimated_time_of_arrival: Optional[str]
+    estimated_time_of_arrival: NotRequired[Optional[str]]
 
 
 class CreateTransferQuoteInput(TypedDict, total=False):
-    wallet_id: str
-    sender_token: StablecoinToken
-    customer_wallet_address: str
-    customer_token: StablecoinToken
-    customer_network: Network
-    request_amount: int
-    amount_reference: AmountReference
+    wallet_id: Required[str]
+    sender_token: Required[StablecoinToken]
+    customer_wallet_address: Required[str]
+    customer_token: Required[StablecoinToken]
+    customer_network: Required[Network]
+    request_amount: Required[int]
+    amount_reference: Required[AmountReference]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
+    partner_flat_fee: int
+    partner_percentage_fee: int
 
 
 class CreateTransferQuoteResponse(TypedDict):
@@ -41,7 +44,9 @@ class CreateTransferQuoteResponse(TypedDict):
     receiver_amount: float
     sender_amount: float
     flat_fee: float
-    partner_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
+    partner_flat_fee: NotRequired[int]
+    partner_percentage_fee: NotRequired[int]
 
 
 class CreateTransferInput(TypedDict):
@@ -51,31 +56,33 @@ class CreateTransferInput(TypedDict):
 class Transfer(TypedDict):
     id: str
     instance_id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     transfer_quote_id: str
     wallet_id: str
-    sender_token: StablecoinToken
+    sender_token: Union[StablecoinToken, str]
     sender_amount: float
     receiver_amount: float
-    customer_token: StablecoinToken
-    customer_network: Network
+    customer_token: Union[StablecoinToken, str]
+    customer_network: Union[Network, str]
     customer_wallet_address: str
     customer_id: str
-    address: Optional[str]
+    address: NotRequired[Optional[str]]
     network: str
     tracking_transaction_monitoring: TransferTrackingStep
     tracking_paymaster: TransferTrackingStep
     tracking_bridge_swap: TransferTrackingStep
     tracking_complete: TransferTrackingStep
-    tracking_partner_fee: TransferTrackingStep
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
-    partner_fee_amount: Optional[float]
-    external_id: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TransferTrackingStep]]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
+    partner_fee_amount: NotRequired[Optional[float]]
+    external_id: NotRequired[Optional[str]]
+    partner_flat_fee: NotRequired[int]
+    partner_percentage_fee: NotRequired[int]
 
 
 class CreateTransferTrackingStep(TypedDict):
@@ -95,7 +102,7 @@ class CreateTransferTrackingMonitoring(TypedDict):
 
 class CreateTransferResponse(TypedDict):
     id: str
-    status: TransactionStatus
+    status: Union[TransactionStatus, str]
     tracking_bridge_swap: CreateTransferTrackingStep
     tracking_complete: CreateTransferTrackingStep
     tracking_paymaster: CreateTransferTrackingStep
@@ -111,30 +118,43 @@ class ListTransfersResponse(TypedDict):
     pagination: PaginationMetadata
 
 
+class ListTransfersInput(PaginationParams, total=False):
+    customer_id: str
+    wallet_id: str
+    status: TransactionStatus
+    network: Network
+    token: StablecoinToken
+
+
 class TransfersResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
         self._client = client
 
-    async def create_quote(self, data: CreateTransferQuoteInput) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data)
+    async def create_quote(
+        self, data: CreateTransferQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data, options=options)
 
-    async def create(self, data: CreateTransferInput) -> BlindpayApiResponse[CreateTransferResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/transfers", data)
+    async def create(
+        self, data: CreateTransferInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
-    async def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    async def list(self, params: Optional[ListTransfersInput] = None) -> BlindpayApiResponse[ListTransfersResponse]:
+        query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
 
+    def list_auto_paging(self, params: Optional[ListTransfersInput] = None) -> AsyncIterator[Transfer]:
+        return async_auto_paging_iter(self.list, params)
+
     async def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/transfers/{transfer_id}")
+        return await self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
 
     async def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return await self._client.get(f"/e/transfers/{transfer_id}")
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``transfers.get(transfer_id)`` instead."""
+        return await self._client.get(f"/e/transfers/{path_param(transfer_id)}")
 
 
 class TransfersResourceSync:
@@ -142,25 +162,30 @@ class TransfersResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def create_quote(self, data: CreateTransferQuoteInput) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data)
+    def create_quote(
+        self, data: CreateTransferQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data, options=options)
 
-    def create(self, data: CreateTransferInput) -> BlindpayApiResponse[CreateTransferResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/transfers", data)
+    def create(
+        self, data: CreateTransferInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
-    def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
-        query_string = ""
-        if params:
-            filtered_params = {k: v for k, v in params.items() if v is not None}
-            if filtered_params:
-                query_string = f"?{urlencode(filtered_params)}"
+    def list(self, params: Optional[ListTransfersInput] = None) -> BlindpayApiResponse[ListTransfersResponse]:
+        query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
 
+    def list_auto_paging(self, params: Optional[ListTransfersInput] = None) -> Iterator[Transfer]:
+        return auto_paging_iter(self.list, params)
+
     def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/transfers/{transfer_id}")
+        return self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
 
     def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return self._client.get(f"/e/transfers/{transfer_id}")
+        """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
+        Use ``transfers.get(transfer_id)`` instead."""
+        return self._client.get(f"/e/transfers/{path_param(transfer_id)}")
 
 
 def create_transfers_resource(instance_id: str, client: InternalApiClient) -> TransfersResource:

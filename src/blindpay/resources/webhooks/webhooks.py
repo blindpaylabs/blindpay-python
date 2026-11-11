@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse
 
 WebhookEvents = Literal[
@@ -29,6 +30,11 @@ WebhookEvents = Literal[
     "transfer.complete",
     "wallet.new",
     "wallet.inbound",
+    "blockchainWallet.update",
+    "payable.complete",
+    "payable.new",
+    "payable.update",
+    "wallet.update",
 ]
 
 
@@ -44,11 +50,11 @@ class CreateWebhookEndpointResponse(TypedDict):
 class WebhookEndpoint(TypedDict):
     id: str
     url: str
-    events: List[WebhookEvents]
-    last_event_at: str
+    events: List[Union[WebhookEvents, str]]
+    last_event_at: NotRequired[Optional[str]]
     instance_id: str
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
 
 
 ListWebhookEndpointsResponse = List[WebhookEndpoint]
@@ -70,14 +76,18 @@ class WebhookEndpointsResource:
     async def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
 
-    async def create(self, data: CreateWebhookEndpointInput) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)
+    async def create(
+        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    async def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}")
+    async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
+        )
 
     async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")
+        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")
 
     async def get_portal_access_url(self) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/portal-access")
@@ -91,14 +101,18 @@ class WebhookEndpointsResourceSync:
     def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
 
-    def create(self, data: CreateWebhookEndpointInput) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)
+    def create(
+        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}")
+    def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(
+            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
+        )
 
     def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")
+        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")
 
     def get_portal_access_url(self) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
         return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/portal-access")

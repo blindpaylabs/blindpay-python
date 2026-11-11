@@ -1,12 +1,32 @@
-from typing import Generic, Literal, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 T = TypeVar("T")
 
 
 class ErrorResponse(TypedDict):
+    """The ``error`` half of every result. The SDK always fills every key; only ``message`` is typed as required
+    so hand-built errors (e.g. in tests) stay valid.
+
+    - ``status``: HTTP status, or 0 when no response arrived (network error, timeout).
+    - ``code``: the API's stable UPPERCASE error code, or an ``SDK_*`` code for client-side failures.
+    - ``errors``: the API's detail list (empty when absent).
+    - ``request_id``: the ``X-Request-Id`` response header.
+    - ``idempotency_key``: the key the request carried (yours or auto-generated). Resend with it to resume safely.
+    - ``retryable``: the request may succeed if resent with the same ``idempotency_key``. For a create or payout
+      that returned a 5xx, look the resource up before resending.
+    """
+
     message: str
+    status: NotRequired[int]
+    code: NotRequired[Optional[str]]
+    description: NotRequired[Optional[str]]
+    errors: NotRequired[List[Any]]
+    trace_id: NotRequired[Optional[str]]
+    request_id: NotRequired[Optional[str]]
+    idempotency_key: NotRequired[Optional[str]]
+    retryable: NotRequired[bool]
 
 
 class BlindpayErrorResponse(TypedDict):
@@ -37,9 +57,13 @@ Network = Literal[
     "tron",
     "solana",
     "solana_devnet",
+    "arc",
+    "arc_testnet",
+    "tempo",
+    "tempo_testnet",
 ]
 
-StablecoinToken = Literal["USDC", "USDT", "USDB"]
+StablecoinToken = Literal["USDC", "USDT", "USDB", "EURB", "EURC"]
 
 TransactionDocumentType = Literal[
     "invoice", "purchase_order", "delivery_slip", "contract", "customs_declaration", "bill_of_lading", "others"
@@ -47,7 +71,7 @@ TransactionDocumentType = Literal[
 
 BankAccountType = Literal["checking", "saving"]
 
-Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS"]
+Currency = Literal["USDC", "USDT", "USDB", "BRL", "USD", "MXN", "COP", "ARS", "GBP", "EUR"]
 
 Rail = Literal[
     "wire",
@@ -61,6 +85,7 @@ Rail = Literal[
     "rtp",
     "ted",
     "sepa",
+    "faster_payments",
 ]
 
 AccountClass = Literal["individual", "business"]
@@ -326,7 +351,15 @@ PaginationOffset = Literal["0", "10", "50", "100", "200", "500", "1000"]
 
 
 class PaginationParams(TypedDict, total=False):
-    limit: PaginationLimit
+    """Cursor pagination. Sending any of ``limit``, ``starting_after`` or ``ending_before`` makes the API answer
+    with the ``{data, pagination}`` envelope; without them some lists return a bare array of every row.
+
+    - ``limit``: page size, an int or its string form (``10, 50, 100, 200, 500, 1000``).
+    - ``starting_after``: the previous page's ``pagination.next_page``.
+    - ``offset``: deprecated, ignored by the API; use ``starting_after``.
+    """
+
+    limit: Union[PaginationLimit, int]
     offset: PaginationOffset
     starting_after: str
     ending_before: str
@@ -334,24 +367,81 @@ class PaginationParams(TypedDict, total=False):
 
 class PaginationMetadata(TypedDict):
     has_more: bool
-    next_page: Optional[str]
-    prev_page: Optional[str]
+    next_page: NotRequired[Optional[str]]
+    """Pass it as ``starting_after`` to get the next page; absent or null when ``has_more`` is false."""
+    prev_page: NotRequired[Optional[str]]
+
+
+class CardInstruction(TypedDict):
+    """How to collect a card payin: tokenize the card with ``tokenization_key`` or send the payer to
+    ``checkout_url``."""
+
+    provider: str
+    tokenization_key: str
+    checkout_public_key: NotRequired[Optional[str]]
+    checkout_token: NotRequired[Optional[str]]
+    checkout_url: NotRequired[Optional[str]]
 
 
 class TrackingTransaction(TypedDict):
     step: str
-    status: Optional[str]
-    transaction_hash: Optional[str]
-    completed_at: Optional[str]
+    status: NotRequired[Optional[str]]
+    transaction_hash: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
+    card_instruction: NotRequired[Optional[CardInstruction]]
+    card_evidence: NotRequired[Optional[Dict[str, Any]]]
+    card_claim_at: NotRequired[Optional[str]]
+    card_failed_attempts: NotRequired[Optional[int]]
+    card_gates_failed_at: NotRequired[Optional[str]]
+    provider_name: NotRequired[Optional[str]]
+    pse_instruction: NotRequired[Optional[Dict[str, Any]]]
+    ted_instruction: NotRequired[Optional[Dict[str, Any]]]
+    transfers_instruction: NotRequired[Optional[Dict[str, Any]]]
+    description: NotRequired[Optional[str]]
+    end_to_end_id: NotRequired[Optional[str]]
+    external_id: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    sender_account_number: NotRequired[Optional[str]]
+    sender_bank_code: NotRequired[Optional[str]]
+    sender_bank_name: NotRequired[Optional[str]]
+    sender_name: NotRequired[Optional[str]]
+    sender_tax_id: NotRequired[Optional[str]]
+    trace_number: NotRequired[Optional[str]]
+    transaction_reference: NotRequired[Optional[str]]
+    ledger_in_transaction_id: NotRequired[Optional[str]]
+    ledger_out_transaction_id: NotRequired[Optional[str]]
+    provider_error_reason: NotRequired[Optional[str]]
 
 
 class TrackingPayment(TypedDict):
     step: str
-    provider_name: Optional[str]
-    provider_transaction_id: Optional[str]
-    provider_status: Optional[str]
-    estimated_time_of_arrival: Optional[str]
-    completed_at: Optional[str]
+    provider_name: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    provider_status: NotRequired[Optional[str]]
+    estimated_time_of_arrival: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
+    refund_review_reason: NotRequired[Optional[str]]
+    review_context: NotRequired[Optional[Dict[str, Any]]]
+    review_contexts: NotRequired[Optional[Dict[str, Any]]]
+    review_sources: NotRequired[Optional[List[str]]]
+    refund_review_actioned_at: NotRequired[Optional[str]]
+    refund_review_detected_at: NotRequired[Optional[str]]
+    returned_amount: NotRequired[Optional[int]]
+    review_source: NotRequired[Optional[str]]
+    approved_risk_sources: NotRequired[Optional[List[str]]]
+    coelsa_id: NotRequired[Optional[str]]
+    end_to_end_id: NotRequired[Optional[str]]
+    provider_clearing_system: NotRequired[Optional[str]]
+    provider_error_reason: NotRequired[Optional[str]]
+    provider_imad: NotRequired[Optional[str]]
+    provider_reference: NotRequired[Optional[str]]
+    provider_uetr: NotRequired[Optional[str]]
+    recipient_account_number: NotRequired[Optional[str]]
+    recipient_account_type: NotRequired[Optional[str]]
+    recipient_bank_code: NotRequired[Optional[str]]
+    recipient_branch_code: NotRequired[Optional[str]]
+    recipient_name: NotRequired[Optional[str]]
+    recipient_tax_id: NotRequired[Optional[str]]
 
 
 class TrackingLiquidity(TypedDict):
@@ -364,9 +454,11 @@ class TrackingLiquidity(TypedDict):
 
 class TrackingComplete(TypedDict):
     step: str
-    status: Optional[str]
-    transaction_hash: Optional[str]
-    completed_at: Optional[str]
+    status: NotRequired[Optional[str]]
+    transaction_hash: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    refund_reason: NotRequired[Optional[str]]
 
 
 class TrackingPartnerFee(TypedDict):
@@ -388,9 +480,11 @@ RecipientRelationship = Literal[
     "other",
 ]
 
-BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan", "portage", "ssb"]
+BankingPartner = Literal["cfsb", "citi", "hsbc", "jpmorgan", "portage", "ssb", "bre_b", "portage_g", "spei"]
 
-PaymentMethod = Literal["ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted"]
+PaymentMethod = Literal[
+    "ach", "wire", "pix", "spei", "transfers", "pse", "international_swift", "rtp", "ted", "ach_pull", "bre_b", "card"
+]
 
 KycStatus = Literal["awaiting_contract", "compliance_request"]
 
@@ -406,4 +500,4 @@ AipriseDocumentType = Literal[
 
 ApprovalRate = Literal["high", "low", "medium"]
 
-ManualExecutionStatus = Literal["failed"]
+ManualExecutionStatus = Literal["failed", "concluded", "pending"]
