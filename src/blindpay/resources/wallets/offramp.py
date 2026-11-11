@@ -9,14 +9,14 @@ from ...types import BlindpayApiResponse, Network
 
 class OfframpWallet(TypedDict):
     id: str
-    external_id: Optional[str]
+    external_id: NotRequired[Optional[str]]
     instance_id: str
     customer_id: str
     bank_account_id: str
     network: Union[Network, str]
     address: str
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
     partner_fee_id: NotRequired[Optional[str]]
 
 
@@ -38,7 +38,7 @@ class CreateOfframpWalletInput(TypedDict):
 
 class CreateOfframpWalletResponse(TypedDict):
     id: str
-    external_id: str
+    external_id: NotRequired[Optional[str]]
     network: Union[Network, str]
     address: str
 

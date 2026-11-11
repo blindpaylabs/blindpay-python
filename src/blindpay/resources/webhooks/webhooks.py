@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -51,10 +51,10 @@ class WebhookEndpoint(TypedDict):
     id: str
     url: str
     events: List[Union[WebhookEvents, str]]
-    last_event_at: str
+    last_event_at: NotRequired[Optional[str]]
     instance_id: str
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
 
 
 ListWebhookEndpointsResponse = List[WebhookEndpoint]

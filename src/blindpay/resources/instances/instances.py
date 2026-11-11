@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -26,10 +26,10 @@ class InstanceMember(TypedDict):
     id: str
     email: str
     first_name: str
-    middle_name: str
+    middle_name: NotRequired[Optional[str]]
     last_name: str
     image_url: str
-    created_at: str
+    created_at: NotRequired[Optional[str]]
     role: Union[InstanceMemberRole, str]
 
 

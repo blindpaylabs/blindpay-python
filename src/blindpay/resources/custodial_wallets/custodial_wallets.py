@@ -12,11 +12,11 @@ YieldStatus = Literal["disabled", "enabled", "disabling"]
 
 class CustodialWallet(TypedDict):
     id: str
-    customer_id: str
-    instance_id: str
+    customer_id: NotRequired[str]
+    instance_id: NotRequired[str]
     network: Union[Network, str]
-    address: Optional[str]
-    created_at: Optional[str]
+    address: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
     yield_status: NotRequired[Optional[Union[YieldStatus, str]]]
 
 

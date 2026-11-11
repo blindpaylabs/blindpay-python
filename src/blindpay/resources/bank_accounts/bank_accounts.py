@@ -41,57 +41,57 @@ class BankAccount(TypedDict):
     id: str
     type: Union[Rail, str]
     name: str
-    pix_key: Optional[str]
-    beneficiary_name: Optional[str]
-    routing_number: Optional[str]
-    account_number: Optional[str]
-    account_type: Optional[Union[BankAccountType, str]]
-    account_class: Optional[Union[AccountClass, str]]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Union[Country, str]]
-    postal_code: Optional[str]
-    spei_protocol: Optional[str]
-    spei_institution_code: Optional[str]
-    spei_clabe: Optional[str]
-    sepa_beneficiary_bic: Optional[str]
-    transfers_type: Optional[Union[ArgentinaTransfers, str]]
-    transfers_account: Optional[str]
-    ach_cop_beneficiary_first_name: Optional[str]
-    ach_cop_beneficiary_last_name: Optional[str]
-    ach_cop_document_id: Optional[str]
-    ach_cop_document_type: Optional[Union[AchCopDocument, str]]
-    ach_cop_email: Optional[str]
-    ach_cop_bank_code: Optional[str]
-    ach_cop_bank_account: Optional[str]
-    swift_code_bic: Optional[str]
-    swift_account_holder_name: Optional[str]
-    swift_account_number_iban: Optional[str]
-    swift_beneficiary_address_line_1: Optional[str]
-    swift_beneficiary_address_line_2: Optional[str]
-    swift_beneficiary_country: Optional[Union[Country, str]]
-    swift_beneficiary_city: Optional[str]
-    swift_beneficiary_state_province_region: Optional[str]
-    swift_beneficiary_postal_code: Optional[str]
-    swift_bank_name: Optional[str]
-    swift_bank_address_line_1: Optional[str]
-    swift_bank_address_line_2: Optional[str]
-    swift_bank_country: Optional[Union[Country, str]]
-    swift_bank_city: Optional[str]
-    swift_bank_state_province_region: Optional[str]
-    swift_bank_postal_code: Optional[str]
-    swift_intermediary_bank_swift_code_bic: Optional[str]
-    swift_intermediary_bank_account_number_iban: Optional[str]
-    swift_intermediary_bank_name: Optional[str]
-    swift_intermediary_bank_country: Optional[Union[Country, str]]
-    tron_wallet_hash: Optional[str]
-    offramp_wallets: Optional[List[OfframpWallet]]
-    created_at: Optional[str]
-    ted_bank_code: Optional[str]
-    ted_branch_code: Optional[str]
-    ted_cpf_cnpj: Optional[str]
+    pix_key: NotRequired[Optional[str]]
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    spei_protocol: NotRequired[Optional[str]]
+    spei_institution_code: NotRequired[Optional[str]]
+    spei_clabe: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    transfers_type: NotRequired[Optional[Union[ArgentinaTransfers, str]]]
+    transfers_account: NotRequired[Optional[str]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    swift_code_bic: NotRequired[Optional[str]]
+    swift_account_holder_name: NotRequired[Optional[str]]
+    swift_account_number_iban: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_1: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_2: NotRequired[Optional[str]]
+    swift_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    swift_beneficiary_city: NotRequired[Optional[str]]
+    swift_beneficiary_state_province_region: NotRequired[Optional[str]]
+    swift_beneficiary_postal_code: NotRequired[Optional[str]]
+    swift_bank_name: NotRequired[Optional[str]]
+    swift_bank_address_line_1: NotRequired[Optional[str]]
+    swift_bank_address_line_2: NotRequired[Optional[str]]
+    swift_bank_country: NotRequired[Optional[Union[Country, str]]]
+    swift_bank_city: NotRequired[Optional[str]]
+    swift_bank_state_province_region: NotRequired[Optional[str]]
+    swift_bank_postal_code: NotRequired[Optional[str]]
+    swift_intermediary_bank_swift_code_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_account_number_iban: NotRequired[Optional[str]]
+    swift_intermediary_bank_name: NotRequired[Optional[str]]
+    swift_intermediary_bank_country: NotRequired[Optional[Union[Country, str]]]
+    tron_wallet_hash: NotRequired[Optional[str]]
+    offramp_wallets: NotRequired[Optional[List[OfframpWallet]]]
+    created_at: NotRequired[Optional[str]]
+    ted_bank_code: NotRequired[Optional[str]]
+    ted_branch_code: NotRequired[Optional[str]]
+    ted_cpf_cnpj: NotRequired[Optional[str]]
     faster_payments_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
     faster_payments_account_number: NotRequired[Optional[str]]
     faster_payments_beneficiary_address_line_1: NotRequired[Optional[str]]
@@ -122,8 +122,8 @@ class CreatePixResponse(TypedDict):
     id: str
     type: Union[PixType, str]
     name: str
-    pix_key: str
-    created_at: str
+    pix_key: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateArgentinaTransfersInput(TypedDict):
@@ -138,10 +138,10 @@ class CreateArgentinaTransfersResponse(TypedDict):
     id: str
     type: Union[TransfersBitsoType, str]
     name: str
-    beneficiary_name: str
-    transfers_type: Union[ArgentinaTransfers, str]
-    transfers_account: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    transfers_type: NotRequired[Optional[Union[ArgentinaTransfers, str]]]
+    transfers_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateSpeiInput(TypedDict):
@@ -157,11 +157,11 @@ class CreateSpeiResponse(TypedDict):
     id: str
     type: Union[SpeiBitsoType, str]
     name: str
-    beneficiary_name: str
-    spei_protocol: Union[SpeiProtocol, str]
-    spei_institution_code: str
-    spei_clabe: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    spei_protocol: NotRequired[Optional[Union[SpeiProtocol, str]]]
+    spei_institution_code: NotRequired[Optional[str]]
+    spei_clabe: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateColombiaAchInput(TypedDict):
@@ -181,15 +181,15 @@ class CreateColombiaAchResponse(TypedDict):
     id: str
     type: Union[AchCopBitsoType, str]
     name: str
-    account_type: Union[BankAccountType, str]
-    ach_cop_beneficiary_first_name: str
-    ach_cop_beneficiary_last_name: str
-    ach_cop_document_id: str
-    ach_cop_document_type: Union[AchCopDocument, str]
-    ach_cop_email: str
-    ach_cop_bank_code: str
-    ach_cop_bank_account: str
-    created_at: str
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateAchInputRequired(TypedDict):
@@ -220,25 +220,25 @@ class CreateAchResponse(TypedDict):
     id: str
     type: Union[AchType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    account_type: Union[BankAccountType, str]
-    account_class: Union[AccountClass, str]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Union[Country, str]]
-    postal_code: Optional[str]
-    ach_cop_beneficiary_first_name: Optional[str]
-    ach_cop_beneficiary_last_name: Optional[str]
-    ach_cop_document_id: Optional[str]
-    ach_cop_document_type: Optional[Union[AchCopDocument, str]]
-    ach_cop_email: Optional[str]
-    ach_cop_bank_code: Optional[str]
-    ach_cop_bank_account: Optional[str]
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    ach_cop_beneficiary_first_name: NotRequired[Optional[str]]
+    ach_cop_beneficiary_last_name: NotRequired[Optional[str]]
+    ach_cop_document_id: NotRequired[Optional[str]]
+    ach_cop_document_type: NotRequired[Optional[Union[AchCopDocument, str]]]
+    ach_cop_email: NotRequired[Optional[str]]
+    ach_cop_bank_code: NotRequired[Optional[str]]
+    ach_cop_bank_account: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateWireInputRequired(TypedDict):
@@ -268,16 +268,16 @@ class CreateWireResponse(TypedDict):
     id: str
     type: Union[WireType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
-    state_province_region: str
-    country: Union[Country, str]
-    postal_code: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateInternationalSwiftInputRequired(TypedDict):
@@ -321,35 +321,35 @@ class CreateInternationalSwiftResponse(TypedDict):
     id: str
     type: Union[InternationalSwiftType, str]
     name: str
-    beneficiary_name: Optional[str]
-    address_line_1: Optional[str]
-    address_line_2: Optional[str]
-    city: Optional[str]
-    state_province_region: Optional[str]
-    country: Optional[Union[Country, str]]
-    postal_code: Optional[str]
-    swift_code_bic: str
-    swift_account_holder_name: str
-    swift_account_number_iban: str
-    swift_beneficiary_address_line_1: str
-    swift_beneficiary_address_line_2: Optional[str]
-    swift_beneficiary_country: Union[Country, str]
-    swift_beneficiary_city: str
-    swift_beneficiary_state_province_region: str
-    swift_beneficiary_postal_code: str
-    swift_bank_name: str
-    swift_bank_address_line_1: str
-    swift_bank_address_line_2: Optional[str]
-    swift_bank_country: Union[Country, str]
-    swift_bank_city: str
-    swift_bank_state_province_region: str
-    swift_bank_postal_code: str
-    sepa_beneficiary_bic: Optional[str]
-    swift_intermediary_bank_swift_code_bic: Optional[str]
-    swift_intermediary_bank_account_number_iban: Optional[str]
-    swift_intermediary_bank_name: Optional[str]
-    swift_intermediary_bank_country: Optional[Union[Country, str]]
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    swift_code_bic: NotRequired[Optional[str]]
+    swift_account_holder_name: NotRequired[Optional[str]]
+    swift_account_number_iban: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_1: NotRequired[Optional[str]]
+    swift_beneficiary_address_line_2: NotRequired[Optional[str]]
+    swift_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    swift_beneficiary_city: NotRequired[Optional[str]]
+    swift_beneficiary_state_province_region: NotRequired[Optional[str]]
+    swift_beneficiary_postal_code: NotRequired[Optional[str]]
+    swift_bank_name: NotRequired[Optional[str]]
+    swift_bank_address_line_1: NotRequired[Optional[str]]
+    swift_bank_address_line_2: NotRequired[Optional[str]]
+    swift_bank_country: NotRequired[Optional[Union[Country, str]]]
+    swift_bank_city: NotRequired[Optional[str]]
+    swift_bank_state_province_region: NotRequired[Optional[str]]
+    swift_bank_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_swift_code_bic: NotRequired[Optional[str]]
+    swift_intermediary_bank_account_number_iban: NotRequired[Optional[str]]
+    swift_intermediary_bank_name: NotRequired[Optional[str]]
+    swift_intermediary_bank_country: NotRequired[Optional[Union[Country, str]]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateRtpInputRequired(TypedDict):
@@ -379,16 +379,16 @@ class CreateRtpResponse(TypedDict):
     id: str
     type: Union[RtpType, str]
     name: str
-    beneficiary_name: str
-    routing_number: str
-    account_number: str
-    address_line_1: str
-    address_line_2: Optional[str]
-    city: str
-    state_province_region: str
-    country: Union[Country, str]
-    postal_code: str
-    created_at: str
+    beneficiary_name: NotRequired[Optional[str]]
+    routing_number: NotRequired[Optional[str]]
+    account_number: NotRequired[Optional[str]]
+    address_line_1: NotRequired[Optional[str]]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[Optional[str]]
+    state_province_region: NotRequired[Optional[str]]
+    country: NotRequired[Optional[Union[Country, str]]]
+    postal_code: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class _CreateSepaInputRequired(TypedDict):
@@ -413,18 +413,18 @@ class CreateSepaResponse(TypedDict):
     id: str
     type: Union[Literal["sepa"], str]
     name: str
-    account_class: Union[AccountClass, str]
-    recipient_relationship: Optional[Union[RecipientRelationship, str]]
-    sepa_iban: str
-    sepa_beneficiary_bic: str
-    sepa_beneficiary_legal_name: str
-    sepa_beneficiary_address_line_1: str
-    sepa_beneficiary_address_line_2: Optional[str]
-    sepa_beneficiary_city: str
-    sepa_beneficiary_state_province_region: Optional[str]
-    sepa_beneficiary_postal_code: str
-    sepa_beneficiary_country: Union[Country, str]
-    created_at: str
+    account_class: NotRequired[Optional[Union[AccountClass, str]]]
+    recipient_relationship: NotRequired[Optional[Union[RecipientRelationship, str]]]
+    sepa_iban: NotRequired[Optional[str]]
+    sepa_beneficiary_bic: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_2: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_state_province_region: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateFasterPaymentsInput(TypedDict):
@@ -458,12 +458,12 @@ class CreatePixSafeResponse(TypedDict):
     id: str
     type: Union[PixSafeType, str]
     name: str
-    account_number: str
-    account_type: Union[BankAccountType, str]
-    pix_safe_bank_code: str
-    pix_safe_branch_code: str
-    pix_safe_cpf_cnpj: str
-    created_at: str
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreateTedInput(TypedDict):
@@ -480,12 +480,12 @@ class CreateTedResponse(TypedDict):
     id: str
     type: Union[TedType, str]
     name: str
-    account_number: str
-    account_type: Union[BankAccountType, str]
-    ted_bank_code: str
-    ted_branch_code: str
-    ted_cpf_cnpj: str
-    created_at: str
+    account_number: NotRequired[Optional[str]]
+    account_type: NotRequired[Optional[Union[BankAccountType, str]]]
+    ted_bank_code: NotRequired[Optional[str]]
+    ted_branch_code: NotRequired[Optional[str]]
+    ted_cpf_cnpj: NotRequired[Optional[str]]
+    created_at: NotRequired[Optional[str]]
 
 
 class CreatePlaidLinkInput(TypedDict):

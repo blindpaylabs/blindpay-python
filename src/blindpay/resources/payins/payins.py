@@ -36,25 +36,25 @@ class RtpDetails(TypedDict):
 
 
 class BeneficiaryDetails(TypedDict):
-    name: str
-    address_line_1: str
-    address_line_2: Optional[str]
+    name: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
 
 
 class ReceivingBankDetails(TypedDict):
-    name: str
-    address_line_1: str
-    address_line_2: Optional[str]
+    name: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
 
 
 class BankDetails(TypedDict):
-    routing_number: str
-    account_number: str
-    account_type: str
-    swift_bic_code: str
-    ach: AchDetails
-    wire: WireDetails
-    rtp: RtpDetails
+    routing_number: NotRequired[str]
+    account_number: NotRequired[str]
+    account_type: NotRequired[str]
+    swift_bic_code: NotRequired[Optional[str]]
+    ach: NotRequired[Optional[AchDetails]]
+    wire: NotRequired[Optional[WireDetails]]
+    rtp: NotRequired[Optional[RtpDetails]]
     beneficiary: BeneficiaryDetails
     receiving_bank: ReceivingBankDetails
 
@@ -62,45 +62,45 @@ class BankDetails(TypedDict):
 class Payin(TypedDict):
     customer_id: str
     id: str
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
     status: Union[TransactionStatus, str]
-    manual_execution_status: Optional[Union[ManualExecutionStatus, str]]
+    manual_execution_status: NotRequired[Optional[Union[ManualExecutionStatus, str]]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: Optional[TrackingTransaction]
     tracking_payment: Optional[TrackingPayment]
     tracking_complete: Optional[TrackingComplete]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
     type: str
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
     token: Union[StablecoinToken, str]
-    partner_fee_amount: Optional[float]
-    total_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
+    total_fee_amount: NotRequired[Optional[float]]
     commercial_quotation: Optional[float]
     blindpay_quotation: Optional[float]
     currency: str
-    billing_fee: float
+    billing_fee: NotRequired[float]
     name: str
-    address: Optional[str]
+    address: NotRequired[Optional[str]]
     network: Union[Network, str]
-    blindpay_bank_details: Optional[BankDetails]
-    is_otc: Optional[bool]
-    billing_fee_amount: Optional[float]
-    pse_document_type: Optional[str]
-    pse_full_name: Optional[str]
-    pse_payment_link: Optional[str]
-    pse_tax_id: Optional[str]
-    partner_fee_id: Optional[str]
+    blindpay_bank_details: NotRequired[Optional[BankDetails]]
+    is_otc: NotRequired[Optional[bool]]
+    billing_fee_amount: NotRequired[Optional[float]]
+    pse_document_type: NotRequired[Optional[str]]
+    pse_full_name: NotRequired[Optional[str]]
+    pse_payment_link: NotRequired[Optional[str]]
+    pse_tax_id: NotRequired[Optional[str]]
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 class ListPayinsInput(PaginationParams, total=False):
@@ -140,39 +140,39 @@ class GetPayinTrackingTransaction(TypedDict):
 class GetPayinTrackResponse(TypedDict):
     customer_id: str
     id: str
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
     status: str
-    manual_execution_status: Optional[Union[ManualExecutionStatus, str]]
+    manual_execution_status: NotRequired[Optional[Union[ManualExecutionStatus, str]]]
     payin_quote_id: str
     instance_id: str
     tracking_transaction: TrackingTransaction
     tracking_payment: TrackingPayment
     tracking_complete: TrackingComplete
-    tracking_partner_fee: TrackingPartnerFee
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
+    tracking_partner_fee: NotRequired[TrackingPartnerFee]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
     type: str
     payment_method: str
     sender_amount: Optional[float]
     receiver_amount: Optional[float]
     token: Union[StablecoinToken, str]
-    partner_fee_amount: Optional[float]
-    total_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
+    total_fee_amount: NotRequired[Optional[float]]
     commercial_quotation: Optional[float]
     blindpay_quotation: Optional[float]
     currency: str
-    billing_fee: float
+    billing_fee: NotRequired[float]
     name: str
-    address: Optional[str]
+    address: NotRequired[Optional[str]]
     network: Union[Network, str]
-    blindpay_bank_details: Optional[BankDetails]
-    partner_fee_id: Optional[str]
+    blindpay_bank_details: NotRequired[Optional[BankDetails]]
+    partner_fee_id: NotRequired[Optional[str]]
     billing_fee_amount: NotRequired[Optional[float]]
 
 
@@ -188,16 +188,16 @@ ExportPayinsResponse = List[Payin]
 class CreateEvmPayinResponse(TypedDict):
     id: str
     status: Union[TransactionStatus, str]
-    pix_code: Optional[str]
-    memo_code: Optional[str]
-    clabe: Optional[str]
+    pix_code: NotRequired[Optional[str]]
+    memo_code: NotRequired[Optional[str]]
+    clabe: NotRequired[Optional[str]]
     tracking_complete: Optional[TrackingComplete]
     tracking_payment: Optional[TrackingPayment]
     tracking_transaction: Optional[TrackingTransaction]
-    tracking_partner_fee: Optional[TrackingPartnerFee]
+    tracking_partner_fee: NotRequired[Optional[TrackingPartnerFee]]
     blindpay_bank_details: BankDetails
-    customer_id: Optional[str]
-    receiver_amount: Optional[float]
+    customer_id: NotRequired[Optional[str]]
+    receiver_amount: NotRequired[Optional[float]]
     billing_fee_amount: NotRequired[Optional[float]]
 
 

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -15,8 +15,8 @@ class PartnerFee(TypedDict):
     payout_flat_fee: float
     payin_percentage_fee: float
     payin_flat_fee: float
-    evm_wallet_address: str
-    stellar_wallet_address: str
+    evm_wallet_address: NotRequired[str]
+    stellar_wallet_address: NotRequired[str]
 
 
 ListPartnerFeesResponse = List[PartnerFee]
@@ -41,20 +41,20 @@ class CreatePartnerFeeResponse(TypedDict):
     payout_flat_fee: float
     payin_percentage_fee: float
     payin_flat_fee: float
-    evm_wallet_address: Optional[str]
-    stellar_wallet_address: Optional[str]
+    evm_wallet_address: NotRequired[Optional[str]]
+    stellar_wallet_address: NotRequired[Optional[str]]
 
 
 class GetPartnerFeeResponse(TypedDict):
     id: str
     instance_id: str
-    evm_wallet_address: str
+    evm_wallet_address: NotRequired[str]
     name: str
     payin_flat_fee: float
     payin_percentage_fee: float
     payout_flat_fee: float
     payout_percentage_fee: float
-    stellar_wallet_address: Optional[str]
+    stellar_wallet_address: NotRequired[Optional[str]]
 
 
 class PartnerFeesResource:

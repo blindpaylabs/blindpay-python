@@ -30,7 +30,7 @@ class FeesResponse(_FeesYield):
     domestic_wire: Optional[FeeOptions]
     pix: Optional[FeeOptions]
     solana: Optional[FeeOptions]
-    ted: Optional[FeeOptions]
+    ted: NotRequired[Optional[FeeOptions]]
     faster_payments: NotRequired[FeeOptions]
 
 

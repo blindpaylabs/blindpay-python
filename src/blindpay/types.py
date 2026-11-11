@@ -385,9 +385,9 @@ class CardInstruction(TypedDict):
 
 class TrackingTransaction(TypedDict):
     step: str
-    status: Optional[str]
-    transaction_hash: Optional[str]
-    completed_at: Optional[str]
+    status: NotRequired[Optional[str]]
+    transaction_hash: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
     card_instruction: NotRequired[Optional[CardInstruction]]
     card_evidence: NotRequired[Optional[Dict[str, Any]]]
     card_claim_at: NotRequired[Optional[str]]
@@ -397,11 +397,11 @@ class TrackingTransaction(TypedDict):
 
 class TrackingPayment(TypedDict):
     step: str
-    provider_name: Optional[str]
-    provider_transaction_id: Optional[str]
-    provider_status: Optional[str]
-    estimated_time_of_arrival: Optional[str]
-    completed_at: Optional[str]
+    provider_name: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    provider_status: NotRequired[Optional[str]]
+    estimated_time_of_arrival: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
     refund_review_reason: NotRequired[Optional[str]]
     review_context: NotRequired[Optional[Dict[str, Any]]]
     review_contexts: NotRequired[Optional[Dict[str, Any]]]
@@ -422,9 +422,9 @@ class TrackingLiquidity(TypedDict):
 
 class TrackingComplete(TypedDict):
     step: str
-    status: Optional[str]
-    transaction_hash: Optional[str]
-    completed_at: Optional[str]
+    status: NotRequired[Optional[str]]
+    transaction_hash: NotRequired[Optional[str]]
+    completed_at: NotRequired[Optional[str]]
 
 
 class TrackingPartnerFee(TypedDict):

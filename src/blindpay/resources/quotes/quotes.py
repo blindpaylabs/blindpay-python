@@ -51,11 +51,11 @@ class CreateQuoteResponse(TypedDict):
     blindpay_quotation: Optional[float]
     receiver_amount: Optional[float]
     sender_amount: Optional[float]
-    partner_fee_amount: Optional[float]
-    flat_fee: Optional[float]
-    contract: Optional[Contract]
-    customer_local_amount: Optional[float]
-    description: Optional[str]
+    partner_fee_amount: NotRequired[Optional[float]]
+    flat_fee: NotRequired[Optional[float]]
+    contract: NotRequired[Optional[Contract]]
+    customer_local_amount: NotRequired[Optional[float]]
+    description: NotRequired[Optional[str]]
 
 
 class GetFxRateInput(TypedDict):
@@ -66,10 +66,10 @@ class GetFxRateInput(TypedDict):
 
 
 class GetFxRateResponse(TypedDict):
-    commercial_quotation: float
-    blindpay_quotation: float
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
     result_amount: float
-    instance_flat_fee: float
+    instance_flat_fee: NotRequired[Optional[float]]
     instance_percentage_fee: float
 
 

@@ -42,7 +42,7 @@ class TestCustodialWallets:
             assert response["data"] is not None
             assert response["data"]["id"] == "cw_000000000000"
             assert response["data"]["network"] == "solana"
-            assert response["data"]["address"] == "So1ana1234567890"
+            assert response["data"].get("address") == "So1ana1234567890"
             # `name` is required on the wire (CreateWalletIn.required includes it);
             # the create() body must actually carry it, not just the type.
             mock_request.assert_called_once_with(

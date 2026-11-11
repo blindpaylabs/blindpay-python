@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import build_query, path_param
@@ -68,8 +68,8 @@ class BankDetail(TypedDict):
     label: str
     regex: str
     key: Union[BankDetailKey, str]
-    items: Optional[List[BankDetailItem]]
-    required: bool
+    items: NotRequired[Optional[List[BankDetailItem]]]
+    required: NotRequired[Optional[bool]]
 
 
 class RailInfo(TypedDict):
@@ -97,8 +97,8 @@ GetSwiftCodeBankDetailsResponse = List[SwiftCodeBankDetail]
 
 
 class NaicsCode(TypedDict):
-    code: str
-    title: str
+    code: NotRequired[str]
+    title: NotRequired[str]
 
 
 GetNaicsCodesResponse = List[NaicsCode]

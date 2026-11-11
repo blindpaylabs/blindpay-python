@@ -19,7 +19,7 @@ AmountReference = Literal["sender", "receiver"]
 
 class TransferTrackingStep(TypedDict):
     step: str
-    estimated_time_of_arrival: Optional[str]
+    estimated_time_of_arrival: NotRequired[Optional[str]]
 
 
 class CreateTransferQuoteInput(TypedDict, total=False):
@@ -44,7 +44,7 @@ class CreateTransferQuoteResponse(TypedDict):
     receiver_amount: float
     sender_amount: float
     flat_fee: float
-    partner_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
     partner_flat_fee: NotRequired[int]
     partner_percentage_fee: NotRequired[int]
 
@@ -66,21 +66,21 @@ class Transfer(TypedDict):
     customer_network: Union[Network, str]
     customer_wallet_address: str
     customer_id: str
-    address: Optional[str]
+    address: NotRequired[Optional[str]]
     network: str
     tracking_transaction_monitoring: TransferTrackingStep
     tracking_paymaster: TransferTrackingStep
     tracking_bridge_swap: TransferTrackingStep
     tracking_complete: TransferTrackingStep
-    tracking_partner_fee: TransferTrackingStep
-    created_at: Optional[str]
-    updated_at: Optional[str]
-    image_url: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    legal_name: Optional[str]
-    partner_fee_amount: Optional[float]
-    external_id: Optional[str]
+    tracking_partner_fee: NotRequired[Optional[TransferTrackingStep]]
+    created_at: NotRequired[Optional[str]]
+    updated_at: NotRequired[Optional[str]]
+    image_url: NotRequired[Optional[str]]
+    first_name: NotRequired[Optional[str]]
+    last_name: NotRequired[Optional[str]]
+    legal_name: NotRequired[Optional[str]]
+    partner_fee_amount: NotRequired[Optional[float]]
+    external_id: NotRequired[Optional[str]]
     partner_flat_fee: NotRequired[int]
     partner_percentage_fee: NotRequired[int]
 

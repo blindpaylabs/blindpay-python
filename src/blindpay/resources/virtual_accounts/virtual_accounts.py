@@ -66,12 +66,12 @@ class CreateVirtualAccountBreB(TypedDict):
 
 class VirtualAccount(TypedDict):
     id: str
-    us: USBankDetails
+    us: NotRequired[Optional[USBankDetails]]
     token: Union[StablecoinToken, str]
-    blockchain_wallet_id: Optional[str]
+    blockchain_wallet_id: NotRequired[Optional[str]]
     banking_partner: Optional[Union[BankingPartner, str]]
     kyc_status: Optional[str]
-    blockchain_wallet: Optional[str]
+    blockchain_wallet: NotRequired[Optional[str]]
     co: NotRequired[Optional[VirtualAccountCo]]
     mx: NotRequired[Optional[VirtualAccountMx]]
     partner_fee_id: NotRequired[Optional[str]]

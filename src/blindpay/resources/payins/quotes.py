@@ -42,7 +42,7 @@ class CreatePayinQuoteResponse(TypedDict):
     blindpay_quotation: Optional[float]
     receiver_amount: Optional[float]
     sender_amount: Optional[float]
-    partner_fee_amount: Optional[float]
+    partner_fee_amount: NotRequired[Optional[float]]
     flat_fee: Optional[float]
     card_instruction: NotRequired[Optional[CardInstruction]]
 
@@ -55,10 +55,10 @@ class GetPayinFxRateInput(TypedDict):
 
 
 class GetPayinFxRateResponse(TypedDict):
-    commercial_quotation: float
-    blindpay_quotation: float
+    commercial_quotation: Optional[float]
+    blindpay_quotation: Optional[float]
     result_amount: float
-    instance_flat_fee: float
+    instance_flat_fee: Optional[float]
     instance_percentage_fee: float
 
 

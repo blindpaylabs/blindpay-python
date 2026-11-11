@@ -15,9 +15,9 @@ class BlockchainWallet(TypedDict):
     id: str
     name: Optional[str]
     network: Optional[Union[Network, str]]
-    address: Optional[str]
-    signature_tx_hash: Optional[str]
-    is_account_abstraction: Optional[bool]
+    address: NotRequired[Optional[str]]
+    signature_tx_hash: NotRequired[Optional[str]]
+    is_account_abstraction: NotRequired[Optional[bool]]
     customer_id: str
     is_self_custody: NotRequired[Optional[bool]]
 
@@ -70,7 +70,7 @@ class MintUsdbSolanaInput(TypedDict):
 
 class MintUsdbSolanaResponse(TypedDict):
     success: bool
-    signature: str
+    signature: NotRequired[str]
 
 
 class PrepareSolanaDelegationTransactionInput(TypedDict):
@@ -81,7 +81,7 @@ class PrepareSolanaDelegationTransactionInput(TypedDict):
 
 class PrepareSolanaDelegationTransactionResponse(TypedDict):
     success: bool
-    transaction: str
+    transaction: NotRequired[str]
 
 
 class SetSelfCustodyInput(TypedDict):
