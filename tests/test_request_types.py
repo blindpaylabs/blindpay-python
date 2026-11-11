@@ -28,6 +28,9 @@ PER_VARIANT_HELPERS = {
 }
 
 
+# Body keys the SDK method sets itself (bank-account/customer helpers inject the discriminator).
+INJECTED = {"type", "kyc_type", "is_account_abstraction"}
+
 PATH_PARAMS = {"customer_id", "id", "bank_account_id", "payout_id", "virtual_account_id", "member_id"}
 
 
@@ -71,6 +74,8 @@ def test_input_required_keys_match_the_spec(schema: str, file: str, symbol: str)
     over_required = sorted((set(cls.__required_keys__) & properties) - required)
 
     assert not under_required, f"{symbol}: the spec requires {under_required}"
+    undeclared = sorted(required - set(cls.__required_keys__) - set(cls.__optional_keys__) - INJECTED)
+    assert not undeclared, f"{symbol}: the spec requires {undeclared}, which it doesn't declare"
     assert not not_in_spec, f"{symbol}: requires {not_in_spec}, which the spec doesn't have"
     if symbol not in PER_VARIANT_HELPERS:
         assert not over_required, f"{symbol}: the spec makes {over_required} optional"

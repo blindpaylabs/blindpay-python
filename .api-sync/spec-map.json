@@ -1323,6 +1323,16 @@
         "file": "src/blindpay/resources/customers/customers.py",
         "symbol": "VirtualAccountPreapprovalBankingPartner"
       }
+    },
+    {
+      "spec": {
+        "schema": "UpdateInstanceMemberIn",
+        "property": "user_role"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/instances/instances.py",
+        "symbol": "InstanceMemberRole"
+      }
     }
   ],
   "types": [

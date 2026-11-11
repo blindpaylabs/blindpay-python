@@ -129,6 +129,7 @@ class CreatePayinInput(TypedDict):
     token: NotRequired[StablecoinToken]
     network: NotRequired[Network]
     description: NotRequired[Optional[str]]
+    payin_quote_id: str
 
 
 class GetPayinTrackingTransaction(TypedDict):
