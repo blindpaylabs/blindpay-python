@@ -1672,3 +1672,28 @@ class TestApplyManyChangesToOneFile:
 
         source = (repo / "src/blindpay/resources/sample.py").read_text()
         assert '"c"' in source and '"dark"' in source and "note:" in source
+
+
+class TestSharedTargetClass:
+    def test_two_map_entries_on_one_class_add_a_field_once(self, repo: Path):
+        _write_fixture_repo(repo)
+        map_data: dict[str, Any] = {
+            "enums": [],
+            "types": [
+                {"spec": "AOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]},
+                {"spec": "BOut", "sdk": [{"file": "src/blindpay/resources/sample.py", "symbol": "Plain"}]},
+            ],
+            "ignore": {"schemas": []},
+        }
+        _write_map_and_unmodeled(repo, map_data, _op_unmodeled(("get", "/a"), ("get", "/b")))
+        props = {"id": {"type": "string"}, "name": {"type": ["string", "null"]}, "note": {"type": "string"}}
+        spec = base_schema(
+            {"AOut": {"properties": props}, "BOut": {"properties": props}},
+            {"/a": {"get": op(ref_out="AOut")}, "/b": {"get": op(ref_out="BOut")}},
+        )
+        write(repo, ".api-sync/spec-snapshot.json", json.dumps(spec))
+        sync = load_sync(repo)
+
+        assert sync.cmd_apply(sync.SNAPSHOT_PATH, None) == 0
+
+        assert (repo / "src/blindpay/resources/sample.py").read_text().count("note:") == 1

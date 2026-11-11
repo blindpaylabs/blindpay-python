@@ -1585,6 +1585,11 @@ def apply_property_change(gap: PropertyGap, index: SdkIndex) -> tuple[list[Appli
         # Re-read: an earlier enum or property change in this run may have rewritten the file.
         source = info.file.read_text()
         info.node = _reparse_class(info.file, symbol)
+        if any(
+            isinstance(i, ast.AnnAssign) and isinstance(i.target, ast.Name) and i.target.id == name
+            for i in info.node.body
+        ):
+            continue  # another map entry sharing this class already added it in this run
         for required_name in ("NotRequired", "Optional"):
             if f"{required_name}[" in annotation:
                 updated = ensure_name_imported(source, required_name)
