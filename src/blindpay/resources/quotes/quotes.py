@@ -37,9 +37,9 @@ class CreateQuoteInput(TypedDict):
     cover_fees: NotRequired[Optional[bool]]
     description: NotRequired[Optional[str]]
     partner_fee_id: NotRequired[Optional[str]]
-    transaction_document_file: Optional[str]
-    transaction_document_id: Optional[str]
-    transaction_document_type: TransactionDocumentType
+    transaction_document_file: NotRequired[Optional[str]]
+    transaction_document_id: NotRequired[Optional[str]]
+    transaction_document_type: NotRequired[TransactionDocumentType]
     refund_wallet_address: NotRequired[Optional[str]]
     payable_id: NotRequired[Optional[str]]
 

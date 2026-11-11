@@ -50,7 +50,7 @@ class UpdateInstanceInput(TypedDict, total=False):
 
 class UpdateInstanceMemberRoleInput(TypedDict):
     member_id: str
-    role: InstanceMemberRole
+    role: NotRequired[InstanceMemberRole]
 
 
 class MigrateInstanceOwnershipInput(TypedDict):

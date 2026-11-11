@@ -122,13 +122,13 @@ class ListPayinsResponse(TypedDict):
 
 
 class CreatePayinInput(TypedDict):
-    quote_id: str
-    sender_address: str
-    receiver_address: str
-    amount: float
-    token: StablecoinToken
-    network: Network
-    description: Optional[str]
+    quote_id: NotRequired[str]
+    sender_address: NotRequired[str]
+    receiver_address: NotRequired[str]
+    amount: NotRequired[float]
+    token: NotRequired[StablecoinToken]
+    network: NotRequired[Network]
+    description: NotRequired[Optional[str]]
 
 
 class GetPayinTrackingTransaction(TypedDict):

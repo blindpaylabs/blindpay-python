@@ -28,6 +28,9 @@ PER_VARIANT_HELPERS = {
 }
 
 
+PATH_PARAMS = {"customer_id", "id", "bank_account_id", "payout_id", "virtual_account_id", "member_id"}
+
+
 def request_schemas() -> Set[str]:
     names: Set[str] = set()
     for path in SPEC["paths"].values():
@@ -62,8 +65,12 @@ def test_input_required_keys_match_the_spec(schema: str, file: str, symbol: str)
     cls = getattr(importlib.import_module(file[len("src/") : -len(".py")].replace("/", ".")), symbol)
 
     under_required = sorted(set(cls.__optional_keys__) & required)
+    # Keys the SDK moves into the URL (customer_id, id, ...) aren't body fields; anything else the spec lacks must
+    # not be required (stale fields stay but optional, plan D13).
+    not_in_spec = sorted(set(cls.__required_keys__) - properties - PATH_PARAMS)
     over_required = sorted((set(cls.__required_keys__) & properties) - required)
 
     assert not under_required, f"{symbol}: the spec requires {under_required}"
+    assert not not_in_spec, f"{symbol}: requires {not_in_spec}, which the spec doesn't have"
     if symbol not in PER_VARIANT_HELPERS:
         assert not over_required, f"{symbol}: the spec makes {over_required} optional"
