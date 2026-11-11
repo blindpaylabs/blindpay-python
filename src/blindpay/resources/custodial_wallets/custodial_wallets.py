@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse, Network
 
 
@@ -67,19 +68,25 @@ class CustodialWalletsResource:
             f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
         )
 
-    async def create(self, data: CreateCustodialWalletInput) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
+    async def create(
+        self, data: CreateCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload, options=options
+        )
 
     async def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
         return await self._client.get(
             f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}/balance"
         )
 
-    async def delete(self, data: DeleteCustodialWalletInput) -> BlindpayApiResponse[None]:
+    async def delete(
+        self, data: DeleteCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
         return await self._client.delete(
-            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}", options=options
         )
 
 
@@ -94,19 +101,25 @@ class CustodialWalletsResourceSync:
     def get(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWallet]:
         return self._client.get(f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}")
 
-    def create(self, data: CreateCustodialWalletInput) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
+    def create(
+        self, data: CreateCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateCustodialWalletResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/wallets", payload, options=options
+        )
 
     def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
         return self._client.get(
             f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}/balance"
         )
 
-    def delete(self, data: DeleteCustodialWalletInput) -> BlindpayApiResponse[None]:
+    def delete(
+        self, data: DeleteCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
         return self._client.delete(
-            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}"
+            f"/instances/{self._instance_id}/customers/{data['customer_id']}/wallets/{data['id']}", options=options
         )
 
 

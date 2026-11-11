@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     BlindpayApiResponse,
     Network,
@@ -116,11 +117,15 @@ class TransfersResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def create_quote(self, data: CreateTransferQuoteInput) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data)
+    async def create_quote(
+        self, data: CreateTransferQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data, options=options)
 
-    async def create(self, data: CreateTransferInput) -> BlindpayApiResponse[CreateTransferResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/transfers", data)
+    async def create(
+        self, data: CreateTransferInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
     async def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
         query_string = ""
@@ -142,11 +147,15 @@ class TransfersResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def create_quote(self, data: CreateTransferQuoteInput) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data)
+    def create_quote(
+        self, data: CreateTransferQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferQuoteResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/transfer-quotes", data, options=options)
 
-    def create(self, data: CreateTransferInput) -> BlindpayApiResponse[CreateTransferResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/transfers", data)
+    def create(
+        self, data: CreateTransferInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTransferResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
     def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
         query_string = ""

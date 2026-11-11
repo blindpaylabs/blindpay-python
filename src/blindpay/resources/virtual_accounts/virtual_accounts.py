@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BankingPartner, BlindpayApiResponse, StablecoinToken
 
 
@@ -77,17 +78,25 @@ class VirtualAccountsResource:
         return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts")
 
     async def update(
-        self, customer_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput
+        self,
+        customer_id: str,
+        virtual_account_id: str,
+        data: UpdateVirtualAccountInput,
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[None]:
         return await self._client.put(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}", data
+            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}",
+            data,
+            options=options,
         )
 
-    async def create(self, data: CreateVirtualAccountInput) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
+    async def create(
+        self, data: CreateVirtualAccountInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload
+            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload, options=options
         )
 
     async def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
@@ -105,16 +114,26 @@ class VirtualAccountsResourceSync:
         return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts")
 
     def update(
-        self, customer_id: str, virtual_account_id: str, data: UpdateVirtualAccountInput
+        self,
+        customer_id: str,
+        virtual_account_id: str,
+        data: UpdateVirtualAccountInput,
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[None]:
         return self._client.put(
-            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}", data
+            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts/{virtual_account_id}",
+            data,
+            options=options,
         )
 
-    def create(self, data: CreateVirtualAccountInput) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
+    def create(
+        self, data: CreateVirtualAccountInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateVirtualAccountResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/virtual-accounts", payload, options=options
+        )
 
     def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
         return self._client.get(

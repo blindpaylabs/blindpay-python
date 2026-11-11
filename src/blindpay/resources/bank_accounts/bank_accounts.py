@@ -3,6 +3,7 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -468,78 +469,122 @@ class BankAccountsResource:
     async def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
 
-    async def delete(self, customer_id: str, id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+    async def delete(
+        self, customer_id: str, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return await self._client.delete(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}", options=options
+        )
 
-    async def create_pix(self, data: CreatePixInput) -> BlindpayApiResponse[CreatePixResponse]:
+    async def create_pix(
+        self, data: CreatePixInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
     async def create_argentina_transfers(
-        self, data: CreateArgentinaTransfersInput
+        self, data: CreateArgentinaTransfersInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateArgentinaTransfersResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_spei(self, data: CreateSpeiInput) -> BlindpayApiResponse[CreateSpeiResponse]:
+    async def create_spei(
+        self, data: CreateSpeiInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSpeiResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_colombia_ach(self, data: CreateColombiaAchInput) -> BlindpayApiResponse[CreateColombiaAchResponse]:
+    async def create_colombia_ach(
+        self, data: CreateColombiaAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateColombiaAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_ach(self, data: CreateAchInput) -> BlindpayApiResponse[CreateAchResponse]:
+    async def create_ach(
+        self, data: CreateAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_wire(self, data: CreateWireInput) -> BlindpayApiResponse[CreateWireResponse]:
+    async def create_wire(
+        self, data: CreateWireInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWireResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
     async def create_international_swift(
-        self, data: CreateInternationalSwiftInput
+        self, data: CreateInternationalSwiftInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_rtp(self, data: CreateRtpInput) -> BlindpayApiResponse[CreateRtpResponse]:
+    async def create_rtp(
+        self, data: CreateRtpInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateRtpResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+    async def create_pix_safe(
+        self, data: CreatePixSafeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixSafeResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+    async def create_ted(
+        self, data: CreateTedInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTedResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    async def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+    async def create_sepa(
+        self, data: CreateSepaInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSepaResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
-        return await self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
 
 class BankAccountsResourceSync:
@@ -553,78 +598,120 @@ class BankAccountsResourceSync:
     def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
         return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
 
-    def delete(self, customer_id: str, id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}")
+    def delete(self, customer_id: str, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{id}", options=options
+        )
 
-    def create_pix(self, data: CreatePixInput) -> BlindpayApiResponse[CreatePixResponse]:
+    def create_pix(
+        self, data: CreatePixInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
     def create_argentina_transfers(
-        self, data: CreateArgentinaTransfersInput
+        self, data: CreateArgentinaTransfersInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateArgentinaTransfersResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "transfers_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_spei(self, data: CreateSpeiInput) -> BlindpayApiResponse[CreateSpeiResponse]:
+    def create_spei(
+        self, data: CreateSpeiInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSpeiResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "spei_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_colombia_ach(self, data: CreateColombiaAchInput) -> BlindpayApiResponse[CreateColombiaAchResponse]:
+    def create_colombia_ach(
+        self, data: CreateColombiaAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateColombiaAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach_cop_bitso"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_ach(self, data: CreateAchInput) -> BlindpayApiResponse[CreateAchResponse]:
+    def create_ach(
+        self, data: CreateAchInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateAchResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ach"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_wire(self, data: CreateWireInput) -> BlindpayApiResponse[CreateWireResponse]:
+    def create_wire(
+        self, data: CreateWireInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWireResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "wire"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
     def create_international_swift(
-        self, data: CreateInternationalSwiftInput
+        self, data: CreateInternationalSwiftInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateInternationalSwiftResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "international_swift"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_rtp(self, data: CreateRtpInput) -> BlindpayApiResponse[CreateRtpResponse]:
+    def create_rtp(
+        self, data: CreateRtpInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateRtpResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "rtp"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_pix_safe(self, data: CreatePixSafeInput) -> BlindpayApiResponse[CreatePixSafeResponse]:
+    def create_pix_safe(
+        self, data: CreatePixSafeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePixSafeResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "pix_safe"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_ted(self, data: CreateTedInput) -> BlindpayApiResponse[CreateTedResponse]:
+    def create_ted(
+        self, data: CreateTedInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateTedResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "ted"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
-    def create_sepa(self, data: CreateSepaInput) -> BlindpayApiResponse[CreateSepaResponse]:
+    def create_sepa(
+        self, data: CreateSepaInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSepaResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         payload["type"] = "sepa"
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts", payload, options=options
+        )
 
 
 def create_bank_accounts_resource(instance_id: str, client: InternalApiClient) -> BankAccountsResource:

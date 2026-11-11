@@ -1,6 +1,9 @@
+from typing import Optional
+
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 
@@ -21,9 +24,9 @@ class OwnershipResource:
         self._client = client
 
     async def migrate(
-        self, data: MigrateInstanceOwnershipInput
+        self, data: MigrateInstanceOwnershipInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/ownership", data)
+        return await self._client.post(f"/instances/{self._instance_id}/ownership", data, options=options)
 
 
 # --- Sync resource ---
@@ -34,8 +37,10 @@ class OwnershipResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def migrate(self, data: MigrateInstanceOwnershipInput) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/ownership", data)
+    def migrate(
+        self, data: MigrateInstanceOwnershipInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/ownership", data, options=options)
 
 
 # --- Factory functions ---

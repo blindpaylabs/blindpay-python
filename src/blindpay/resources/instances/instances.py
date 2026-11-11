@@ -3,6 +3,7 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 InstanceMemberRole = Literal["owner", "admin", "finance", "checker", "operations", "developer", "viewer"]
@@ -50,22 +51,30 @@ class InstancesResource:
     async def get_members(self) -> BlindpayApiResponse[GetInstanceMembersResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/members")
 
-    async def update(self, data: UpdateInstanceInput) -> BlindpayApiResponse[None]:
-        return await self._client.put(f"/instances/{self._instance_id}", data)
+    async def update(
+        self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return await self._client.put(f"/instances/{self._instance_id}", data, options=options)
 
-    async def delete(self) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}")
+    async def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(f"/instances/{self._instance_id}", options=options)
 
-    async def delete_member(self, member_id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/members/{member_id}")
+    async def delete_member(
+        self, member_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return await self._client.delete(f"/instances/{self._instance_id}/members/{member_id}", options=options)
 
-    async def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
-        return await self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
+    async def update_member_role(
+        self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return await self._client.put(
+            f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role}, options=options
+        )
 
     async def migrate_ownership(
-        self, data: MigrateInstanceOwnershipInput
+        self, data: MigrateInstanceOwnershipInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/ownership", data)
+        return await self._client.post(f"/instances/{self._instance_id}/ownership", data, options=options)
 
 
 class InstancesResourceSync:
@@ -76,22 +85,26 @@ class InstancesResourceSync:
     def get_members(self) -> BlindpayApiResponse[GetInstanceMembersResponse]:
         return self._client.get(f"/instances/{self._instance_id}/members")
 
-    def update(self, data: UpdateInstanceInput) -> BlindpayApiResponse[None]:
-        return self._client.put(f"/instances/{self._instance_id}", data)
+    def update(self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.put(f"/instances/{self._instance_id}", data, options=options)
 
-    def delete(self) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}")
+    def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(f"/instances/{self._instance_id}", options=options)
 
-    def delete_member(self, member_id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/members/{member_id}")
+    def delete_member(self, member_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(f"/instances/{self._instance_id}/members/{member_id}", options=options)
 
-    def update_member_role(self, member_id: str, role: InstanceMemberRole) -> BlindpayApiResponse[None]:
-        return self._client.put(f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role})
+    def update_member_role(
+        self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
+        return self._client.put(
+            f"/instances/{self._instance_id}/members/{member_id}", {"user_role": role}, options=options
+        )
 
     def migrate_ownership(
-        self, data: MigrateInstanceOwnershipInput
+        self, data: MigrateInstanceOwnershipInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[MigrateInstanceOwnershipResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/ownership", data)
+        return self._client.post(f"/instances/{self._instance_id}/ownership", data, options=options)
 
 
 def create_instances_resource(instance_id: str, client: InternalApiClient) -> InstancesResource:

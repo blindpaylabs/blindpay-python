@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 from typing_extensions import Literal, NotRequired, TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync, MultipartFile
+from ..._internal.http import RequestOptions
 from ...types import ApprovalRate, BlindpayApiResponse
 
 UploadBucket = Literal["avatar", "onboarding", "limit_increase", "documents"]
@@ -144,13 +145,17 @@ class UploadResource:
         self._client: InternalApiClient = resolved_client
         self._instance_query = _build_instance_query(resolved_instance_id)
 
-    async def create(self, data: UploadInput) -> BlindpayApiResponse[UploadResponse]:
+    async def create(
+        self, data: UploadInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UploadResponse]:
         form, files = _upload_request(data)
-        return await self._client.post_multipart(f"/upload{self._instance_query}", form, files)
+        return await self._client.post_multipart(f"/upload{self._instance_query}", form, files, options=options)
 
-    async def analyze(self, data: UploadAnalyzeInput) -> BlindpayApiResponse[UploadAnalyzeOutput]:
+    async def analyze(
+        self, data: UploadAnalyzeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UploadAnalyzeOutput]:
         form, files = _analyze_request(data)
-        return await self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files)
+        return await self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files, options=options)
 
 
 class UploadResourceSync:
@@ -159,13 +164,17 @@ class UploadResourceSync:
         self._client: InternalApiClientSync = resolved_client
         self._instance_query = _build_instance_query(resolved_instance_id)
 
-    def create(self, data: UploadInput) -> BlindpayApiResponse[UploadResponse]:
+    def create(
+        self, data: UploadInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UploadResponse]:
         form, files = _upload_request(data)
-        return self._client.post_multipart(f"/upload{self._instance_query}", form, files)
+        return self._client.post_multipart(f"/upload{self._instance_query}", form, files, options=options)
 
-    def analyze(self, data: UploadAnalyzeInput) -> BlindpayApiResponse[UploadAnalyzeOutput]:
+    def analyze(
+        self, data: UploadAnalyzeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UploadAnalyzeOutput]:
         form, files = _analyze_request(data)
-        return self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files)
+        return self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files, options=options)
 
 
 @overload

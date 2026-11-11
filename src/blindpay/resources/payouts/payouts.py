@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from typing_extensions import TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -226,25 +227,35 @@ class PayoutsResource:
         return await self._client.get(f"/e/payouts/{payout_id}")
 
     async def authorize_stellar_token(
-        self, data: AuthorizeStellarTokenInput
+        self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[AuthorizeStellarTokenResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payouts/stellar/authorize", data, options=options
+        )
 
-    async def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+    async def create_stellar(
+        self, data: CreateStellarPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data, options=options)
 
-    async def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+    async def create_evm(
+        self, data: CreateEvmPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/evm", data, options=options)
 
-    async def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+    async def create_solana(
+        self, data: CreateSolanaPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payouts/solana", data, options=options)
 
     async def submit_documents(
-        self, data: SubmitPayoutDocumentsInput
+        self, data: SubmitPayoutDocumentsInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
-        return await self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload, options=options
+        )
 
 
 class PayoutsResourceSync:
@@ -276,23 +287,33 @@ class PayoutsResourceSync:
         return self._client.get(f"/e/payouts/{payout_id}")
 
     def authorize_stellar_token(
-        self, data: AuthorizeStellarTokenInput
+        self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[AuthorizeStellarTokenResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data)
+        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar/authorize", data, options=options)
 
-    def create_stellar(self, data: CreateStellarPayoutInput) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data)
+    def create_stellar(
+        self, data: CreateStellarPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateStellarPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/stellar", data, options=options)
 
-    def create_evm(self, data: CreateEvmPayoutInput) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data)
+    def create_evm(
+        self, data: CreateEvmPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/evm", data, options=options)
 
-    def create_solana(self, data: CreateSolanaPayoutInput) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data)
+    def create_solana(
+        self, data: CreateSolanaPayoutInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateSolanaPayoutResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payouts/solana", data, options=options)
 
-    def submit_documents(self, data: SubmitPayoutDocumentsInput) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
+    def submit_documents(
+        self, data: SubmitPayoutDocumentsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[SubmitPayoutDocumentsResponse]:
         payout_id = data["payout_id"]
         payload = {k: v for k, v in data.items() if k != "payout_id"}
-        return self._client.post(f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/payouts/{payout_id}/documents", payload, options=options
+        )
 
 
 def create_payouts_resource(instance_id: str, client: InternalApiClient) -> PayoutsResource:

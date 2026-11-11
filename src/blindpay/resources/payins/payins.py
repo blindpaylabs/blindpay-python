@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from typing_extensions import deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     BlindpayApiResponse,
     ManualExecutionStatus,
@@ -231,8 +232,12 @@ class PayinsResource:
     async def get_track(self, payin_id: str) -> BlindpayApiResponse[GetPayinTrackResponse]:
         return await self._client.get(f"/e/payins/{payin_id}")
 
-    async def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
+    async def create_evm(
+        self, payin_quote_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayinResponse]:
+        return await self._client.post(
+            f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id}, options=options
+        )
 
 
 class PayinsResourceSync:
@@ -260,8 +265,12 @@ class PayinsResourceSync:
         query_string = f"?{urlencode(filtered_params)}" if filtered_params else ""
         return self._client.get(f"/instances/{self._instance_id}/export/payins{query_string}")
 
-    def create_evm(self, payin_quote_id: str) -> BlindpayApiResponse[CreateEvmPayinResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id})
+    def create_evm(
+        self, payin_quote_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateEvmPayinResponse]:
+        return self._client.post(
+            f"/instances/{self._instance_id}/payins/evm", {"payin_quote_id": payin_quote_id}, options=options
+        )
 
 
 def create_payins_resource(instance_id: str, client: InternalApiClient) -> PayinsResource:

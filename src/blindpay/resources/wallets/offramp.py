@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse, Network
 
 
@@ -59,13 +60,16 @@ class OfframpWalletsResource:
             f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets"
         )
 
-    async def create(self, data: CreateOfframpWalletInput) -> BlindpayApiResponse[CreateOfframpWalletResponse]:
+    async def create(
+        self, data: CreateOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateOfframpWalletResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         payload = {k: v for k, v in data.items() if k not in ["customer_id", "bank_account_id"]}
         return await self._client.post(
             f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
             payload,
+            options=options,
         )
 
     async def get(self, data: GetOfframpWalletInput) -> BlindpayApiResponse[GetOfframpWalletResponse]:
@@ -89,13 +93,16 @@ class OfframpWalletsResourceSync:
             f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets"
         )
 
-    def create(self, data: CreateOfframpWalletInput) -> BlindpayApiResponse[CreateOfframpWalletResponse]:
+    def create(
+        self, data: CreateOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateOfframpWalletResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         payload = {k: v for k, v in data.items() if k not in ["customer_id", "bank_account_id"]}
         return self._client.post(
             f"/instances/{self._instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
             payload,
+            options=options,
         )
 
     def get(self, data: GetOfframpWalletInput) -> BlindpayApiResponse[GetOfframpWalletResponse]:

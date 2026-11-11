@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     BlindpayApiResponse,
     Country,
@@ -747,33 +748,37 @@ class CustomersResource:
         return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
 
     async def create_individual_with_standard_kyc(
-        self, data: CreateIndividualWithStandardKYCInput
+        self, data: CreateIndividualWithStandardKYCInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateIndividualWithStandardKYCResponse]:
         payload = {"kyc_type": "standard", "type": "individual", **data}
-        return await self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     async def create_individual_with_enhanced_kyc(
-        self, data: CreateIndividualWithEnhancedKYCInput
+        self, data: CreateIndividualWithEnhancedKYCInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateIndividualWithEnhancedKYCResponse]:
         payload = {"kyc_type": "enhanced", "type": "individual", **data}
-        return await self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     async def create_business_with_standard_kyb(
-        self, data: CreateBusinessWithStandardKYBInput
+        self, data: CreateBusinessWithStandardKYBInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateBusinessWithStandardKYBResponse]:
         payload = {"kyc_type": "standard", "type": "business", **data}
-        return await self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     async def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}")
 
-    async def update(self, data: UpdateCustomerInput) -> BlindpayApiResponse[None]:
+    async def update(
+        self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[None]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return await self._client.put(f"/instances/{self._instance_id}/customers/{customer_id}", payload)
+        return await self._client.put(
+            f"/instances/{self._instance_id}/customers/{customer_id}", payload, options=options
+        )
 
-    async def delete(self, customer_id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}")
+    async def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}", options=options)
 
     async def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{customer_id}")
@@ -784,12 +789,12 @@ class CustomersResource:
         return await self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase")
 
     async def request_limit_increase(
-        self, data: RequestLimitIncreaseInput
+        self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[RequestLimitIncreaseResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.post(
-            f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload
+            f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload, options=options
         )
 
 
@@ -809,33 +814,33 @@ class CustomersResourceSync:
         return self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
 
     def create_individual_with_standard_kyc(
-        self, data: CreateIndividualWithStandardKYCInput
+        self, data: CreateIndividualWithStandardKYCInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateIndividualWithStandardKYCResponse]:
         payload = {"kyc_type": "standard", "type": "individual", **data}
-        return self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     def create_individual_with_enhanced_kyc(
-        self, data: CreateIndividualWithEnhancedKYCInput
+        self, data: CreateIndividualWithEnhancedKYCInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateIndividualWithEnhancedKYCResponse]:
         payload = {"kyc_type": "enhanced", "type": "individual", **data}
-        return self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     def create_business_with_standard_kyb(
-        self, data: CreateBusinessWithStandardKYBInput
+        self, data: CreateBusinessWithStandardKYBInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateBusinessWithStandardKYBResponse]:
         payload = {"kyc_type": "standard", "type": "business", **data}
-        return self._client.post(f"/instances/{self._instance_id}/customers", payload)
+        return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
     def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
         return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}")
 
-    def update(self, data: UpdateCustomerInput) -> BlindpayApiResponse[None]:
+    def update(self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return self._client.put(f"/instances/{self._instance_id}/customers/{customer_id}", payload)
+        return self._client.put(f"/instances/{self._instance_id}/customers/{customer_id}", payload, options=options)
 
-    def delete(self, customer_id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}")
+    def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(f"/instances/{self._instance_id}/customers/{customer_id}", options=options)
 
     def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/limits/customers/{customer_id}")
@@ -844,11 +849,13 @@ class CustomersResourceSync:
         return self._client.get(f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase")
 
     def request_limit_increase(
-        self, data: RequestLimitIncreaseInput
+        self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[RequestLimitIncreaseResponse]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
-        return self._client.post(f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload)
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{customer_id}/limit-increase", payload, options=options
+        )
 
 
 def create_customers_resource(instance_id: str, client: InternalApiClient) -> CustomersResource:

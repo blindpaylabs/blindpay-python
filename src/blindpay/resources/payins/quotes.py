@@ -3,6 +3,7 @@ from typing import List, Literal, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import (
     BlindpayApiResponse,
     Currency,
@@ -61,10 +62,14 @@ class PayinQuotesResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def create(self, data: CreatePayinQuoteInput) -> BlindpayApiResponse[CreatePayinQuoteResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/payin-quotes", data)
+    async def create(
+        self, data: CreatePayinQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePayinQuoteResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/payin-quotes", data, options=options)
 
-    async def get_fx_rate(self, data: GetPayinFxRateInput) -> BlindpayApiResponse[GetPayinFxRateResponse]:
+    async def get_fx_rate(
+        self, data: GetPayinFxRateInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPayinFxRateResponse]:
         # Convert 'from_currency' back to 'from' for API
         payload = {
             "currency_type": data["currency_type"],
@@ -72,7 +77,7 @@ class PayinQuotesResource:
             "to": data["to"],
             "request_amount": data["request_amount"],
         }
-        return await self._client.post(f"/instances/{self._instance_id}/payin-quotes/fx", payload)
+        return await self._client.post(f"/instances/{self._instance_id}/payin-quotes/fx", payload, options=options)
 
 
 class PayinQuotesResourceSync:
@@ -80,10 +85,14 @@ class PayinQuotesResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def create(self, data: CreatePayinQuoteInput) -> BlindpayApiResponse[CreatePayinQuoteResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/payin-quotes", data)
+    def create(
+        self, data: CreatePayinQuoteInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePayinQuoteResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/payin-quotes", data, options=options)
 
-    def get_fx_rate(self, data: GetPayinFxRateInput) -> BlindpayApiResponse[GetPayinFxRateResponse]:
+    def get_fx_rate(
+        self, data: GetPayinFxRateInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPayinFxRateResponse]:
         # Convert 'from_currency' back to 'from' for API
         payload = {
             "currency_type": data["currency_type"],
@@ -91,7 +100,7 @@ class PayinQuotesResourceSync:
             "to": data["to"],
             "request_amount": data["request_amount"],
         }
-        return self._client.post(f"/instances/{self._instance_id}/payin-quotes/fx", payload)
+        return self._client.post(f"/instances/{self._instance_id}/payin-quotes/fx", payload, options=options)
 
 
 def create_payin_quotes_resource(instance_id: str, client: InternalApiClient) -> PayinQuotesResource:

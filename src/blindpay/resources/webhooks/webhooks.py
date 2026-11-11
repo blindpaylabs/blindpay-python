@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import Literal, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 WebhookEvents = Literal[
@@ -70,11 +71,13 @@ class WebhookEndpointsResource:
     async def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
 
-    async def create(self, data: CreateWebhookEndpointInput) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)
+    async def create(
+        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    async def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}")
+    async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}", options=options)
 
     async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")
@@ -91,11 +94,13 @@ class WebhookEndpointsResourceSync:
     def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
         return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
 
-    def create(self, data: CreateWebhookEndpointInput) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data)
+    def create(
+        self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}")
+    def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(f"/instances/{self._instance_id}/webhook-endpoints/{id}", options=options)
 
     def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
         return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{id}/secret")

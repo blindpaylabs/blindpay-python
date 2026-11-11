@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 
@@ -64,14 +65,16 @@ class PartnerFeesResource:
     async def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/partner-fees")
 
-    async def create(self, data: CreatePartnerFeeInput) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
-        return await self._client.post(f"/instances/{self._instance_id}/partner-fees", data)
+    async def create(
+        self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
+        return await self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
     async def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{id}")
 
-    async def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return await self._client.delete(f"/instances/{self._instance_id}/partner-fees/{id}")
+    async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return await self._client.delete(f"/instances/{self._instance_id}/partner-fees/{id}", options=options)
 
 
 class PartnerFeesResourceSync:
@@ -82,14 +85,16 @@ class PartnerFeesResourceSync:
     def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
         return self._client.get(f"/instances/{self._instance_id}/partner-fees")
 
-    def create(self, data: CreatePartnerFeeInput) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
-        return self._client.post(f"/instances/{self._instance_id}/partner-fees", data)
+    def create(
+        self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
     def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
         return self._client.get(f"/instances/{self._instance_id}/partner-fees/{id}")
 
-    def delete(self, id: str) -> BlindpayApiResponse[None]:
-        return self._client.delete(f"/instances/{self._instance_id}/partner-fees/{id}")
+    def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+        return self._client.delete(f"/instances/{self._instance_id}/partner-fees/{id}", options=options)
 
 
 def create_partner_fees_resource(instance_id: str, client: InternalApiClient) -> PartnerFeesResource:
