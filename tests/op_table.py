@@ -20,6 +20,9 @@ MEMBER = "us_000000000000"
 Call = Callable[[Any, Optional[RequestOptions]], Any]
 
 
+NO_BODY_CHECK: Any = object()
+
+
 @dataclass(frozen=True)
 class Op:
     operation: str  # "METHOD /v1/path" exactly as in reference/sdk-surface.txt and fixtures/index.json
@@ -28,6 +31,8 @@ class Op:
     path: str  # the exact raw path the call sends (query string excluded)
     multipart: bool = False
     note: str = ""
+    body: Any = NO_BODY_CHECK  # the exact JSON body the call must send
+    query: Optional[str] = None  # the exact query string the call must send
 
     @property
     def http_method(self) -> str:
@@ -596,6 +601,7 @@ OPS: List[Op] = [
         "instances.rfi.submit",
         lambda c, o: c.instances.rfi.submit({"response": {"tax_id": "123"}}, o),
         f"{INST}/rfi",
+        body={"tax_id": "123"},
     ),
     Op(
         "GET /v1/instances/{instance_id}/customers/{customer_id}/rfi",
@@ -610,6 +616,7 @@ OPS: List[Op] = [
             {"customer_id": CUSTOMER, "response": {"docs": ["https://example.com/a.pdf"]}}, o
         ),
         f"{CUST}/rfi",
+        body={"docs": ["https://example.com/a.pdf"]},
     ),
     Op(
         "POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid",
@@ -618,6 +625,7 @@ OPS: List[Op] = [
             {"customer_id": CUSTOMER, "redirect_url": "https://example.com/done"}, o
         ),
         f"{CUST}/bank-accounts/plaid",
+        body={"redirect_url": "https://example.com/done"},
     ),
     Op(
         "PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}",
@@ -626,6 +634,7 @@ OPS: List[Op] = [
             {"customer_id": CUSTOMER, "id": ITEM, "is_self_custody": True}, o
         ),
         f"{CUST}/blockchain-wallets/{ITEM}",
+        body={"is_self_custody": True},
     ),
     Op(
         "PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}",
@@ -634,26 +643,39 @@ OPS: List[Op] = [
             {"customer_id": CUSTOMER, "bank_account_id": BANK_ACCOUNT, "id": ITEM, "partner_fee_id": None}, o
         ),
         f"{CUST}/bank-accounts/{BANK_ACCOUNT}/offramp-wallets/{ITEM}",
+        body={"partner_fee_id": None},
     ),
     Op(
         "POST /v1/presign",
         "upload.presign",
         lambda c, o: c.upload.presign({"file_url": "https://example.com/a.pdf"}, o),
         f"{V1}/presign",
+        body={"file_url": "https://example.com/a.pdf"},
+        query="instance_id=in_000000000000",
     ),
     Op(
         "GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits",
         "wallets.custodial.get_deposits",
         lambda c, o: c.wallets.custodial.get_deposits({"customer_id": CUSTOMER, "id": ITEM}),
         f"{CUST}/wallets/{ITEM}/deposits",
+        query="",
     ),
     Op(
         "POST /v1/instances/{instance_id}/payables",
         "payables.create",
-        lambda c, o: c.payables.create({"customer_id": CUSTOMER, "currency": "BRL", "boleto_barcode": "0"}, o),
+        lambda c, o: c.payables.create(
+            {"customer_id": CUSTOMER, "currency": "BRL", "boleto_barcode": "0", "from": {"legal_name": "Acme"}}, o
+        ),
         f"{INST}/payables",
+        body={"customer_id": CUSTOMER, "currency": "BRL", "boleto_barcode": "0", "from": {"legal_name": "Acme"}},
     ),
-    Op("GET /v1/instances/{instance_id}/payables", "payables.list", lambda c, o: c.payables.list(), f"{INST}/payables"),
+    Op(
+        "GET /v1/instances/{instance_id}/payables",
+        "payables.list",
+        lambda c, o: c.payables.list(),
+        f"{INST}/payables",
+        query="",
+    ),
     Op(
         "GET /v1/instances/{instance_id}/payables/{id}",
         "payables.get",

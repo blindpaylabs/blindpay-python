@@ -19,7 +19,7 @@ import pytest
 from blindpay import RequestOptions
 from blindpay.types import BlindpaySuccessResponse
 from tests.http_mock import async_client, sync_client
-from tests.op_table import OPS, Op
+from tests.op_table import NO_BODY_CHECK, OPS, Op
 from tests.spec_fixtures import SPEC_DIR, load_index, variant_errors
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "blindpay" / "resources"
@@ -134,6 +134,29 @@ class TestOperations:
         request = recorder.requests[-1]
         assert request.method == op.http_method
         assert request.url.raw_path.split(b"?")[0].decode() == op.path
+        if op.query is not None:
+            assert request.url.query.decode() == op.query
+        if op.body is not NO_BODY_CHECK:
+            assert json.loads(request.content) == op.body
+
+    @pytest.mark.parametrize("kind", KINDS)
+    async def test_faster_payments_injects_the_rail_type(self, kind: str):
+        op = next(o for o in OPS if o.method == "customers.bank_accounts.create_faster_payments")
+        recorder = Recorder()
+
+        await run(kind, op, recorder)
+
+        assert json.loads(recorder.requests[-1].content) == {"type": "faster_payments", "name": "Acme"}
+
+    @pytest.mark.parametrize("kind", KINDS)
+    async def test_offramp_update_omits_an_absent_partner_fee(self, kind: str):
+        recorder = Recorder()
+        client: Any = async_client(recorder) if kind == "async" else sync_client(recorder)
+        result = client.wallets.offramp.update({"customer_id": "cu_1", "bank_account_id": "ba_1", "id": "ow_1"})
+        if kind == "async":
+            await result
+
+        assert json.loads(recorder.requests[-1].content) == {}
 
     @pytest.mark.parametrize("kind", KINDS)
     @pytest.mark.parametrize("op", OPS, ids=[op.method for op in OPS])
