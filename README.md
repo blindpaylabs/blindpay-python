@@ -252,6 +252,8 @@ No public method or type was removed. Things that behave differently:
     (`name` on ACH/wire/SWIFT/RTP bank accounts, payin-quote `currency_type`/`payment_method`/`request_amount`/
     `token`, transfer-quote fields, `banking_partner`/`blockchain_wallet_id`/`token` on virtual accounts,
     `name` on `instances.update`).
+  - `request_amount` on `quotes.create` and `payins.quotes.create` is `int` (cents), no longer `float`.
+  - `retryable` on errors is now `False` for a mutation that carried no idempotency key, and for a mutation 408.
   - `payouts.list`, `payins.list` and `payables.list` return the `{data, pagination}` envelope **or** a bare list
     (see Pagination); `virtual_accounts.list` returns a list.
 - `client.verify_webhook_signature` still works but is deprecated: use `webhooks.verify` / `webhooks.construct_event`.
