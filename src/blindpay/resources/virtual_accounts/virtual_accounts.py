@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from typing_extensions import Literal, NotRequired, TypedDict
+from typing_extensions import Literal, NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -89,9 +89,9 @@ class _CreateVirtualAccountInputRequired(TypedDict):
 
 
 class CreateVirtualAccountInput(_CreateVirtualAccountInputRequired, total=False):
-    blockchain_wallet_id: str
-    token: StablecoinToken
-    banking_partner: BankingPartner
+    blockchain_wallet_id: Required[str]
+    token: Required[StablecoinToken]
+    banking_partner: Required[BankingPartner]
     sole_proprietor_doc_type: Optional[str]
     sole_proprietor_doc_file: Optional[str]
     bre_b: Optional[CreateVirtualAccountBreB]

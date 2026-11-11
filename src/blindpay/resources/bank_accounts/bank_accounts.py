@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -197,7 +197,7 @@ class _CreateAchInputRequired(TypedDict):
 
 
 class CreateAchInput(_CreateAchInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     account_number: Optional[str]
     account_type: Optional[BankAccountType]
@@ -246,7 +246,7 @@ class _CreateWireInputRequired(TypedDict):
 
 
 class CreateWireInput(_CreateWireInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_number: Optional[str]
     account_class: Optional[AccountClass]
     beneficiary_name: Optional[str]
@@ -285,7 +285,7 @@ class _CreateInternationalSwiftInputRequired(TypedDict):
 
 
 class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     recipient_relationship: Optional[RecipientRelationship]
     swift_account_holder_name: Optional[str]
@@ -357,7 +357,7 @@ class _CreateRtpInputRequired(TypedDict):
 
 
 class CreateRtpInput(_CreateRtpInputRequired, total=False):
-    name: str
+    name: Required[str]
     account_class: Optional[AccountClass]
     beneficiary_name: Optional[str]
     routing_number: Optional[str]

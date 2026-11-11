@@ -74,6 +74,7 @@ class TestVirtualAccounts:
                     "customer_id": "re_000000000000",
                     "blockchain_wallet_id": "bw_000000000000",
                     "token": "USDC",
+                    "banking_partner": "jpmorgan",
                 }
             )
 
@@ -82,7 +83,7 @@ class TestVirtualAccounts:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/customers/re_000000000000/virtual-accounts",
-                {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
+                {"blockchain_wallet_id": "bw_000000000000", "token": "USDC", "banking_partner": "jpmorgan"},
             )
 
     @pytest.mark.asyncio
@@ -198,6 +199,7 @@ class TestVirtualAccountsSync:
                     "customer_id": "re_000000000000",
                     "blockchain_wallet_id": "bw_000000000000",
                     "token": "USDC",
+                    "banking_partner": "jpmorgan",
                 }
             )
 
@@ -206,7 +208,7 @@ class TestVirtualAccountsSync:
             mock_request.assert_called_once_with(
                 "POST",
                 "/instances/in_000000000000/customers/re_000000000000/virtual-accounts",
-                {"blockchain_wallet_id": "bw_000000000000", "token": "USDC"},
+                {"blockchain_wallet_id": "bw_000000000000", "token": "USDC", "banking_partner": "jpmorgan"},
             )
 
     def test_get_virtual_account(self):

@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions
@@ -23,10 +23,10 @@ class PayerRules(TypedDict, total=False):
 
 class CreatePayinQuoteInput(TypedDict, total=False):
     blockchain_wallet_id: Optional[str]
-    currency_type: CurrencyType
-    payment_method: PaymentMethod
-    request_amount: float
-    token: StablecoinToken
+    currency_type: Required[CurrencyType]
+    payment_method: Required[PaymentMethod]
+    request_amount: Required[float]
+    token: Required[StablecoinToken]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
     payer_rules: Optional[PayerRules]

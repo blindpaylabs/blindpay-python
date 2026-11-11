@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -37,7 +37,7 @@ GetInstanceMembersResponse = List[InstanceMember]
 
 
 class UpdateInstanceInput(TypedDict, total=False):
-    name: str
+    name: Required[str]
     customer_invite_redirect_url: Optional[str]
     email_notifications: bool
     require_passkey: bool

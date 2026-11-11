@@ -29,14 +29,14 @@ class Contract(TypedDict):
 
 
 class CreateQuoteInput(TypedDict):
-    bank_account_id: str
-    currency_type: CurrencyType
+    bank_account_id: NotRequired[str]
+    currency_type: NotRequired[CurrencyType]
     network: Optional[Network]
-    request_amount: float
+    request_amount: NotRequired[float]
     token: Optional[StablecoinToken]
-    cover_fees: Optional[bool]
-    description: Optional[str]
-    partner_fee_id: Optional[str]
+    cover_fees: NotRequired[Optional[bool]]
+    description: NotRequired[Optional[str]]
+    partner_fee_id: NotRequired[Optional[str]]
     transaction_document_file: Optional[str]
     transaction_document_id: Optional[str]
     transaction_document_type: TransactionDocumentType

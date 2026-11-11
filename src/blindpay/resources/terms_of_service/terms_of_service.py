@@ -1,6 +1,6 @@
 from typing import Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions
@@ -9,8 +9,8 @@ from ...types import BlindpayApiResponse
 
 class InitiateInput(TypedDict):
     idempotency_key: str
-    customer_id: Optional[str]
-    redirect_url: Optional[str]
+    customer_id: NotRequired[Optional[str]]
+    redirect_url: NotRequired[Optional[str]]
 
 
 class InitiateResponse(TypedDict):

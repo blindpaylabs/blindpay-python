@@ -1,6 +1,6 @@
 from typing import AsyncIterator, Iterator, List, Optional, Union
 
-from typing_extensions import Literal, NotRequired, TypedDict
+from typing_extensions import Literal, NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
@@ -23,13 +23,13 @@ class TransferTrackingStep(TypedDict):
 
 
 class CreateTransferQuoteInput(TypedDict, total=False):
-    wallet_id: str
-    sender_token: StablecoinToken
-    customer_wallet_address: str
-    customer_token: StablecoinToken
-    customer_network: Network
-    request_amount: int
-    amount_reference: AmountReference
+    wallet_id: Required[str]
+    sender_token: Required[StablecoinToken]
+    customer_wallet_address: Required[str]
+    customer_token: Required[StablecoinToken]
+    customer_network: Required[Network]
+    request_amount: Required[int]
+    amount_reference: Required[AmountReference]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
     partner_flat_fee: int

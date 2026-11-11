@@ -136,7 +136,7 @@ ExportPayoutsResponse = List[Payout]
 
 class AuthorizeStellarTokenInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
     wallet_id: NotRequired[str]
 
 
@@ -146,8 +146,8 @@ class AuthorizeStellarTokenResponse(TypedDict):
 
 class CreateStellarPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
-    signed_transaction: Optional[str]
+    sender_wallet_address: NotRequired[str]
+    signed_transaction: NotRequired[Optional[str]]
     wallet_id: NotRequired[str]
 
 
@@ -166,7 +166,7 @@ class CreateStellarPayoutResponse(TypedDict):
 
 class CreateEvmPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
     wallet_id: NotRequired[str]
 
 
@@ -185,7 +185,7 @@ class CreateEvmPayoutResponse(TypedDict):
 
 class CreateSolanaPayoutInput(TypedDict):
     quote_id: str
-    sender_wallet_address: str
+    sender_wallet_address: NotRequired[str]
     wallet_id: NotRequired[str]
 
 
@@ -207,7 +207,7 @@ class SubmitPayoutDocumentsInput(TypedDict):
     transaction_document_type: TransactionDocumentType
     transaction_document_id: str
     transaction_document_file: str
-    description: Optional[str]
+    description: NotRequired[Optional[str]]
 
 
 class SubmitPayoutDocumentsResponse(TypedDict):
