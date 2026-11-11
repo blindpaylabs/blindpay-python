@@ -220,5 +220,29 @@
     "field": "content_type",
     "reason": "SDK-side multipart metadata for the uploaded file part (its filename and MIME type in the multipart/form-data body), not a JSON field. The spec models the part as a binary string.",
     "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "RequestOptions",
+    "field": "headers",
+    "reason": "SDK-side per-request option (RequestOptions), not a wire field: extra HTTP headers for one call.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "RequestOptions",
+    "field": "timeout",
+    "reason": "SDK-side per-request option (RequestOptions), not a wire field: per-attempt timeout in seconds.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "ErrorResponse",
+    "field": "request_id",
+    "reason": "SDK-side error metadata, not an error-body field: read from the X-Request-Id response header.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "ErrorResponse",
+    "field": "retryable",
+    "reason": "SDK-side error metadata, not an error-body field: computed by the SDK from the plan's retry table (status, code, idempotency_key_in_flight).",
+    "owner": "sdk-maintainers"
   }
 ]

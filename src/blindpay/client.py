@@ -1,10 +1,29 @@
+import asyncio
+import time
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, Mapping, Optional, TypeVar, Union
 
 import httpx
 
 from ._internal.api_client import MultipartFile
 from ._internal.exceptions import BlindPayError
+from ._internal.http import (
+    DEFAULT_BASE_URL,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_TIMEOUT,
+    HttpMethod,
+    RequestOptions,
+    api_root,
+    build_headers,
+    encode_json,
+    error_from_exception,
+    error_from_response,
+    exception_retry_delay,
+    request_timeout,
+    resolve_idempotency_key,
+    response_retry_delay,
+    success_from_response,
+)
 from ._version import __version__
 from .types import BlindpayApiResponse
 from .webhooks import DEFAULT_TOLERANCE_SECONDS, verify as verify_webhook
@@ -42,20 +61,10 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
-HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
 
-
-def _to_api_response(response: httpx.Response) -> BlindpayApiResponse[Any]:
-    if response.status_code >= 400:
-        try:
-            error_data = response.json()
-            error_message = error_data.get("message", "Unknown error")
-        except Exception:
-            error_message = "Unknown error"
-
-        return {"data": None, "error": {"message": error_message}}
-
-    return {"data": response.json(), "error": None}
+def _options_kwarg(options: Optional[RequestOptions]) -> Dict[str, Any]:
+    # Only pass options through when set, so _request keeps its (method, path, body) call shape.
+    return {"options": options} if options else {}
 
 
 def _with_legacy_v1_prefix(svix_signature: str) -> str:
@@ -65,101 +74,238 @@ def _with_legacy_v1_prefix(svix_signature: str) -> str:
 
 
 class ApiClientImpl:
-    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.AsyncBaseTransport] = None):
+    """Async HTTP layer: one shared ``httpx.AsyncClient``, retries per the A2 table, ``asyncio.sleep`` backoff."""
+
+    def __init__(
+        self,
+        base_url: str,
+        headers: Dict[str, str],
+        *,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        http_client: Optional[httpx.AsyncClient] = None,
+    ):
         self.base_url = base_url
         self.headers = headers
-        self._transport = transport
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self._owns_client = http_client is None
+        self._client = http_client if http_client is not None else httpx.AsyncClient()
+        self._sleep: Callable[[float], Awaitable[None]] = asyncio.sleep
 
     async def get(self, path: str) -> BlindpayApiResponse[T]:
         return await self._request("GET", path)
 
-    async def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return await self._request("POST", path, body)
+    async def post(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return await self._request("POST", path, body, **_options_kwarg(options))
 
-    async def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return await self._request("PUT", path, body)
+    async def put(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return await self._request("PUT", path, body, **_options_kwarg(options))
 
-    async def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return await self._request("PATCH", path, body)
+    async def patch(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return await self._request("PATCH", path, body, **_options_kwarg(options))
 
-    async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
-        return await self._request("DELETE", path, body)
+    async def delete(
+        self, path: str, body: Optional[Mapping[str, Any]] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return await self._request("DELETE", path, body, **_options_kwarg(options))
 
     async def post_multipart(
-        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+        self,
+        path: str,
+        data: Mapping[str, str],
+        files: Mapping[str, MultipartFile],
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[T]:
-        return await self._send("POST", path, data=data, files=files)
+        return await self._send("POST", path, data=data, files=files, options=options)
 
     async def _request(
         self,
         method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[T]:
-        if body is not None:
-            return await self._send(method, path, json=body)
-        return await self._send(method, path)
+        return await self._send(method, path, json_body=body, options=options)
 
-    async def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
+    async def _send(
+        self,
+        method: HttpMethod,
+        path: str,
+        *,
+        json_body: Optional[Mapping[str, Any]] = None,
+        data: Optional[Mapping[str, str]] = None,
+        files: Optional[Mapping[str, MultipartFile]] = None,
+        options: Optional[RequestOptions] = None,
+    ) -> BlindpayApiResponse[T]:
+        multipart = files is not None
+        key = resolve_idempotency_key(method, options, multipart=multipart, max_retries=self.max_retries)
+        content = encode_json(json_body) if json_body is not None else None
+        request: Dict[str, Any] = {
+            "headers": build_headers(self.headers, options, key, json_body=content is not None),
+            "timeout": request_timeout(options, self.timeout),
+        }
+        if content is not None:
+            request["content"] = content
+        if multipart:
+            request.update(data=data, files=files)
         url = f"{self.base_url}{path}"
 
-        try:
-            async with httpx.AsyncClient(transport=self._transport) as client:
-                response = await client.request(method=method, url=url, headers=self.headers, **content)
-                return _to_api_response(response)
+        attempt = 0
+        while True:
+            try:
+                response = await self._client.request(method, url, **request)
+            except Exception as error:
+                delay = exception_retry_delay(
+                    error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+                )
+                if delay is not None and attempt < self.max_retries:
+                    await self._sleep(delay)
+                    attempt += 1
+                    continue
+                return {"data": None, "error": error_from_exception(error, key)}
 
-        except Exception as e:
-            error_message = str(e) if str(e) else "Unknown error"
-            return {"data": None, "error": {"message": error_message}}
+            if response.is_success:
+                return success_from_response(response, key)
+            delay = response_retry_delay(
+                response, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+            )
+            if delay is not None and attempt < self.max_retries:
+                await self._sleep(delay)
+                attempt += 1
+                continue
+            return {"data": None, "error": error_from_response(response, key)}
+
+    async def aclose(self) -> None:
+        if self._owns_client:
+            await self._client.aclose()
 
 
 class ApiClientImplSync:
-    def __init__(self, base_url: str, headers: Dict[str, str], transport: Optional[httpx.BaseTransport] = None):
+    """Sync HTTP layer: one shared ``httpx.Client``, retries per the A2 table, ``time.sleep`` backoff."""
+
+    def __init__(
+        self,
+        base_url: str,
+        headers: Dict[str, str],
+        *,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        http_client: Optional[httpx.Client] = None,
+    ):
         self.base_url = base_url
         self.headers = headers
-        self.client = httpx.Client(base_url=base_url, headers=headers, transport=transport)
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self._owns_client = http_client is None
+        self.client = http_client if http_client is not None else httpx.Client()
+        self._sleep: Callable[[float], None] = time.sleep
 
     def get(self, path: str) -> BlindpayApiResponse[T]:
         return self._request("GET", path)
 
-    def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return self._request("POST", path, body)
+    def post(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return self._request("POST", path, body, **_options_kwarg(options))
 
-    def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return self._request("PUT", path, body)
+    def put(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return self._request("PUT", path, body, **_options_kwarg(options))
 
-    def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[T]:
-        return self._request("PATCH", path, body)
+    def patch(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return self._request("PATCH", path, body, **_options_kwarg(options))
 
-    def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[T]:
-        return self._request("DELETE", path, body)
+    def delete(
+        self, path: str, body: Optional[Mapping[str, Any]] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[T]:
+        return self._request("DELETE", path, body, **_options_kwarg(options))
 
     def post_multipart(
-        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+        self,
+        path: str,
+        data: Mapping[str, str],
+        files: Mapping[str, MultipartFile],
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[T]:
-        return self._send("POST", path, data=data, files=files)
+        return self._send("POST", path, data=data, files=files, options=options)
 
     def _request(
         self,
         method: HttpMethod,
         path: str,
         body: Optional[Mapping[str, Any]] = None,
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[T]:
-        if body is not None:
-            return self._send(method, path, json=body)
-        return self._send(method, path)
+        return self._send(method, path, json_body=body, options=options)
 
-    def _send(self, method: HttpMethod, path: str, **content: Any) -> BlindpayApiResponse[T]:
-        try:
-            response = self.client.request(method=method, url=path, **content)
-            return _to_api_response(response)
+    def _send(
+        self,
+        method: HttpMethod,
+        path: str,
+        *,
+        json_body: Optional[Mapping[str, Any]] = None,
+        data: Optional[Mapping[str, str]] = None,
+        files: Optional[Mapping[str, MultipartFile]] = None,
+        options: Optional[RequestOptions] = None,
+    ) -> BlindpayApiResponse[T]:
+        multipart = files is not None
+        key = resolve_idempotency_key(method, options, multipart=multipart, max_retries=self.max_retries)
+        content = encode_json(json_body) if json_body is not None else None
+        request: Dict[str, Any] = {
+            "headers": build_headers(self.headers, options, key, json_body=content is not None),
+            "timeout": request_timeout(options, self.timeout),
+        }
+        if content is not None:
+            request["content"] = content
+        if multipart:
+            request.update(data=data, files=files)
+        url = f"{self.base_url}{path}"
 
-        except Exception as e:
-            error_message = str(e) if str(e) else "Unknown error"
-            return {"data": None, "error": {"message": error_message}}
+        attempt = 0
+        while True:
+            try:
+                response = self.client.request(method, url, **request)
+            except Exception as error:
+                delay = exception_retry_delay(
+                    error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+                )
+                if delay is not None and attempt < self.max_retries:
+                    self._sleep(delay)
+                    attempt += 1
+                    continue
+                return {"data": None, "error": error_from_exception(error, key)}
+
+            if response.is_success:
+                return success_from_response(response, key)
+            delay = response_retry_delay(
+                response, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+            )
+            if delay is not None and attempt < self.max_retries:
+                self._sleep(delay)
+                attempt += 1
+                continue
+            return {"data": None, "error": error_from_response(response, key)}
 
     def close(self) -> None:
-        self.client.close()
+        if self._owns_client:
+            self.client.close()
+
+
+def _validate_settings(timeout: float, max_retries: int) -> None:
+    if timeout <= 0:
+        raise BlindPayError("timeout must be a positive number of seconds")
+    if max_retries < 0:
+        raise BlindPayError("max_retries must be 0 (no retries) or more")
 
 
 class _InstancesNamespace:
@@ -260,16 +406,27 @@ class BlindPay:
     _instance_id: str
     _base_url: str
 
-    def __init__(self, *, api_key: str, instance_id: str):
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        instance_id: str,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        http_client: Optional[httpx.AsyncClient] = None,
+    ):
         if not api_key:
             raise BlindPayError("Api key not provided, get your api key on blindpay dashboard")
 
         if not instance_id:
             raise BlindPayError("Instance id not provided, get your instance id on blindpay dashboard")
 
+        _validate_settings(timeout, max_retries)
+
         self._api_key = api_key
         self._instance_id = instance_id
-        self._base_url = "https://api.blindpay.com/v1"
+        self._base_url = api_root(base_url)
 
         # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
         # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
@@ -279,7 +436,12 @@ class BlindPay:
             "Authorization": f"Bearer {self._api_key}",
         }
 
-        self._api = ApiClientImpl(self._base_url, self._headers)
+        self._api = ApiClientImpl(
+            self._base_url, self._headers, timeout=timeout, max_retries=max_retries, http_client=http_client
+        )
+
+    def __repr__(self) -> str:
+        return f"BlindPay(instance_id={self._instance_id!r}, base_url={self._base_url!r}, api_key='***')"
 
     @cached_property
     def available(self) -> "AvailableResource":
@@ -398,6 +560,18 @@ class BlindPay:
             tolerance=tolerance,
         )
 
+    async def aclose(self) -> None:
+        """Closes the underlying HTTP client (unless you passed your own ``http_client``)."""
+        await self._api.aclose()
+
+    async def __aenter__(self) -> "BlindPay":
+        return self
+
+    async def __aexit__(
+        self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]
+    ) -> None:
+        await self.aclose()
+
 
 class _InstancesNamespaceSync:
     def __init__(self, instance_id: str, api_client: ApiClientImplSync) -> None:
@@ -497,16 +671,27 @@ class BlindPaySync:
     _instance_id: str
     _base_url: str
 
-    def __init__(self, *, api_key: str, instance_id: str):
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        instance_id: str,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        http_client: Optional[httpx.Client] = None,
+    ):
         if not api_key:
             raise BlindPayError("Api key not provided, get your api key on blindpay dashboard")
 
         if not instance_id:
             raise BlindPayError("Instance id not provided, get your instance id on blindpay dashboard")
 
+        _validate_settings(timeout, max_retries)
+
         self._api_key = api_key
         self._instance_id = instance_id
-        self._base_url = "https://api.blindpay.com/v1"
+        self._base_url = api_root(base_url)
 
         # No client-wide Content-Type: httpx sets application/json for JSON bodies and multipart/form-data
         # (with its boundary) for uploads. A fixed JSON Content-Type would break the multipart requests.
@@ -516,7 +701,12 @@ class BlindPaySync:
             "Authorization": f"Bearer {self._api_key}",
         }
 
-        self._api = ApiClientImplSync(self._base_url, self._headers)
+        self._api = ApiClientImplSync(
+            self._base_url, self._headers, timeout=timeout, max_retries=max_retries, http_client=http_client
+        )
+
+    def __repr__(self) -> str:
+        return f"BlindPaySync(instance_id={self._instance_id!r}, base_url={self._base_url!r}, api_key='***')"
 
     @cached_property
     def available(self) -> "AvailableResourceSync":

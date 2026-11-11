@@ -1,12 +1,32 @@
-from typing import Generic, Literal, Optional, TypeVar, Union
+from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 T = TypeVar("T")
 
 
 class ErrorResponse(TypedDict):
+    """The ``error`` half of every result. The SDK always fills every key; only ``message`` is typed as required
+    so hand-built errors (e.g. in tests) stay valid.
+
+    - ``status``: HTTP status, or 0 when no response arrived (network error, timeout).
+    - ``code``: the API's stable UPPERCASE error code, or an ``SDK_*`` code for client-side failures.
+    - ``errors``: the API's detail list (empty when absent).
+    - ``request_id``: the ``X-Request-Id`` response header.
+    - ``idempotency_key``: the key the request carried (yours or auto-generated). Resend with it to resume safely.
+    - ``retryable``: the request may succeed if resent with the same ``idempotency_key``. For a create or payout
+      that returned a 5xx, look the resource up before resending.
+    """
+
     message: str
+    status: NotRequired[int]
+    code: NotRequired[Optional[str]]
+    description: NotRequired[Optional[str]]
+    errors: NotRequired[List[Any]]
+    trace_id: NotRequired[Optional[str]]
+    request_id: NotRequired[Optional[str]]
+    idempotency_key: NotRequired[Optional[str]]
+    retryable: NotRequired[bool]
 
 
 class BlindpayErrorResponse(TypedDict):

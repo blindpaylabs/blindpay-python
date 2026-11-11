@@ -1,6 +1,7 @@
 from typing import IO, Any, Mapping, Optional, Protocol, Tuple, Union
 
 from ..types import BlindpayApiResponse
+from .http import RequestOptions
 
 MultipartFile = Tuple[str, Union[bytes, IO[bytes]], str]
 """A multipart file part: (filename, content, content type)."""
@@ -16,24 +17,36 @@ class InternalApiClient(Protocol):
         """Make a GET request"""
         ...
 
-    async def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    async def post(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a POST request"""
         ...
 
-    async def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    async def put(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a PUT request"""
         ...
 
-    async def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    async def patch(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a PATCH request"""
         ...
 
-    async def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[Any]:
+    async def delete(
+        self, path: str, body: Optional[Mapping[str, Any]] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a DELETE request"""
         ...
 
     async def post_multipart(
-        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+        self,
+        path: str,
+        data: Mapping[str, str],
+        files: Mapping[str, MultipartFile],
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[Any]:
         """Make a multipart/form-data POST request"""
         ...
@@ -46,24 +59,36 @@ class InternalApiClientSync(Protocol):
         """Make a GET request"""
         ...
 
-    def post(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    def post(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a POST request"""
         ...
 
-    def put(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    def put(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a PUT request"""
         ...
 
-    def patch(self, path: str, body: Mapping[str, Any]) -> BlindpayApiResponse[Any]:
+    def patch(
+        self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a PATCH request"""
         ...
 
-    def delete(self, path: str, body: Optional[Mapping[str, Any]] = None) -> BlindpayApiResponse[Any]:
+    def delete(
+        self, path: str, body: Optional[Mapping[str, Any]] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Any]:
         """Make a DELETE request"""
         ...
 
     def post_multipart(
-        self, path: str, data: Mapping[str, str], files: Mapping[str, MultipartFile]
+        self,
+        path: str,
+        data: Mapping[str, str],
+        files: Mapping[str, MultipartFile],
+        options: Optional[RequestOptions] = None,
     ) -> BlindpayApiResponse[Any]:
         """Make a multipart/form-data POST request"""
         ...
