@@ -39,12 +39,20 @@ if TYPE_CHECKING:
         CustodialWalletsResourceSync,
     )
     from blindpay.resources.fees.fees import FeesResource, FeesResourceSync
+    from blindpay.resources.instances.onboarding import OnboardingResource, OnboardingResourceSync
     from blindpay.resources.limits.limits import LimitsResource, LimitsResourceSync
     from blindpay.resources.ownership.ownership import OwnershipResource, OwnershipResourceSync
     from blindpay.resources.partner_fees.partner_fees import PartnerFeesResource, PartnerFeesResourceSync
+    from blindpay.resources.payables.payables import PayablesResource, PayablesResourceSync
     from blindpay.resources.payins.quotes import PayinQuotesResource, PayinQuotesResourceSync
     from blindpay.resources.payouts.payouts import PayoutsResource, PayoutsResourceSync
     from blindpay.resources.quotes.quotes import QuotesResource, QuotesResourceSync
+    from blindpay.resources.rfi.rfi import (
+        CustomerRfiResource,
+        CustomerRfiResourceSync,
+        InstanceRfiResource,
+        InstanceRfiResourceSync,
+    )
     from blindpay.resources.terms_of_service.terms_of_service import (
         TermsOfServiceResource,
         TermsOfServiceResourceSync,
@@ -327,6 +335,18 @@ class _InstancesNamespace(InstancesResource):
 
         return create_terms_of_service_resource(self._instance_id, self._api)
 
+    @cached_property
+    def onboarding(self) -> "OnboardingResource":
+        from blindpay.resources.instances.onboarding import create_onboarding_resource
+
+        return create_onboarding_resource(self._instance_id, self._api)
+
+    @cached_property
+    def rfi(self) -> "InstanceRfiResource":
+        from blindpay.resources.rfi.rfi import create_instance_rfi_resource
+
+        return create_instance_rfi_resource(self._instance_id, self._api)
+
 
 class _PayinsNamespace(PayinsResource):
     """``PayinsResource`` plus its sub-resources, all visible to type checkers."""
@@ -354,6 +374,12 @@ class _CustomersNamespace(CustomersResource):
         from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource
 
         return create_bank_accounts_resource(self._instance_id, self._api)
+
+    @cached_property
+    def rfi(self) -> "CustomerRfiResource":
+        from blindpay.resources.rfi.rfi import create_customer_rfi_resource
+
+        return create_customer_rfi_resource(self._instance_id, self._api)
 
 
 class _WalletsNamespace:
@@ -453,6 +479,12 @@ class BlindPay:
         from blindpay.resources.quotes import create_quotes_resource
 
         return create_quotes_resource(self._instance_id, self._api)
+
+    @cached_property
+    def payables(self) -> "PayablesResource":
+        from blindpay.resources.payables import create_payables_resource
+
+        return create_payables_resource(self._instance_id, self._api)
 
     @cached_property
     def payouts(self) -> "PayoutsResource":
@@ -571,6 +603,18 @@ class _InstancesNamespaceSync(InstancesResourceSync):
 
         return create_terms_of_service_resource_sync(self._instance_id, self._api)
 
+    @cached_property
+    def onboarding(self) -> "OnboardingResourceSync":
+        from blindpay.resources.instances.onboarding import create_onboarding_resource_sync
+
+        return create_onboarding_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def rfi(self) -> "InstanceRfiResourceSync":
+        from blindpay.resources.rfi.rfi import create_instance_rfi_resource_sync
+
+        return create_instance_rfi_resource_sync(self._instance_id, self._api)
+
 
 class _PayinsNamespaceSync(PayinsResourceSync):
     """``PayinsResourceSync`` plus its sub-resources, all visible to type checkers."""
@@ -598,6 +642,12 @@ class _CustomersNamespaceSync(CustomersResourceSync):
         from blindpay.resources.bank_accounts.bank_accounts import create_bank_accounts_resource_sync
 
         return create_bank_accounts_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def rfi(self) -> "CustomerRfiResourceSync":
+        from blindpay.resources.rfi.rfi import create_customer_rfi_resource_sync
+
+        return create_customer_rfi_resource_sync(self._instance_id, self._api)
 
 
 class _WalletsNamespaceSync:
@@ -697,6 +747,12 @@ class BlindPaySync:
         from blindpay.resources.quotes import create_quotes_resource_sync
 
         return create_quotes_resource_sync(self._instance_id, self._api)
+
+    @cached_property
+    def payables(self) -> "PayablesResourceSync":
+        from blindpay.resources.payables import create_payables_resource_sync
+
+        return create_payables_resource_sync(self._instance_id, self._api)
 
     @cached_property
     def payouts(self) -> "PayoutsResourceSync":

@@ -569,4 +569,100 @@ OPS: List[Op] = [
         lambda c, o: c.instances.webhook_endpoints.get_secret(ITEM),
         f"{INST}/webhook-endpoints/{ITEM}/secret",
     ),
+    # --- added for 94/94
+    Op("GET /v1/instances/{id}", "instances.get", lambda c, o: c.instances.get(), INST),
+    Op(
+        "GET /v1/instances/{instance_id}/onboarding/business_details",
+        "instances.onboarding.get_business_details",
+        lambda c, o: c.instances.onboarding.get_business_details(),
+        f"{INST}/onboarding/business_details",
+    ),
+    Op(
+        "GET /v1/instances/{instance_id}/onboarding/business_profile",
+        "instances.onboarding.get_business_profile",
+        lambda c, o: c.instances.onboarding.get_business_profile(),
+        f"{INST}/onboarding/business_profile",
+    ),
+    Op(
+        "GET /v1/instances/{instance_id}/onboarding/ownership_documents",
+        "instances.onboarding.get_ownership_documents",
+        lambda c, o: c.instances.onboarding.get_ownership_documents(),
+        f"{INST}/onboarding/ownership_documents",
+    ),
+    Op("GET /v1/instances/{instance_id}/rfi", "instances.rfi.get", lambda c, o: c.instances.rfi.get(), f"{INST}/rfi"),
+    Op(
+        "POST /v1/instances/{instance_id}/rfi",
+        "instances.rfi.submit",
+        lambda c, o: c.instances.rfi.submit({"response": {"tax_id": "123"}}, o),
+        f"{INST}/rfi",
+    ),
+    Op(
+        "GET /v1/instances/{instance_id}/customers/{customer_id}/rfi",
+        "customers.rfi.get",
+        lambda c, o: c.customers.rfi.get(CUSTOMER),
+        f"{CUST}/rfi",
+    ),
+    Op(
+        "POST /v1/instances/{instance_id}/customers/{customer_id}/rfi",
+        "customers.rfi.submit",
+        lambda c, o: c.customers.rfi.submit(
+            {"customer_id": CUSTOMER, "response": {"docs": ["https://example.com/a.pdf"]}}, o
+        ),
+        f"{CUST}/rfi",
+    ),
+    Op(
+        "POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid",
+        "customers.bank_accounts.create_plaid_link",
+        lambda c, o: c.customers.bank_accounts.create_plaid_link(
+            {"customer_id": CUSTOMER, "redirect_url": "https://example.com/done"}, o
+        ),
+        f"{CUST}/bank-accounts/plaid",
+    ),
+    Op(
+        "PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}",
+        "wallets.blockchain.set_self_custody",
+        lambda c, o: c.wallets.blockchain.set_self_custody(
+            {"customer_id": CUSTOMER, "id": ITEM, "is_self_custody": True}, o
+        ),
+        f"{CUST}/blockchain-wallets/{ITEM}",
+    ),
+    Op(
+        "PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}",
+        "wallets.offramp.update",
+        lambda c, o: c.wallets.offramp.update(
+            {"customer_id": CUSTOMER, "bank_account_id": BANK_ACCOUNT, "id": ITEM, "partner_fee_id": None}, o
+        ),
+        f"{CUST}/bank-accounts/{BANK_ACCOUNT}/offramp-wallets/{ITEM}",
+    ),
+    Op(
+        "POST /v1/presign",
+        "upload.presign",
+        lambda c, o: c.upload.presign({"file_url": "https://example.com/a.pdf"}, o),
+        f"{V1}/presign",
+    ),
+    Op(
+        "GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits",
+        "wallets.custodial.get_deposits",
+        lambda c, o: c.wallets.custodial.get_deposits({"customer_id": CUSTOMER, "id": ITEM}),
+        f"{CUST}/wallets/{ITEM}/deposits",
+    ),
+    Op(
+        "POST /v1/instances/{instance_id}/payables",
+        "payables.create",
+        lambda c, o: c.payables.create({"customer_id": CUSTOMER, "currency": "BRL", "boleto_barcode": "0"}, o),
+        f"{INST}/payables",
+    ),
+    Op("GET /v1/instances/{instance_id}/payables", "payables.list", lambda c, o: c.payables.list(), f"{INST}/payables"),
+    Op(
+        "GET /v1/instances/{instance_id}/payables/{id}",
+        "payables.get",
+        lambda c, o: c.payables.get(ITEM),
+        f"{INST}/payables/{ITEM}",
+    ),
+    Op(
+        "DELETE /v1/instances/{instance_id}/payables/{id}",
+        "payables.delete",
+        lambda c, o: c.payables.delete(ITEM, o),
+        f"{INST}/payables/{ITEM}",
+    ),
 ]

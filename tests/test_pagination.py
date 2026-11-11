@@ -14,6 +14,7 @@ PAGINATION_END = {"has_more": False, "next_page": None, "prev_page": None}
 
 # accessor name on the client -> path segment of its list route
 PAGERS = {
+    "payables": "payables",
     "payouts": "payouts",
     "payins": "payins",
     "customers": "customers",
@@ -157,3 +158,22 @@ class TestListShapes:
 
         assert ids == ["a1"]
         assert len(calls) == 2
+
+
+@pytest.mark.parametrize("kind", ["async", "sync"])
+class TestWalletDeposits:
+    async def test_get_deposits_auto_paging_follows_the_cursor_and_keeps_filters(self, kind: str):
+        pages = Pages([["d1", "d2"], ["d3"]])
+        params = {"customer_id": "cu_000000000000", "id": "wa_000000000000", "token": "USDC"}
+
+        if kind == "async":
+            client: Any = async_client(pages)
+            ids = [d["id"] async for d in client.wallets.custodial.get_deposits_auto_paging(params)]
+        else:
+            client = sync_client(pages)
+            ids = [d["id"] for d in client.wallets.custodial.get_deposits_auto_paging(params)]
+
+        assert ids == ["d1", "d2", "d3"]
+        assert [q.get("starting_after") for q in pages.queries] == [None, ["d2"]]
+        assert all(q["token"] == ["USDC"] and q["limit"] == ["100"] for q in pages.queries)
+        assert all("customer_id" not in q and "id" not in q for q in pages.queries)

@@ -362,8 +362,9 @@ class PaginationParams(TypedDict, total=False):
 
 class PaginationMetadata(TypedDict):
     has_more: bool
-    next_page: Optional[str]
-    prev_page: Optional[str]
+    next_page: NotRequired[Optional[str]]
+    """Pass it as ``starting_after`` to get the next page; absent or null when ``has_more`` is false."""
+    prev_page: NotRequired[Optional[str]]
 
 
 class TrackingTransaction(TypedDict):

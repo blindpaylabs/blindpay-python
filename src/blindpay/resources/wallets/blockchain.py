@@ -81,6 +81,12 @@ class PrepareSolanaDelegationTransactionResponse(TypedDict):
     transaction: str
 
 
+class SetSelfCustodyInput(TypedDict):
+    customer_id: str
+    id: str
+    is_self_custody: bool
+
+
 class BlockchainWalletsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -158,6 +164,19 @@ class BlockchainWalletsResource:
         self, data: PrepareSolanaDelegationTransactionInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PrepareSolanaDelegationTransactionResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/prepare-delegate-solana", data, options=options)
+
+    async def set_self_custody(
+        self, data: SetSelfCustodyInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BlockchainWallet]:
+        """Declares whether the customer controls the wallet's keys (mandatory for Brazilian customers). It can be
+        set once, while ``is_self_custody`` is still null; a second call returns 409
+        ``WALLETS_SELF_CUSTODY_ALREADY_SET``."""
+        return await self._client.patch(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/blockchain-wallets/{path_param(data['id'])}",
+            {"is_self_custody": data["is_self_custody"]},
+            options=options,
+        )
 
 
 class BlockchainWalletsResourceSync:
@@ -237,6 +256,19 @@ class BlockchainWalletsResourceSync:
         self, data: PrepareSolanaDelegationTransactionInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[PrepareSolanaDelegationTransactionResponse]:
         return self._client.post(f"/instances/{self._instance_id}/prepare-delegate-solana", data, options=options)
+
+    def set_self_custody(
+        self, data: SetSelfCustodyInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[BlockchainWallet]:
+        """Declares whether the customer controls the wallet's keys (mandatory for Brazilian customers). It can be
+        set once, while ``is_self_custody`` is still null; a second call returns 409
+        ``WALLETS_SELF_CUSTODY_ALREADY_SET``."""
+        return self._client.patch(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/blockchain-wallets/{path_param(data['id'])}",
+            {"is_self_custody": data["is_self_custody"]},
+            options=options,
+        )
 
 
 def create_blockchain_wallets_resource(instance_id: str, client: InternalApiClient) -> BlockchainWalletsResource:

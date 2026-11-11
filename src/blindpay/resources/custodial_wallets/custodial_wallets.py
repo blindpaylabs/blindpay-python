@@ -1,10 +1,11 @@
-from typing import List, Optional
+from typing import AsyncIterator, Iterator, List, Optional, Union
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import RequestOptions, path_param
-from ...types import BlindpayApiResponse, Network
+from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
+from ...types import BlindpayApiResponse, Network, PaginationMetadata
 
 
 class CustodialWallet(TypedDict):
@@ -55,6 +56,42 @@ class DeleteCustodialWalletInput(TypedDict):
     id: str
 
 
+WalletDepositStatus = Literal["processing", "completed", "on_hold", "refunded"]
+WalletDepositToken = Literal["USDC", "USDT", "USDB", "EURC", "EURB"]
+
+
+class WalletDeposit(TypedDict):
+    """A deposit into a managed wallet. ``amount`` is integer cents; ``token_amount`` the exact token amount."""
+
+    id: str
+    wallet_id: str
+    network: Union[Network, str]
+    token: Union[WalletDepositToken, str]
+    amount: int
+    token_amount: Optional[str]
+    status: Union[WalletDepositStatus, str]
+    transaction_hash: str
+    sender_address: Optional[str]
+    created_at: str
+
+
+class ListWalletDepositsResponse(TypedDict):
+    data: List[WalletDeposit]
+    pagination: PaginationMetadata
+
+
+class GetWalletDepositsInput(TypedDict):
+    """``limit`` is one of 5, 10, 50, 100, 200 (default 10); the API always returns the envelope."""
+
+    customer_id: str
+    id: str
+    limit: NotRequired[Union[Literal["5", "10", "50", "100", "200"], int]]
+    starting_after: NotRequired[str]
+    ending_before: NotRequired[str]
+    token: NotRequired[WalletDepositToken]
+    status: NotRequired[WalletDepositStatus]
+
+
 class CustodialWalletsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -89,6 +126,16 @@ class CustodialWalletsResource:
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
             options=options,
         )
+
+    async def get_deposits(self, data: GetWalletDepositsInput) -> BlindpayApiResponse[ListWalletDepositsResponse]:
+        query_string = build_query({k: v for k, v in data.items() if k not in ("customer_id", "id")})
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/wallets/{path_param(data['id'])}/deposits{query_string}"
+        )
+
+    def get_deposits_auto_paging(self, data: GetWalletDepositsInput) -> AsyncIterator[WalletDeposit]:
+        return async_auto_paging_iter(self.get_deposits, data)
 
 
 class CustodialWalletsResourceSync:
@@ -125,6 +172,16 @@ class CustodialWalletsResourceSync:
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
             options=options,
         )
+
+    def get_deposits(self, data: GetWalletDepositsInput) -> BlindpayApiResponse[ListWalletDepositsResponse]:
+        query_string = build_query({k: v for k, v in data.items() if k not in ("customer_id", "id")})
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/wallets/{path_param(data['id'])}/deposits{query_string}"
+        )
+
+    def get_deposits_auto_paging(self, data: GetWalletDepositsInput) -> Iterator[WalletDeposit]:
+        return auto_paging_iter(self.get_deposits, data)
 
 
 def create_custodial_wallets_resource(instance_id: str, client: InternalApiClient) -> CustodialWalletsResource:

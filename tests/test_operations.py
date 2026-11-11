@@ -178,6 +178,7 @@ KNOWN_DRIFT: Set[str] = {
     "wallets.blockchain.create_with_hash",
     "wallets.blockchain.list",
     "wallets.blockchain.get",
+    "wallets.blockchain.set_self_custody",
     "customers.list",
     "customers.get_limit_increase_requests",
     "customers.get",

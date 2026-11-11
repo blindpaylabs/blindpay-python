@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -458,6 +458,15 @@ class CreateTedResponse(TypedDict):
     created_at: str
 
 
+class CreatePlaidLinkInput(TypedDict):
+    customer_id: str
+    redirect_url: NotRequired[Optional[str]]
+
+
+class PlaidLink(TypedDict):
+    url: str
+
+
 class BankAccountsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -613,6 +622,18 @@ class BankAccountsResource:
             options=options,
         )
 
+    async def create_plaid_link(
+        self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PlaidLink]:
+        """Starts a Plaid Link session for the customer to connect a US bank account; send them to ``url``."""
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return await self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/plaid",
+            payload,
+            options=options,
+        )
+
 
 class BankAccountsResourceSync:
     def __init__(self, instance_id: str, client: InternalApiClientSync):
@@ -761,6 +782,18 @@ class BankAccountsResourceSync:
         payload["type"] = "sepa"
         return self._client.post(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts",
+            payload,
+            options=options,
+        )
+
+    def create_plaid_link(
+        self, data: CreatePlaidLinkInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PlaidLink]:
+        """Starts a Plaid Link session for the customer to connect a US bank account; send them to ``url``."""
+        customer_id = data["customer_id"]
+        payload = {k: v for k, v in data.items() if k != "customer_id"}
+        return self._client.post(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/plaid",
             payload,
             options=options,
         )

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
@@ -48,6 +48,18 @@ class GetOfframpWalletInput(TypedDict):
     id: str
 
 
+class UpdateOfframpWalletInput(TypedDict):
+    customer_id: str
+    bank_account_id: str
+    id: str
+    partner_fee_id: NotRequired[Optional[str]]
+    """A partner fee id to apply, or ``None`` to remove the current one. Omit it to leave the fee unchanged."""
+
+
+class UpdateOfframpWalletResponse(TypedDict):
+    success: bool
+
+
 class OfframpWalletsResource:
     def __init__(self, instance_id: str, client: InternalApiClient):
         self._instance_id = instance_id
@@ -78,6 +90,17 @@ class OfframpWalletsResource:
         id = data["id"]
         return await self._client.get(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
+        )
+
+    async def update(
+        self, data: UpdateOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UpdateOfframpWalletResponse]:
+        payload = {k: v for k, v in data.items() if k not in ("customer_id", "bank_account_id", "id")}
+        return await self._client.put(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/bank-accounts/{path_param(data['bank_account_id'])}/offramp-wallets/{path_param(data['id'])}",
+            payload,
+            options=options,
         )
 
 
@@ -111,6 +134,17 @@ class OfframpWalletsResourceSync:
         id = data["id"]
         return self._client.get(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
+        )
+
+    def update(
+        self, data: UpdateOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[UpdateOfframpWalletResponse]:
+        payload = {k: v for k, v in data.items() if k not in ("customer_id", "bank_account_id", "id")}
+        return self._client.put(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
+            f"/bank-accounts/{path_param(data['bank_account_id'])}/offramp-wallets/{path_param(data['id'])}",
+            payload,
+            options=options,
         )
 
 

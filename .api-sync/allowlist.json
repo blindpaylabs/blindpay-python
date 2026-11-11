@@ -244,5 +244,95 @@
     "field": "retryable",
     "reason": "SDK-side error metadata, not an error-body field: computed by the SDK from the plan's retry table (status, code, idempotency_key_in_flight).",
     "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "WalletDeposit",
+    "field": "sender_address",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "WalletDeposit",
+    "field": "token_amount",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "Instance",
+    "field": "onboarding_step",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessDetails",
+    "field": "entity_type",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessDetails",
+    "field": "state_of_incorporation",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessDetails",
+    "field": "trading_names",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "estimated_volume_per_month",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "has_kyc_screening",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "is_regulated",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "scenario",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "scenario_description",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "OnboardingBusinessProfile",
+    "field": "top_volume_by_country",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "PayableLineItem",
+    "field": "price",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "PayableLineItem",
+    "field": "quantity",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "SetSelfCustodyInput",
+    "field": "is_self_custody",
+    "reason": "In the reference spec (blindpay-v2@66144f3b2) but not yet in the stale committed spec-snapshot.json. Remove this entry when the snapshot is refreshed.",
+    "owner": "sdk-maintainers"
   }
 ]

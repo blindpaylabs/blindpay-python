@@ -138,6 +138,15 @@ def _legacy_order(
     return cast(Optional[str], instance_id), client
 
 
+class PresignInput(TypedDict):
+    file_url: str
+
+
+class PresignResponse(TypedDict):
+    file_url: str
+    expires_at: str
+
+
 class UploadResource:
     def __init__(self, instance_id: Optional[str], client: Optional[InternalApiClient] = None):
         resolved_instance_id, resolved_client = _legacy_order(instance_id, client)
@@ -155,6 +164,12 @@ class UploadResource:
     ) -> BlindpayApiResponse[UploadAnalyzeOutput]:
         form, files = _analyze_request(data)
         return await self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files, options=options)
+
+    async def presign(
+        self, data: PresignInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PresignResponse]:
+        """Exchanges an uploaded file's ``file_url`` for a short-lived signed URL you can download it from."""
+        return await self._client.post(f"/presign{self._instance_query}", data, options=options)
 
 
 class UploadResourceSync:
@@ -174,6 +189,12 @@ class UploadResourceSync:
     ) -> BlindpayApiResponse[UploadAnalyzeOutput]:
         form, files = _analyze_request(data)
         return self._client.post_multipart(f"/upload/analyze{self._instance_query}", form, files, options=options)
+
+    def presign(
+        self, data: PresignInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PresignResponse]:
+        """Exchanges an uploaded file's ``file_url`` for a short-lived signed URL you can download it from."""
+        return self._client.post(f"/presign{self._instance_query}", data, options=options)
 
 
 @overload

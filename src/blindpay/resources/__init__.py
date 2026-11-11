@@ -3,13 +3,15 @@ from .bank_accounts import create_bank_accounts_resource
 from .custodial_wallets import create_custodial_wallets_resource
 from .customers import create_customers_resource
 from .fees import create_fees_resource
-from .instances import create_instances_resource
+from .instances import create_instances_resource, create_onboarding_resource
 from .limits import create_limits_resource
 from .ownership import create_ownership_resource
 from .partner_fees import create_partner_fees_resource
+from .payables import create_payables_resource, create_payables_resource_sync
 from .payins import create_payin_quotes_resource, create_payins_resource
 from .payouts import create_payouts_resource
 from .quotes import create_quotes_resource
+from .rfi import create_customer_rfi_resource, create_instance_rfi_resource
 from .terms_of_service import create_terms_of_service_resource, create_terms_of_service_resource_sync
 from .transfers import create_transfers_resource
 from .upload import create_upload_resource
@@ -24,9 +26,14 @@ __all__ = [
     "create_custodial_wallets_resource",
     "create_fees_resource",
     "create_instances_resource",
+    "create_onboarding_resource",
+    "create_instance_rfi_resource",
+    "create_customer_rfi_resource",
     "create_limits_resource",
     "create_ownership_resource",
     "create_partner_fees_resource",
+    "create_payables_resource",
+    "create_payables_resource_sync",
     "create_payins_resource",
     "create_payin_quotes_resource",
     "create_payouts_resource",
