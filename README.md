@@ -142,11 +142,13 @@ response = await blindpay.payouts.create_evm(
 
 - `idempotency_key` (1 to 255 characters) is sent as `Idempotency-Key`. The API stores the response for that key, so
   resending the same request with the same key returns the stored result instead of creating a second payout. An
-  empty key or one longer than 255 characters raises `BlindPayError` before anything is sent.
+  empty, padded or non-ASCII key, or one longer than 255 characters, raises `BlindPayError` before anything is
+  sent.
 - With retries on (the default) and no key of yours, the SDK generates a UUIDv4 key before the first attempt, so a
   retried request can't execute twice. Uploads (`upload.create`, `upload.analyze`) never carry a key: the API
   doesn't deduplicate multipart requests.
-- `timeout` overrides the client's per-attempt timeout; `headers` adds headers to this request only.
+- `timeout` overrides the client's per-attempt timeout; `headers` adds headers to this request only (names are
+  case-insensitive; `Authorization`, `User-Agent` and `Idempotency-Key` can't be set this way).
 
 What the SDK retries, with exponential backoff (0.5 s doubling up to 8 s, with jitter) or the server's
 `Retry-After` when it is 60 s or less:
@@ -154,7 +156,7 @@ What the SDK retries, with exponential backoff (0.5 s doubling up to 8 s, with j
 | Request | Retried on |
 |---|---|
 | `GET` | connection errors, timeouts, HTTP 408, 429, 500, 502, 503, 504 |
-| `POST` / `PUT` / `PATCH` / `DELETE` | connection errors and timeouts (no response arrived), 429, and 409 `idempotency_key_in_flight`, always with the same key and bytes |
+| `POST` / `PUT` / `PATCH` / `DELETE` | connection errors and timeouts before any response arrived, 429, and 409 `idempotency_key_in_flight`, always with the same key and bytes |
 | Uploads | connection failures before anything was sent |
 
 A mutation that gets a 5xx is **not** retried: the API releases the idempotency key on a 5xx, so a resend could run
