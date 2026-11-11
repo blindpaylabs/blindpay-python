@@ -48,6 +48,7 @@ blindpay-python/
     op_table.py                           # Every SDK method -> spec operation, minimal args, exact path
     test_operations.py                    # Options guard + op coverage, driven by op_table.py
     test_client_parity.py                 # Every resource method exists in both clients; namespaces are typed
+    test_request_types.py                 # Request inputs' required keys vs the spec (via spec-map.json)
     test_packaging.py                     # py.typed placement, version single source, User-Agent
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
@@ -110,7 +111,8 @@ resources/custodial_wallets/
 - Use `Optional[X]` from `typing`, not `X | None`.
 - Use `List[X]` from `typing`, not `list[X]`.
 - Use `Literal[...]` from `typing_extensions` for resource-local literals, or from `typing` if already imported.
-- No docstrings on resource methods (the verify_webhook_signature method is an exception).
+- Docstrings on resource methods only where the signature can't say it: units, "exactly one of" inputs, a `None`
+  result, the `/e/*` tracking endpoints' production 401 (plan D19), one-time settings.
 - All methods return `BlindpayApiResponse[T]` where T is the response TypedDict.
 - Double quotes for strings.
 - Imports: standard library first, then third-party, then relative. Sorted by ruff isort.
@@ -433,9 +435,31 @@ async def get(self, entity_id: str) -> BlindpayApiResponse[Entity]:
 
 ## 5. How to modify types
 
+### Typing rules (checked against the spec)
+
+`tests/test_operations.py::test_response_type_matches_every_fixture_variant` checks every method's response type
+against every variant of its shared fixture, and `tests/test_request_types.py` checks inputs. The rules they enforce:
+
+| Where | Spec says | Python annotation |
+|---|---|---|
+| Response field | not in `required` | `NotRequired[...]` |
+| Response field | nullable | `Optional[...]` |
+| Response field | string enum | `Union[<Literal alias>, str]` (known values + forward compatibility, plan C7) |
+| Request field | in `required` | required key (in a `total=False` class: `Required[...]`) |
+| Request field | not in `required` | `NotRequired[...]` (or a `total=False` class) |
+| Either | wire key is a Python keyword (`from`, `yield`) | declare it in a functional base: `_X = TypedDict("_X", {"from": ...})`, then `class X(_X)` |
+
+Request enums stay closed Literals. Exception: the per-rail bank-account helpers and the two blockchain-wallet create
+helpers require fields the merged spec schema marks optional, because the route validates each variant with its own
+schema (`PER_VARIANT_HELPERS` in `tests/test_request_types.py`). Amount fields in cents are `int`; decimal fields
+(quotations, whole-token amounts) are `float`.
+
+Every public name in a resource module must also be exported from `src/blindpay/__init__.py` (the "Resource types"
+block) and from its package `__init__.py`; `tests/test_packaging.py` fails otherwise.
+
 ### Add a field to a TypedDict
 
-Simply add the new field. Use `Optional[X]` if the field can be null in API responses.
+Add the field following the typing rules above (`NotRequired`/`Optional`/`Union[Literal, str]` from the spec).
 
 ```python
 class Payout(TypedDict):
@@ -798,7 +822,22 @@ of removing them outside a major release. Tests call them inside `pytest.warns(D
 
 `.api-sync/allowlist.json` (SDK fields the spec snapshot doesn't know) and `.api-sync/unmodeled.json` (spec
 fields/enums the SDK doesn't model) must stay true. When a fix makes an entry false, delete it in the same commit.
-`python3 .api-sync/sync.py --check` and `python3 .api-sync/check_contract.py` gate CI.
+Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_*`, `aiprise_*`, `jpm_*`, ...) are never modelled:
+record them in `unmodeled.json` with reason "provider-named field; pending blindpay-v2 decision".
+
+`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@66144f3b2` (94 SDK operations). CI gates:
+
+```bash
+python3 .api-sync/sync.py --validate-map
+python3 .api-sync/sync.py --check [--spec <openapi.json>]   # state reconciliation (default: the snapshot)
+python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json   # METHOD+path: every x-sdk op has a method
+python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
+python3 .api-sync/check_contract.py
+```
+
+Operations marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators) must never
+get a method; `--coverage` fails if one does. `--apply` generates enum members, simple fields and standard operations
+(with `options` and `path_param`); anything it can't infer is NEEDS_HUMAN and blocks the whole apply.
 
 ---
 

@@ -50,6 +50,46 @@ Each client owns one HTTP connection pool. Close it with `async with` / `with`, 
 `blindpay.close()`. A configured client is safe to share across threads (sync) or tasks (async); per-request options
 never change it.
 
+## Resources
+
+Both clients expose the same namespaces (94 of 94 public API operations):
+
+| Namespace | What it covers |
+|---|---|
+| `available` | rails, bank-detail fields, NAICS codes, SWIFT lookups |
+| `customers` (+ `.bank_accounts`, `.rfi`) | customers (KYC/KYB), limits, limit increases, bank accounts incl. `create_plaid_link`, compliance RFIs |
+| `quotes`, `payouts` | payout quotes and FX, EVM/Solana/Stellar payouts, documents, tracking |
+| `payins` (+ `.quotes`) | payin quotes and FX, EVM payins, tracking |
+| `payables` | bills to pay (boleto, PIX code, invoice) |
+| `transfers` | transfer quotes and transfers between wallets |
+| `virtual_accounts` | virtual accounts (US, Mexico, Colombia) |
+| `wallets.blockchain` / `.offramp` / `.custodial` | external wallets (incl. `set_self_custody`), offramp wallets, managed wallets (balances, deposits) |
+| `instances` (+ `.webhook_endpoints`, `.terms_of_service`, `.onboarding`, `.rfi`) | your instance, members, webhook endpoints, ToS links, onboarding answers |
+| `partner_fees`, `fees` | partner fees and your billing fees |
+| `upload` | multipart upload and document analysis, `presign` |
+
+Every input, output and enum type is importable from the package root (`from blindpay import Payout, CreateQuoteInput`).
+
+### Amounts and units
+
+- Payout, payin, quote, payable and limit amounts are **integer cents** (`1000` = 10.00).
+- Partner percentage fees are **basis points** (`100` = 1%); flat fees are cents.
+- Managed-wallet balances (`wallets.custodial.get_balance`) are **whole tokens** (`10.5` = 10.5 USDC).
+
+### "Exactly one of" inputs
+
+- `payouts.create_evm` / `create_solana` / `create_stellar` / `authorize_stellar_token`: pass `sender_wallet_address`
+  **or** `wallet_id` (a managed wallet), not both.
+- `quotes.create`: pass `bank_account_id` **or** `payable_id`.
+
+The SDK doesn't validate these; the API answers 400.
+
+### Testing on a development instance
+
+Development instances simulate settlement (test token `USDB`). Payouts of `66600` cents fail and `77700` are refunded;
+dev payins complete in about 30 s; quotes expire after 5 minutes (OTC payin quotes after 10 s); development instances
+allow 40 requests per minute (the SDK retries the 429 for you, honouring `Retry-After`).
+
 ## Configuration
 
 ```python
@@ -124,10 +164,10 @@ with the same `idempotency_key` from the error.**
 
 ## Pagination
 
-Payouts, payins, customers and transfers have cursor pagination. `list` returns one page: the
+Payouts, payins, payables, customers, transfers and managed-wallet deposits have cursor pagination. `list` returns one page: the
 `{"data": [...], "pagination": {"has_more", "next_page", "prev_page"}}` envelope when you pass `limit`,
-`starting_after` or `ending_before`, and (for payouts, payins and customers) a bare list of **every** row when you
-pass none of them. For large collections use the auto-pager, which requests pages of 100 and follows
+`starting_after` or `ending_before`, and (for payouts, payins, payables and customers) a bare list of **every** row
+when you pass none of them. Transfers and deposits always return the envelope. For large collections use the auto-pager, which requests pages of 100 and follows
 `pagination.next_page` for you:
 
 ```python
@@ -136,6 +176,8 @@ async for payout in blindpay.payouts.list_auto_paging({"customer_id": "cu_000000
 
 for customer in blindpay_sync.customers.list_auto_paging():
     ...
+
+deposits = blindpay_sync.wallets.custodial.get_deposits_auto_paging({"customer_id": "cu_000000000000", "id": "wa_000000000000"})
 ```
 
 Pagers only page forward (`ending_before` raises `BlindPayError`). Each page goes through the retry policy above;
@@ -189,6 +231,29 @@ file_url = response["data"]["file_url"]
 
 The API checks the file's MIME type, which the SDK guesses from the filename (or the file's first bytes). Pass
 `filename` and `content_type` to set them explicitly.
+
+`upload.presign({"file_url": file_url})` returns a short-lived signed URL (`file_url`, `expires_at`) to download an
+uploaded file.
+
+## Upgrading to this release
+
+No public method or type was removed. Things that behave differently:
+
+- **Retries and timeouts are on by default**: each attempt times out after 60 s (httpx's default was 5 s), and
+  requests are retried up to 2 times as described above. Mutations carry an auto-generated `Idempotency-Key`. Pass
+  `max_retries=0` to get the old single-attempt behaviour.
+- **Typing only** (nothing changes at runtime; type checkers may report new warnings):
+  - Response fields the API can omit are `NotRequired`, and nullable ones are `Optional`: read them with `.get()`.
+  - Response enum fields are `Union[<known values>, str]`, so values added by the API later still type-check.
+  - Request inputs follow the API's required fields: some keys became optional (`sender_wallet_address`,
+    quote `bank_account_id`, most customer fields), and a few the API always required are now required
+    (`name` on ACH/wire/SWIFT/RTP bank accounts, payin-quote `currency_type`/`payment_method`/`request_amount`/
+    `token`, transfer-quote fields, `banking_partner`/`blockchain_wallet_id`/`token` on virtual accounts,
+    `name` on `instances.update`).
+  - `payouts.list`, `payins.list` and `payables.list` return the `{data, pagination}` envelope **or** a bare list
+    (see Pagination); `virtual_accounts.list` returns a list.
+- `client.verify_webhook_signature` still works but is deprecated: use `webhooks.verify` / `webhooks.construct_event`.
+- `payouts.export` and `payins.export` call a route that doesn't exist and are deprecated.
 
 ## Types
 
