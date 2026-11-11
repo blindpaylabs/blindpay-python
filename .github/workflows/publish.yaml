@@ -63,8 +63,36 @@ jobs:
             exit 0
           fi
 
-          echo "Merging release PR #$PR"
-          gh pr merge "$PR" --squash --repo "$GITHUB_REPOSITORY"
+          HEAD_SHA=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+
+          # 4.0.0 merged a release PR whose __init__.py was a stale copy from
+          # before the parity PR, dropping every export. A release PR may only
+          # move version lines (and the changelog); anything else means its
+          # content is stale, so stop and let the next push rebuild it.
+          # shellcheck disable=SC2016 # $f is a jq variable, not a shell one
+          unexpected=$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$HEAD_SHA" --jq '
+            .files[] | select(.filename != "CHANGELOG.md") | .filename as $f
+            | (.patch // "@@ binary or too large") | split("\n")[]
+            | select(test("^[-+@]") and (test("^@@ -[0-9]") | not))
+            | select(test("^[-+][[:space:]]*(version = |__version__ = |\"[.]\": )") | not)
+            | "\($f): \(.)"')
+          if [ -n "$unexpected" ]; then
+            echo "::error::release PR #$PR changes more than version lines; refusing to merge:"
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+
+          # Never merge a release PR whose CI is red: 4.0.0 merged two seconds
+          # after its type check failed. Checks take a moment to register.
+          for _ in $(seq 1 12); do
+            gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && break
+            [ "$?" -eq 8 ] && break
+            sleep 10
+          done
+          gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" --watch --fail-fast --interval 15
+
+          echo "Merging release PR #$PR at $HEAD_SHA"
+          gh pr merge "$PR" --squash --repo "$GITHUB_REPOSITORY" --match-head-commit "$HEAD_SHA"
 
   publish:
     needs: release-please
@@ -83,7 +111,7 @@ jobs:
         env:
           TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          want="${TAG#v}"
+          want="${TAG##*v}"
           code=$(sed -nE 's/^__version__ = "([^"]+)".*/\1/p' src/blindpay/_version.py)
           meta=$(sed -nE 's/^version = "([^"]+)".*/\1/p' pyproject.toml)
           echo "tag=$want _version.py=$code pyproject=$meta"
