@@ -228,6 +228,16 @@ class BlockchainWalletsResourceSync:
     ) -> BlindpayApiResponse[None]:
         return self._client.post(f"/instances/{self._instance_id}/mint-usdb-stellar", data, options=options)
 
+    def mint_usdb_solana(
+        self, data: MintUsdbSolanaInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[MintUsdbSolanaResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/mint-usdb-solana", data, options=options)
+
+    def prepare_solana_delegation_transaction(
+        self, data: PrepareSolanaDelegationTransactionInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[PrepareSolanaDelegationTransactionResponse]:
+        return self._client.post(f"/instances/{self._instance_id}/prepare-delegate-solana", data, options=options)
+
 
 def create_blockchain_wallets_resource(instance_id: str, client: InternalApiClient) -> BlockchainWalletsResource:
     return BlockchainWalletsResource(instance_id, client)
