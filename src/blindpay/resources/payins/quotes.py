@@ -25,7 +25,8 @@ class CreatePayinQuoteInput(TypedDict, total=False):
     blockchain_wallet_id: Optional[str]
     currency_type: Required[CurrencyType]
     payment_method: Required[PaymentMethod]
-    request_amount: Required[float]
+    request_amount: Required[int]
+    """Integer cents (``1000`` = 10.00) of the side ``currency_type`` names: ``sender`` or ``receiver``."""
     token: Required[StablecoinToken]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]

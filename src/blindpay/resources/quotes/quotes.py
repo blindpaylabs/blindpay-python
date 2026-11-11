@@ -32,7 +32,8 @@ class CreateQuoteInput(TypedDict):
     bank_account_id: NotRequired[str]
     currency_type: NotRequired[CurrencyType]
     network: Optional[Network]
-    request_amount: NotRequired[float]
+    request_amount: NotRequired[int]
+    """Integer cents (``1000`` = 10.00) of the side ``currency_type`` names: ``sender`` or ``receiver``."""
     token: Optional[StablecoinToken]
     cover_fees: NotRequired[Optional[bool]]
     description: NotRequired[Optional[str]]
