@@ -11,7 +11,12 @@ from .blockchain import (
     GetBlockchainWalletMessageResponse,
     GetBlockchainWalletResponse,
     ListBlockchainWalletsResponse,
+    MintUsdbSolanaInput,
+    MintUsdbSolanaResponse,
     MintUsdbStellarInput,
+    PrepareSolanaDelegationTransactionInput,
+    PrepareSolanaDelegationTransactionResponse,
+    SetSelfCustodyInput,
     create_blockchain_wallets_resource,
     create_blockchain_wallets_resource_sync,
 )
@@ -25,6 +30,8 @@ from .offramp import (
     OfframpWallet,
     OfframpWalletsResource,
     OfframpWalletsResourceSync,
+    UpdateOfframpWalletInput,
+    UpdateOfframpWalletResponse,
     create_offramp_wallets_resource,
     create_offramp_wallets_resource_sync,
 )
@@ -60,4 +67,11 @@ __all__ = [
     "CreateAssetTrustlineResponse",
     "ListOfframpWalletsResponse",
     "GetOfframpWalletResponse",
+    "MintUsdbSolanaInput",
+    "MintUsdbSolanaResponse",
+    "PrepareSolanaDelegationTransactionInput",
+    "PrepareSolanaDelegationTransactionResponse",
+    "SetSelfCustodyInput",
+    "UpdateOfframpWalletInput",
+    "UpdateOfframpWalletResponse",
 ]

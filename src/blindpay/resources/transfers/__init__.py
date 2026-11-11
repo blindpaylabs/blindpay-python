@@ -7,6 +7,7 @@ from .transfers import (
     CreateTransferTrackingMonitoring,
     CreateTransferTrackingStep,
     GetTransferResponse,
+    ListTransfersInput,
     ListTransfersResponse,
     Transfer,
     TransfersResource,
@@ -32,4 +33,5 @@ __all__ = [
     "CreateTransferTrackingStep",
     "GetTransferResponse",
     "ListTransfersResponse",
+    "ListTransfersInput",
 ]

@@ -1,5 +1,8 @@
 from .upload import (
     FileContent,
+    PresignInput,
+    PresignResponse,
+    UploadAnalyzeDocumentType,
     UploadAnalyzeInput,
     UploadAnalyzeOutput,
     UploadBucket,
@@ -24,4 +27,7 @@ __all__ = [
     "UploadResource",
     "UploadResourceSync",
     "UploadResponse",
+    "PresignInput",
+    "PresignResponse",
+    "UploadAnalyzeDocumentType",
 ]

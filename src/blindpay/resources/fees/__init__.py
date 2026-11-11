@@ -3,6 +3,7 @@ from .fees import (
     FeesResource,
     FeesResourceSync,
     FeesResponse,
+    YieldFee,
     create_fees_resource,
     create_fees_resource_sync,
 )
@@ -14,4 +15,5 @@ __all__ = [
     "FeesResourceSync",
     "FeeOptions",
     "FeesResponse",
+    "YieldFee",
 ]
