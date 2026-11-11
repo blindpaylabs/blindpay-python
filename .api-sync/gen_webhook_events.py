@@ -23,7 +23,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# Plan rule 8 (blindpay-v2 AGENTS.md): no new typed fields named after a provider. They still arrive at runtime;
+# Provider names stay out of the public SDK surface (blindpay-v2 AGENTS.md):
+# no typed fields named after one. They still arrive at runtime;
 # they're just not modelled. Reason recorded for each: "provider-named field; pending blindpay-v2 decision".
 PROVIDER_NAMED = re.compile(r"^(checkbook|onemoney|circle|aiprise|infinitus|jpm)_")
 OUTPUT = ROOT / "src" / "blindpay" / "webhook_events.py"

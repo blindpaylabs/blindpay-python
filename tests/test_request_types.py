@@ -1,4 +1,4 @@
-"""Request inputs follow the spec's ``required`` list (plan C8), checked through spec-map.json's type mapping."""
+"""Request inputs follow the spec's ``required`` list , checked through spec-map.json's type mapping."""
 
 import importlib
 import json
@@ -69,7 +69,7 @@ def test_input_required_keys_match_the_spec(schema: str, file: str, symbol: str)
 
     under_required = sorted(set(cls.__optional_keys__) & required)
     # Keys the SDK moves into the URL (customer_id, id, ...) aren't body fields; anything else the spec lacks must
-    # not be required (stale fields stay but optional, plan D13).
+    # not be required (stale fields stay, but optional).
     not_in_spec = sorted(set(cls.__required_keys__) - properties - PATH_PARAMS)
     over_required = sorted((set(cls.__required_keys__) & properties) - required)
 

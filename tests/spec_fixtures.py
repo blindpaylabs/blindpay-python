@@ -119,7 +119,8 @@ def value_errors(hint: Any, value: Any, path: str = "$") -> List[str]:
 
     TypedDicts: required keys present, ``None`` only where the hint is ``Optional``. Strings: a closed ``Literal``
     must contain the value, and ``zz_unknown_value_from_future_api`` (the ``unknown_enum`` variant) needs a hint
-    that admits ``str`` (plan C7). Numbers: a non-integral value needs ``float``. Unions pass if any arm does.
+    that admits ``str`` (response enums must accept values added later).
+    Numbers: a non-integral value needs ``float``. Unions pass if any arm does.
     """
     if hint is Any:
         return []

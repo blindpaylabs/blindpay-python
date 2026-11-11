@@ -1,4 +1,4 @@
-"""``webhooks.construct_event`` and the generated typed payloads, against the shared webhook fixtures (plan C6)."""
+"""``webhooks.construct_event`` and the generated typed payloads, against the shared webhook fixtures."""
 
 import base64
 import hashlib

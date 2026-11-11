@@ -1427,7 +1427,7 @@ class TestOperationDiscovery:
 
 
 class TestGeneratedMethodConventions:
-    """Plan §6: generated methods must follow the same request-options and path-encoding rules as hand-written."""
+    """Generated methods must follow the same request-options and path-encoding rules as hand-written."""
 
     def _plan(
         self, sync: types.ModuleType, verb: str, path: str, path_args: list[str], input_type: Optional[str]
@@ -1499,7 +1499,7 @@ class TestGeneratedMethodConventions:
 
 
 class TestOpenApi31AndSdkFlag:
-    """Regression tests for the plan §6 fleet-wide api-sync bugs."""
+    """Regression tests: OpenAPI 3.1 nullable enums, x-sdk: false operations, METHOD+path coverage."""
 
     def test_nullable_enum_null_is_not_a_member(self, repo: Path):
         sync = load_sync(repo)

@@ -1,5 +1,5 @@
 # ruff: noqa: ARG005 -- GET entries ignore the options argument every Call receives.
-"""Every SDK method, keyed by the spec operation it calls (plan Appendix A8).
+"""Every SDK method, keyed by the spec operation it calls.
 
 One table drives the request-options guard test, the op-coverage test and the coverage report. Each entry calls
 the method with minimal arguments on either client (``client`` is ``BlindPay`` or ``BlindPaySync``) and states the
@@ -325,7 +325,7 @@ OPS: List[Op] = [
         "payins.get_track",
         lambda c, o: c.payins.get_track(ITEM),
         f"{V1}/e/payins/{ITEM}",
-        note="D19: 401 for server-side callers in production",
+        note="tracking endpoint: 401 for server-side callers in production",
     ),
     Op("GET /v1/instances/{instance_id}/payins", "payins.list", lambda c, o: c.payins.list(), f"{INST}/payins"),
     Op(
@@ -346,7 +346,7 @@ OPS: List[Op] = [
         "payouts.get_track",
         lambda c, o: c.payouts.get_track(ITEM),
         f"{V1}/e/payouts/{ITEM}",
-        note="D19: 401 for server-side callers in production",
+        note="tracking endpoint: 401 for server-side callers in production",
     ),
     Op("GET /v1/instances/{instance_id}/payouts", "payouts.list", lambda c, o: c.payouts.list(), f"{INST}/payouts"),
     Op(
@@ -451,7 +451,7 @@ OPS: List[Op] = [
         "transfers.get_track",
         lambda c, o: c.transfers.get_track(ITEM),
         f"{V1}/e/transfers/{ITEM}",
-        note="D19: 401 for server-side callers in production",
+        note="tracking endpoint: 401 for server-side callers in production",
     ),
     Op(
         "GET /v1/instances/{instance_id}/transfers",

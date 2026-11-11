@@ -1,6 +1,6 @@
-"""Op-level tests driven by ``tests/op_table.py`` (plan Appendix A8), in both clients.
+"""Op-level tests driven by ``tests/op_table.py`` in both clients.
 
-- Guard (C2): every mutating method forwards its request options (headers, timeout, idempotency key) to the wire,
+- Guard: every mutating method forwards its request options (headers, timeout, idempotency key) to the wire,
   and the table lists every mutating method in the SDK, so a new method can't skip ``options``.
 - Op coverage: every method sends the right HTTP method to the exact path, and every response fixture variant of
   its operation comes back as ``data`` without an error.
@@ -180,7 +180,7 @@ def response_type(op: Op) -> Any:
 
 @pytest.mark.parametrize("op", OPS, ids=[op.method for op in OPS])
 def test_response_type_matches_every_fixture_variant(op: Op):
-    """The static "decode" (plan §1.2, A8): each variant of the op's fixture against the method's response type.
+    """The static "decode": each variant of the op's fixture against the method's response type.
     Required keys, nullability, open enums for ``unknown_enum``, decimals, and no fields the spec lacks."""
     errors = variant_errors(response_type(op), fixture_variants(op.operation))
     assert not errors, "\n".join(sorted(set(errors)))

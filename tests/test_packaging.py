@@ -50,7 +50,7 @@ _ROOT_EXPORTS_ANOTHER_COPY = {
 
 
 def test_every_public_resource_type_is_importable_from_the_package_root():
-    """Plan C11: inputs, outputs, enums and resource classes are all importable as ``from blindpay import X``."""
+    """Inputs, outputs, enums and resource classes are all importable as ``from blindpay import X``."""
     import ast
 
     resources = Path(blindpay.__file__).parent / "resources"

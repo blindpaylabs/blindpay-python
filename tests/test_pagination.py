@@ -1,4 +1,4 @@
-"""List envelopes (plan D3) and the ``list_auto_paging`` pagers (C5, D4), in both clients."""
+"""List envelopes (bare array or {data, pagination}) and the ``list_auto_paging`` pagers, in both clients."""
 
 import json
 from typing import Any, Callable, Dict, List, Optional

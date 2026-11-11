@@ -1,4 +1,4 @@
-"""Retry policy (plan C3 / Appendix A2), idempotency keys (C2) and error shape (C4), in both clients.
+"""Retry policy, idempotency keys and error shape, in both clients.
 
 Every test runs against ``httpx.MockTransport`` with a recording fake sleep, so nothing touches the network or
 really sleeps. ``Client`` drives the async and the sync client through one interface.

@@ -1,4 +1,4 @@
-"""C12: every resource method exists in both clients with the same parameters."""
+"""Every resource method exists in both clients with the same parameters."""
 
 import inspect
 from types import ModuleType
