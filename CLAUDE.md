@@ -274,7 +274,7 @@ Add the import and `__all__` entry:
 from .{resource_name} import create_{snake_name}_resource
 ```
 
-Also add the sync factory if not already following the pattern (note: the barrel `__init__` only exports async factories currently; check existing pattern).
+Export both the async and the sync factory (`create_{snake_name}_resource` and `create_{snake_name}_resource_sync`).
 
 ### Step 3: Wire into `client.py`
 
@@ -366,27 +366,35 @@ Testing pattern:
 Add TypedDicts above the resource classes in the same file:
 ```python
 class NewActionInput(TypedDict):
-    field_a: str
-    field_b: Optional[str]
+    field_a: str  # required by the spec
+    field_b: NotRequired[Optional[str]]  # optional and nullable in the spec
 
 
 class NewActionResponse(TypedDict):
     id: str
-    status: str
+    status: Union[NewActionStatus, str]  # response enum: known values + str
 ```
 
 ### Step 2: Add the method to BOTH resource classes
 
 **Async (in `{EntityName}Resource`):**
 ```python
-async def new_action(self, data: NewActionInput) -> BlindpayApiResponse[NewActionResponse]:
-    return await self._client.post(f"/instances/{self._instance_id}/{api_path}/action", data)
+async def new_action(
+    self, entity_id: str, data: NewActionInput, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[NewActionResponse]:
+    return await self._client.post(
+        f"/instances/{self._instance_id}/{api_path}/{path_param(entity_id)}/action", data, options=options
+    )
 ```
 
 **Sync (in `{EntityName}ResourceSync`):**
 ```python
-def new_action(self, data: NewActionInput) -> BlindpayApiResponse[NewActionResponse]:
-    return self._client.post(f"/instances/{self._instance_id}/{api_path}/action", data)
+def new_action(
+    self, entity_id: str, data: NewActionInput, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[NewActionResponse]:
+    return self._client.post(
+        f"/instances/{self._instance_id}/{api_path}/{path_param(entity_id)}/action", data, options=options
+    )
 ```
 
 ### Step 3: Export from `__init__.py`
@@ -419,16 +427,18 @@ async def create(self, data: CreateInput, options: Optional[RequestOptions] = No
 
 **Method that extracts an ID from input to build the URL:**
 ```python
-async def update(self, data: UpdateInput) -> BlindpayApiResponse[None]:
+async def update(self, data: UpdateInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
     entity_id = data["entity_id"]
     payload = {k: v for k, v in data.items() if k != "entity_id"}
-    return await self._client.put(f"/instances/{self._instance_id}/{path}/{entity_id}", payload)
+    return await self._client.put(
+        f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}", payload, options=options
+    )
 ```
 
 **GET with path param:**
 ```python
 async def get(self, entity_id: str) -> BlindpayApiResponse[Entity]:
-    return await self._client.get(f"/instances/{self._instance_id}/{path}/{entity_id}")
+    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}")
 ```
 
 ---
@@ -728,11 +738,12 @@ refactor(client): simplify namespace initialization
 | Integer property | `field: int` |
 | Boolean property | `field: bool` |
 | Nullable property | `field: Optional[str]` |
-| String enum | `MyEnum = Literal["a", "b", "c"]` |
+| Property not in `required` (response) | `field: NotRequired[...]` |
+| String enum | `MyEnum = Literal["a", "b", "c"]`; response fields use `Union[MyEnum, str]` |
 | Array of objects | `List[MyType]` |
 | Nested object | Separate TypedDict, referenced by name |
-| Optional input field | Use `total=False` on the TypedDict or `Optional[X]` per field |
-| Paginated list response | TypedDict with `data: List[Entity]` + `pagination: PaginationMetadata` |
+| Optional input field | `NotRequired[X]` (or a `total=False` TypedDict); `Optional[X]` only if null is a valid value |
+| Paginated list response | `List{Name}Response` (`data` + `pagination`); the method returns `Union[List{Name}Response, List[Entity]]` when the API sends a bare array without pagination params |
 | Request body | `{Action}Input(TypedDict)` |
 | Response body | `{Action}Response(TypedDict)` |
 
