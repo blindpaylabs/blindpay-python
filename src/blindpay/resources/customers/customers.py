@@ -1,9 +1,10 @@
-from typing import List, Optional, Union
+from typing import AsyncIterator, Iterator, List, Optional, Union
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
     Country,
@@ -742,6 +743,9 @@ class CustomersResource:
         query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
 
+    def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> AsyncIterator[GetCustomerResponse]:
+        return async_auto_paging_iter(self.list, params)
+
     async def create_individual_with_standard_kyc(
         self, data: CreateIndividualWithStandardKYCInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreateIndividualWithStandardKYCResponse]:
@@ -809,6 +813,9 @@ class CustomersResourceSync:
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
         query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> Iterator[GetCustomerResponse]:
+        return auto_paging_iter(self.list, params)
 
     def create_individual_with_standard_kyc(
         self, data: CreateIndividualWithStandardKYCInput, options: Optional[RequestOptions] = None

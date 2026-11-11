@@ -1,9 +1,10 @@
-from typing import List, Literal, Optional
+from typing import AsyncIterator, Iterator, List, Literal, Optional, Union
 
 from typing_extensions import TypedDict, deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     AccountClass,
     BankAccountType,
@@ -202,9 +203,14 @@ class PayoutsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
+    async def list(
+        self, params: Optional[ListPayoutsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
         query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> AsyncIterator[Payout]:
+        return async_auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
     async def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
@@ -254,9 +260,14 @@ class PayoutsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, params: Optional[ListPayoutsInput] = None) -> BlindpayApiResponse[ListPayoutsResponse]:
+    def list(
+        self, params: Optional[ListPayoutsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
         query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> Iterator[Payout]:
+        return auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
     def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:

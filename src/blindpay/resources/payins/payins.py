@@ -1,9 +1,10 @@
-from typing import List, NotRequired, Optional, TypedDict
+from typing import AsyncIterator, Iterator, List, NotRequired, Optional, TypedDict, Union
 
 from typing_extensions import deprecated
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
     ManualExecutionStatus,
@@ -102,7 +103,7 @@ class Payin(TypedDict):
     partner_fee_id: Optional[str]
 
 
-class ListPayinsInput(PaginationParams):
+class ListPayinsInput(PaginationParams, total=False):
     status: Optional[TransactionStatus]
     customer_id: Optional[str]
 
@@ -211,9 +212,14 @@ class PayinsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
+    async def list(
+        self, params: Optional[ListPayinsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayinsResponse, List[Payin]]]:
         query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayinsInput] = None) -> AsyncIterator[Payin]:
+        return async_auto_paging_iter(self.list, params)
 
     async def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
         return await self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")
@@ -239,9 +245,14 @@ class PayinsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, params: Optional[ListPayinsInput] = None) -> BlindpayApiResponse[ListPayinsResponse]:
+    def list(
+        self, params: Optional[ListPayinsInput] = None
+    ) -> BlindpayApiResponse[Union[ListPayinsResponse, List[Payin]]]:
         query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/payins{query_string}")
+
+    def list_auto_paging(self, params: Optional[ListPayinsInput] = None) -> Iterator[Payin]:
+        return auto_paging_iter(self.list, params)
 
     def get(self, payin_id: str) -> BlindpayApiResponse[Payin]:
         return self._client.get(f"/instances/{self._instance_id}/payins/{path_param(payin_id)}")

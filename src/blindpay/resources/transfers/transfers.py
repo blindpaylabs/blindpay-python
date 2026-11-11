@@ -1,9 +1,10 @@
-from typing import List, Optional
+from typing import AsyncIterator, Iterator, List, Optional
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
+from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
 from ...types import (
     BlindpayApiResponse,
     Network,
@@ -130,6 +131,9 @@ class TransfersResource:
         query_string = build_query(params)
         return await self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
 
+    def list_auto_paging(self, params: Optional[PaginationParams] = None) -> AsyncIterator[Transfer]:
+        return async_auto_paging_iter(self.list, params)
+
     async def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
 
@@ -155,6 +159,9 @@ class TransfersResourceSync:
     def list(self, params: Optional[PaginationParams] = None) -> BlindpayApiResponse[ListTransfersResponse]:
         query_string = build_query(params)
         return self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
+
+    def list_auto_paging(self, params: Optional[PaginationParams] = None) -> Iterator[Transfer]:
+        return auto_paging_iter(self.list, params)
 
     def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
         return self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")

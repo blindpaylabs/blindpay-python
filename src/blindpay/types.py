@@ -346,7 +346,15 @@ PaginationOffset = Literal["0", "10", "50", "100", "200", "500", "1000"]
 
 
 class PaginationParams(TypedDict, total=False):
-    limit: PaginationLimit
+    """Cursor pagination. Sending any of ``limit``, ``starting_after`` or ``ending_before`` makes the API answer
+    with the ``{data, pagination}`` envelope; without them some lists return a bare array of every row.
+
+    - ``limit``: page size, an int or its string form (``10, 50, 100, 200, 500, 1000``).
+    - ``starting_after``: the previous page's ``pagination.next_page``.
+    - ``offset``: deprecated, ignored by the API; use ``starting_after``.
+    """
+
+    limit: Union[PaginationLimit, int]
     offset: PaginationOffset
     starting_after: str
     ending_before: str

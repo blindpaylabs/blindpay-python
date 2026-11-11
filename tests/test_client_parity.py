@@ -93,5 +93,10 @@ def test_async_methods_are_coroutines(name: str, async_cls: type, sync_cls: type
     for method, fn in inspect.getmembers(async_cls, inspect.isfunction):
         if method.startswith("_"):
             continue
+        if method.endswith("auto_paging"):
+            # Plain functions that validate params eagerly and return an (async) iterator.
+            assert "AsyncIterator" in str(inspect.signature(fn).return_annotation)
+            assert "AsyncIterator" not in str(inspect.signature(getattr(sync_cls, method)).return_annotation)
+            continue
         assert inspect.iscoroutinefunction(fn), f"{name}.{method} must be async"
         assert not inspect.iscoroutinefunction(getattr(sync_cls, method)), f"{name}Sync.{method} must be sync"
