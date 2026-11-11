@@ -92,6 +92,7 @@ class Payin(TypedDict):
     blindpay_quotation: Optional[float]
     currency: str
     billing_fee: NotRequired[float]
+    """Deprecated: not returned by the API; use ``billing_fee_amount``. Removed in the next major."""
     name: str
     address: NotRequired[Optional[str]]
     network: Union[Network, str]
@@ -182,6 +183,7 @@ class GetPayinTrackResponse(TypedDict):
     blindpay_quotation: Optional[float]
     currency: str
     billing_fee: NotRequired[float]
+    """Deprecated: not returned by the API; use ``billing_fee_amount``. Removed in the next major."""
     name: str
     address: NotRequired[Optional[str]]
     network: Union[Network, str]
