@@ -14,6 +14,7 @@ from ._internal.http import (
     HttpMethod,
     RequestOptions,
     api_root,
+    body_read_failure,
     build_headers,
     encode_json,
     error_from_exception,
@@ -82,7 +83,7 @@ def _with_legacy_v1_prefix(svix_signature: str) -> str:
 
 
 class ApiClientImpl:
-    """Async HTTP layer: one shared ``httpx.AsyncClient``, retries per the A2 table, ``asyncio.sleep`` backoff."""
+    """Async HTTP layer: one shared ``httpx.AsyncClient``, retry rules from ``_internal/http.py``, ``asyncio.sleep``."""
 
     def __init__(
         self,
@@ -168,7 +169,11 @@ class ApiClientImpl:
         attempt = 0
         while True:
             try:
-                response = await self._client.request(method, url, **request)
+                built = self._client.build_request(method, url, **request)
+            except Exception as error:  # a request that can't even be built is never retried
+                return {"data": None, "error": error_from_exception(error, key)}
+            try:
+                response = await self._client.send(built, stream=True)
             except Exception as error:
                 delay = exception_retry_delay(
                     error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
@@ -178,6 +183,19 @@ class ApiClientImpl:
                     attempt += 1
                     continue
                 return {"data": None, "error": error_from_exception(error, key)}
+
+            try:
+                await response.aread()
+            except Exception as error:
+                await response.aclose()
+                delay, read_error = body_read_failure(
+                    response, error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+                )
+                if delay is not None and attempt < self.max_retries:
+                    await self._sleep(delay)
+                    attempt += 1
+                    continue
+                return {"data": None, "error": read_error}
 
             if response.is_success:
                 return success_from_response(response, key)
@@ -196,7 +214,7 @@ class ApiClientImpl:
 
 
 class ApiClientImplSync:
-    """Sync HTTP layer: one shared ``httpx.Client``, retries per the A2 table, ``time.sleep`` backoff."""
+    """Sync HTTP layer: one shared ``httpx.Client``, retries per ``_internal/http.py``, ``time.sleep`` backoff."""
 
     def __init__(
         self,
@@ -282,7 +300,11 @@ class ApiClientImplSync:
         attempt = 0
         while True:
             try:
-                response = self.client.request(method, url, **request)
+                built = self.client.build_request(method, url, **request)
+            except Exception as error:  # a request that can't even be built is never retried
+                return {"data": None, "error": error_from_exception(error, key)}
+            try:
+                response = self.client.send(built, stream=True)
             except Exception as error:
                 delay = exception_retry_delay(
                     error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
@@ -292,6 +314,19 @@ class ApiClientImplSync:
                     attempt += 1
                     continue
                 return {"data": None, "error": error_from_exception(error, key)}
+
+            try:
+                response.read()
+            except Exception as error:
+                response.close()
+                delay, read_error = body_read_failure(
+                    response, error, method=method, idempotency_key=key, multipart=multipart, attempt=attempt
+                )
+                if delay is not None and attempt < self.max_retries:
+                    self._sleep(delay)
+                    attempt += 1
+                    continue
+                return {"data": None, "error": read_error}
 
             if response.is_success:
                 return success_from_response(response, key)

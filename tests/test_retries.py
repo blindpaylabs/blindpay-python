@@ -8,7 +8,7 @@ import asyncio
 import json
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, AsyncIterator, Callable, Dict, Iterator, List, Optional, Union
 
 import httpx
 import pytest
@@ -487,3 +487,77 @@ class TestClientSettings:
 
         assert "test_key" not in repr(client)
         assert "***" in repr(client)
+
+
+class FailingBody(httpx.SyncByteStream, httpx.AsyncByteStream):
+    """A body that breaks after the status line has arrived."""
+
+    def __iter__(self) -> Iterator[bytes]:
+        raise httpx.ReadError("connection reset while reading the body")
+        yield b""  # pragma: no cover
+
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        raise httpx.ReadError("connection reset while reading the body")
+        yield b""  # pragma: no cover
+
+
+def broken_body(status: int) -> httpx.Response:
+    return httpx.Response(status, stream=FailingBody())
+
+
+@pytest.mark.parametrize("kind", KINDS)
+class TestBodyReadFailures:
+    @pytest.mark.parametrize("status", [200, 500, 503])
+    async def test_mutation_is_not_retried_once_a_status_arrived(self, kind: str, status: int):
+        script = Script(broken_body(status), 200)
+
+        response = await Client(kind, script).create()
+
+        assert len(script.requests) == 1
+        error = response["error"]
+        assert (error["status"], error["code"], error["retryable"]) == (status, "SDK_RESPONSE_READ_ERROR", True)
+        assert error["idempotency_key"] == script.keys[0]
+
+    async def test_get_is_retried(self, kind: str):
+        script = Script(broken_body(503), 200)
+
+        response = await Client(kind, script).get()
+
+        assert response["error"] is None
+        assert len(script.requests) == 2
+
+    async def test_local_protocol_error_is_not_retried(self, kind: str):
+        script = Script(httpx.LocalProtocolError("illegal header value"), 200)
+
+        response = await Client(kind, script).get()
+
+        assert len(script.requests) == 1
+        assert response["error"]["code"] == "SDK_ERROR"
+
+
+@pytest.mark.parametrize("kind", KINDS)
+class TestKeyAndHeaderValidation:
+    @pytest.mark.parametrize("key", ["   ", " order-1", "order-1 ", "order-1\n", "order\x00-1", "órder-1"])
+    async def test_malformed_key_is_rejected_before_sending(self, kind: str, key: str):
+        script = Script(200)
+
+        with pytest.raises(BlindPayError, match="idempotency_key"):
+            await Client(kind, script).create({"idempotency_key": key})
+
+        assert script.requests == []
+
+    @pytest.mark.parametrize("name", ["authorization", "AUTHORIZATION", "user-agent", "User-Agent", "idempotency-key"])
+    async def test_protected_headers_cannot_be_overridden(self, kind: str, name: str):
+        script = Script(200)
+
+        with pytest.raises(BlindPayError, match="set by the client"):
+            await Client(kind, script).create({"headers": {name: "x"}})
+
+        assert script.requests == []
+
+    async def test_other_headers_merge_case_insensitively(self, kind: str):
+        script = Script(200)
+
+        await Client(kind, script).create({"headers": {"accept": "application/json; v=2"}})
+
+        assert script.requests[0].headers.get_list("accept") == ["application/json; v=2"]

@@ -1,5 +1,5 @@
 """Transport policy shared by the sync and async clients: request options, idempotency keys, the retry decision
-table (plan Appendix A2), and how responses become ``BlindpayApiResponse`` dicts.
+table, and how responses become ``BlindpayApiResponse`` dicts.
 
 Everything here is pure (no I/O), so both clients run the same rules and tests can exercise them directly.
 """
@@ -7,7 +7,7 @@ Everything here is pure (no I/O), so both clients run the same rules and tests c
 import json
 import random
 import uuid
-from typing import Any, Dict, List, Mapping, Optional, cast
+from typing import Any, Dict, List, Mapping, Optional, Tuple, cast
 from urllib.parse import quote, urlencode
 
 import httpx
@@ -30,6 +30,7 @@ RETRYABLE_ERROR_STATUSES = frozenset({408, 429, 500, 502, 503, 504})
 # 5xx codes the spec's error table classifies as terminal (never retried, never flagged retryable).
 TERMINAL_5XX_CODES = frozenset({"PAYINS_CARD_PAYMENT_PENDING"})
 IDEMPOTENCY_IN_FLIGHT = "idempotency_key_in_flight"
+PROTECTED_HEADERS = frozenset({"authorization", "user-agent", "idempotency-key"})
 
 NETWORK_ERRORS = (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError)
 CONNECT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout)
@@ -93,10 +94,20 @@ def resolve_idempotency_key(
         return None
     key = cast(object, options.get("idempotency_key") if options else None)
     if key is not None:
-        if not isinstance(key, str) or not key or len(key) > MAX_IDEMPOTENCY_KEY_LENGTH:
-            # The API silently ignores an empty key and rejects one over 255 characters, so neither is ever sent.
-            raise BlindPayError("idempotency_key must be a non-empty string of at most 255 characters")
-        return key
+        valid = (
+            isinstance(key, str)
+            and key.strip() == key != ""
+            and len(key) <= MAX_IDEMPOTENCY_KEY_LENGTH
+            and key.isascii()
+            and key.isprintable()
+        )
+        if not valid:
+            # The API silently ignores an empty key and rejects one over 255 characters; a padded key would be
+            # trimmed in transit, so it could match a different stored request. None of them is ever sent.
+            raise BlindPayError(
+                "idempotency_key must be 1-255 printable ASCII characters with no leading or trailing whitespace"
+            )
+        return cast(str, key)
     return str(uuid.uuid4()) if max_retries > 0 else None
 
 
@@ -105,8 +116,16 @@ def build_headers(
 ) -> Dict[str, str]:
     headers = dict(base)
     extra = options.get("headers") if options else None
-    if extra:
-        headers.update(extra)
+    for name, value in (extra or {}).items():
+        lowered = name.lower()
+        if lowered in PROTECTED_HEADERS:
+            raise BlindPayError(
+                f"The {name} header is set by the client"
+                + ("; pass idempotency_key in the request options instead" if lowered == "idempotency-key" else "")
+            )
+        for existing in [k for k in headers if k.lower() == lowered]:
+            del headers[existing]  # header names are case-insensitive: replace, never duplicate
+        headers[name] = value
     if json_body:
         headers["Content-Type"] = "application/json"
     if idempotency_key:
@@ -165,7 +184,7 @@ def _error_code(response: httpx.Response) -> Optional[str]:
 def response_retry_delay(
     response: httpx.Response, *, method: str, idempotency_key: Optional[str], multipart: bool, attempt: int
 ) -> Optional[float]:
-    """Seconds to wait before retrying this response, or None if it must not be retried (A2 rows 2-10)."""
+    """Seconds to wait before retrying this response, or None if it must not be retried."""
     if multipart:
         return None
     mutating = is_mutating(method)
@@ -194,6 +213,38 @@ def exception_retry_delay(
     if is_mutating(method) and not idempotency_key:
         return None
     return backoff(attempt) if isinstance(error, NETWORK_ERRORS) else None
+
+
+def body_read_failure(
+    response: httpx.Response,
+    error: Exception,
+    *,
+    method: str,
+    idempotency_key: Optional[str],
+    multipart: bool,
+    attempt: int,
+) -> Tuple[Optional[float], ErrorResponse]:
+    """The status line arrived but the body couldn't be read. The server answered, so for a mutation this is not
+    "no response": after a 5xx the API has already released the idempotency key, so resending would run the
+    operation again. Only GETs are retried. Returns (delay or None, the error to return if not retrying)."""
+    delay = (
+        None
+        if multipart or is_mutating(method)
+        else exception_retry_delay(
+            error, method=method, idempotency_key=idempotency_key, multipart=multipart, attempt=attempt
+        )
+    )
+    return delay, {
+        "message": f"The response body couldn't be read: {error or type(error).__name__}",
+        "status": response.status_code,
+        "code": "SDK_RESPONSE_READ_ERROR",
+        "description": None,
+        "errors": [],
+        "trace_id": None,
+        "request_id": response.headers.get("X-Request-Id"),
+        "idempotency_key": idempotency_key,
+        "retryable": True,
+    }
 
 
 def _is_retryable_error(status: int, code: Optional[str], in_flight: bool) -> bool:
