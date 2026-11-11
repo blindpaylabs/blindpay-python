@@ -32,6 +32,23 @@ class FeesResponse(_FeesYield):
     solana: Optional[FeeOptions]
     ted: NotRequired[Optional[FeeOptions]]
     faster_payments: NotRequired[FeeOptions]
+    ach_colombia: NotRequired[Optional[FeeOptions]]
+    arbitrum: NotRequired[Optional[FeeOptions]]
+    base: NotRequired[Optional[FeeOptions]]
+    ethereum: NotRequired[Optional[FeeOptions]]
+    international_swift: NotRequired[Optional[FeeOptions]]
+    pix_safe: NotRequired[Optional[FeeOptions]]
+    polygon: NotRequired[Optional[FeeOptions]]
+    rtp: NotRequired[Optional[FeeOptions]]
+    sepa: NotRequired[Optional[FeeOptions]]
+    spei: NotRequired[Optional[FeeOptions]]
+    stellar: NotRequired[Optional[FeeOptions]]
+    transfers_3: NotRequired[Optional[FeeOptions]]
+    tron: NotRequired[Optional[FeeOptions]]
+    created_at: NotRequired[Optional[str]]
+    id: NotRequired[str]
+    instance_id: NotRequired[str]
+    updated_at: NotRequired[Optional[str]]
 
 
 class FeesResource:

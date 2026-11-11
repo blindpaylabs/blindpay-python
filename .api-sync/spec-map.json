@@ -1333,6 +1333,46 @@
         "file": "src/blindpay/resources/instances/instances.py",
         "symbol": "InstanceMemberRole"
       }
+    },
+    {
+      "spec": {
+        "schema": "CreatePayinOut",
+        "property": "payment_method"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "PaymentMethod"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "status"
+      },
+      "sdk": {
+        "file": "src/blindpay/resources/bank_accounts/bank_accounts.py",
+        "symbol": "BankAccountStatus"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "sepa_beneficiary_country"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "Country"
+      }
+    },
+    {
+      "spec": {
+        "schema": "BankAccountOut",
+        "property": "recipient_relationship"
+      },
+      "sdk": {
+        "file": "src/blindpay/types.py",
+        "symbol": "RecipientRelationship"
+      }
     }
   ],
   "types": [

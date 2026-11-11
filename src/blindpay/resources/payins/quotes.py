@@ -45,6 +45,8 @@ class CreatePayinQuoteResponse(TypedDict):
     partner_fee_amount: NotRequired[Optional[float]]
     flat_fee: Optional[float]
     card_instruction: NotRequired[Optional[CardInstruction]]
+    billing_fee_amount: NotRequired[Optional[float]]
+    is_otc: NotRequired[Optional[bool]]
 
 
 class GetPayinFxRateInput(TypedDict):

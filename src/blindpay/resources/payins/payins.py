@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator, List, NotRequired, Optional, TypedDict, Union
+from typing import Any, AsyncIterator, Dict, Iterator, List, NotRequired, Optional, TypedDict, Union
 
 from typing_extensions import deprecated
 
@@ -103,6 +103,11 @@ class Payin(TypedDict):
     pse_payment_link: NotRequired[Optional[str]]
     pse_tax_id: NotRequired[Optional[str]]
     partner_fee_id: NotRequired[Optional[str]]
+    manual_concluded_at: NotRequired[Any]  # an ISO date-time string; the spec declares no type for it
+    manual_concluded_by: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    payer_rules: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class ListPayinsInput(PaginationParams, total=False):
@@ -183,6 +188,11 @@ class GetPayinTrackResponse(TypedDict):
     blindpay_bank_details: NotRequired[Optional[BankDetails]]
     partner_fee_id: NotRequired[Optional[str]]
     billing_fee_amount: NotRequired[Optional[float]]
+    manual_concluded_at: NotRequired[Any]  # an ISO date-time string; the spec declares no type for it
+    manual_concluded_by: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    payer_rules: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class ExportPayinsInput(TypedDict, total=False):
@@ -208,6 +218,10 @@ class CreateEvmPayinResponse(TypedDict):
     customer_id: NotRequired[Optional[str]]
     receiver_amount: NotRequired[Optional[float]]
     billing_fee_amount: NotRequired[Optional[float]]
+    payment_method: NotRequired[Optional[Union[PaymentMethod, str]]]
+    partner_fee: NotRequired[int]
+    sender_amount: NotRequired[Optional[float]]
+    transaction_fee_amount: NotRequired[Optional[float]]
 
 
 _EXPORT_DEPRECATION = (

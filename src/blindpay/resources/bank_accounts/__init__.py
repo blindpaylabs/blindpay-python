@@ -6,6 +6,7 @@ from .bank_accounts import (
     BankAccount,
     BankAccountsResource,
     BankAccountsResourceSync,
+    BankAccountStatus,
     CreateAchInput,
     CreateAchResponse,
     CreateArgentinaTransfersInput,
@@ -48,6 +49,7 @@ from .bank_accounts import (
 )
 
 __all__ = [
+    "BankAccountStatus",
     "create_bank_accounts_resource",
     "create_bank_accounts_resource_sync",
     "BankAccountsResource",

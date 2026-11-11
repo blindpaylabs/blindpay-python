@@ -393,6 +393,24 @@ class TrackingTransaction(TypedDict):
     card_claim_at: NotRequired[Optional[str]]
     card_failed_attempts: NotRequired[Optional[int]]
     card_gates_failed_at: NotRequired[Optional[str]]
+    provider_name: NotRequired[Optional[str]]
+    pse_instruction: NotRequired[Optional[Dict[str, Any]]]
+    ted_instruction: NotRequired[Optional[Dict[str, Any]]]
+    transfers_instruction: NotRequired[Optional[Dict[str, Any]]]
+    description: NotRequired[Optional[str]]
+    end_to_end_id: NotRequired[Optional[str]]
+    external_id: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    sender_account_number: NotRequired[Optional[str]]
+    sender_bank_code: NotRequired[Optional[str]]
+    sender_bank_name: NotRequired[Optional[str]]
+    sender_name: NotRequired[Optional[str]]
+    sender_tax_id: NotRequired[Optional[str]]
+    trace_number: NotRequired[Optional[str]]
+    transaction_reference: NotRequired[Optional[str]]
+    ledger_in_transaction_id: NotRequired[Optional[str]]
+    ledger_out_transaction_id: NotRequired[Optional[str]]
+    provider_error_reason: NotRequired[Optional[str]]
 
 
 class TrackingPayment(TypedDict):
@@ -410,6 +428,20 @@ class TrackingPayment(TypedDict):
     refund_review_detected_at: NotRequired[Optional[str]]
     returned_amount: NotRequired[Optional[int]]
     review_source: NotRequired[Optional[str]]
+    approved_risk_sources: NotRequired[Optional[List[str]]]
+    coelsa_id: NotRequired[Optional[str]]
+    end_to_end_id: NotRequired[Optional[str]]
+    provider_clearing_system: NotRequired[Optional[str]]
+    provider_error_reason: NotRequired[Optional[str]]
+    provider_imad: NotRequired[Optional[str]]
+    provider_reference: NotRequired[Optional[str]]
+    provider_uetr: NotRequired[Optional[str]]
+    recipient_account_number: NotRequired[Optional[str]]
+    recipient_account_type: NotRequired[Optional[str]]
+    recipient_bank_code: NotRequired[Optional[str]]
+    recipient_branch_code: NotRequired[Optional[str]]
+    recipient_name: NotRequired[Optional[str]]
+    recipient_tax_id: NotRequired[Optional[str]]
 
 
 class TrackingLiquidity(TypedDict):
@@ -425,6 +457,8 @@ class TrackingComplete(TypedDict):
     status: NotRequired[Optional[str]]
     transaction_hash: NotRequired[Optional[str]]
     completed_at: NotRequired[Optional[str]]
+    provider_transaction_id: NotRequired[Optional[str]]
+    refund_reason: NotRequired[Optional[str]]
 
 
 class TrackingPartnerFee(TypedDict):

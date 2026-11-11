@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator, List, Literal, Optional, Union
+from typing import Any, AsyncIterator, Dict, Iterator, List, Literal, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict, deprecated
 
@@ -115,6 +115,12 @@ class Payout(TypedDict):
     sepa_beneficiary_legal_name: NotRequired[Optional[str]]
     sepa_beneficiary_postal_code: NotRequired[Optional[str]]
     sepa_iban: NotRequired[Optional[str]]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    partner_fee: NotRequired[int]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    transaction_fee_amount: NotRequired[Optional[float]]
 
 
 class ListPayoutsInput(PaginationParams, total=False):
@@ -169,6 +175,12 @@ class CreateStellarPayoutResponse(TypedDict):
     tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
     customer_id: NotRequired[Optional[str]]
     payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class CreateEvmPayoutInput(TypedDict):
@@ -188,12 +200,19 @@ class CreateEvmPayoutResponse(TypedDict):
     tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
     customer_id: NotRequired[Optional[str]]
     payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class CreateSolanaPayoutInput(TypedDict):
     quote_id: str
     sender_wallet_address: NotRequired[str]
     wallet_id: NotRequired[str]
+    signed_transaction: NotRequired[Optional[str]]
 
 
 class CreateSolanaPayoutResponse(TypedDict):
@@ -207,6 +226,12 @@ class CreateSolanaPayoutResponse(TypedDict):
     tracking_liquidity: NotRequired[Optional[TrackingLiquidity]]
     customer_id: NotRequired[Optional[str]]
     payable_id: NotRequired[Optional[str]]
+    bank_account_id: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
+    offramp_wallet_id: NotRequired[Optional[str]]
+    partner_fee: NotRequired[int]
+    tracking_documents: NotRequired[Optional[Dict[str, Any]]]
+    transaction_fee_amount: NotRequired[Optional[int]]
 
 
 class SubmitPayoutDocumentsInput(TypedDict):

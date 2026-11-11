@@ -1,5 +1,6 @@
 from .customers import (
     AccountPurpose,
+    AdditionalInfoItem,
     AmlHits,
     AmlStatus,
     BusinessIndustry,
@@ -65,6 +66,7 @@ from .customers import (
 )
 
 __all__ = [
+    "AdditionalInfoItem",
     "create_customers_resource",
     "create_customers_resource_sync",
     "CustomersResource",

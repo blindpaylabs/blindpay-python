@@ -82,6 +82,7 @@ class VirtualAccount(TypedDict):
     co: NotRequired[Optional[VirtualAccountCo]]
     mx: NotRequired[Optional[VirtualAccountMx]]
     partner_fee_id: NotRequired[Optional[str]]
+    customer_id: NotRequired[Optional[str]]
 
 
 class _CreateVirtualAccountInputRequired(TypedDict):

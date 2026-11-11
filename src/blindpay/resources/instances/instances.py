@@ -46,6 +46,8 @@ class UpdateInstanceInput(TypedDict, total=False):
     logo_url: Optional[str]
     partner_tos_link: Optional[str]
     partner_tos_screenshot: Optional[str]
+    compliance_emails: Optional[List[str]]
+    customer_rfi_emails_enabled: bool
 
 
 class UpdateInstanceMemberRoleInput(TypedDict):

@@ -18,6 +18,8 @@ class CustodialWallet(TypedDict):
     address: NotRequired[Optional[str]]
     created_at: NotRequired[Optional[str]]
     yield_status: NotRequired[Optional[Union[YieldStatus, str]]]
+    external_id: NotRequired[Optional[str]]
+    name: NotRequired[str]
 
 
 class CustodialWalletBalanceToken(TypedDict):

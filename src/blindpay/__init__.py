@@ -27,6 +27,7 @@ from .resources.bank_accounts.bank_accounts import (
     BankAccount as BankAccount,
     BankAccountsResource as BankAccountsResource,
     BankAccountsResourceSync as BankAccountsResourceSync,
+    BankAccountStatus as BankAccountStatus,
     CreateAchInput as CreateAchInput,
     CreateAchResponse as CreateAchResponse,
     CreateArgentinaTransfersInput as CreateArgentinaTransfersInput,
@@ -84,6 +85,7 @@ from .resources.custodial_wallets.custodial_wallets import (
 )
 from .resources.customers.customers import (
     AccountPurpose as AccountPurpose,
+    AdditionalInfoItem as AdditionalInfoItem,
     AmlHits as AmlHits,
     AmlStatus as AmlStatus,
     BusinessIndustry as BusinessIndustry,
@@ -461,6 +463,8 @@ __all__ = [
 ]
 __all__ += _webhook_events.__all__
 __all__ += [
+    "AdditionalInfoItem",
+    "BankAccountStatus",
     "AvailableResource",
     "AvailableResourceSync",
     "BankDetail",

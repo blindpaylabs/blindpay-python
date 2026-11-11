@@ -37,6 +37,9 @@ class OfframpWallet(TypedDict):
     partner_fee_id: NotRequired[Optional[str]]
 
 
+BankAccountStatus = Literal["verifying", "approved", "rejected", "deprecated"]
+
+
 class BankAccount(TypedDict):
     id: str
     type: Union[Rail, str]
@@ -103,6 +106,25 @@ class BankAccount(TypedDict):
     faster_payments_sort_code: NotRequired[Optional[str]]
     plaid_connected_at: NotRequired[Optional[str]]
     swift_intermediary_bank_routing_number: NotRequired[Optional[str]]
+    business_industry: NotRequired[Optional[str]]
+    recipient_relationship: NotRequired[Optional[Union[RecipientRelationship, str]]]
+    sepa_beneficiary_country: NotRequired[Optional[Union[Country, str]]]
+    status: NotRequired[Optional[Union[BankAccountStatus, str]]]
+    swift_payment_code: NotRequired[Optional[str]]
+    date_of_birth: NotRequired[Optional[str]]
+    phone_number: NotRequired[Optional[str]]
+    pix_safe_bank_code: NotRequired[Optional[str]]
+    pix_safe_branch_code: NotRequired[Optional[str]]
+    pix_safe_cpf_cnpj: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_1: NotRequired[Optional[str]]
+    sepa_beneficiary_address_line_2: NotRequired[Optional[str]]
+    sepa_beneficiary_city: NotRequired[Optional[str]]
+    sepa_beneficiary_legal_name: NotRequired[Optional[str]]
+    sepa_beneficiary_postal_code: NotRequired[Optional[str]]
+    sepa_beneficiary_state_province_region: NotRequired[Optional[str]]
+    sepa_iban: NotRequired[Optional[str]]
+    swift_ifsc_branch_code: NotRequired[Optional[str]]
+    tax_id: NotRequired[Optional[str]]
 
 
 ListBankAccountsResponse = List[BankAccount]
@@ -116,6 +138,7 @@ class CreatePixInput(TypedDict):
     customer_id: str
     name: str
     pix_key: Optional[str]
+    force_cpf_cnpj: NotRequired[Optional[bool]]
 
 
 class CreatePixResponse(TypedDict):
@@ -315,6 +338,7 @@ class CreateInternationalSwiftInput(_CreateInternationalSwiftInputRequired, tota
     tax_id: Optional[str]
     date_of_birth: Optional[str]
     swift_intermediary_bank_routing_number: Optional[str]
+    swift_ifsc_branch_code: Optional[str]
 
 
 class CreateInternationalSwiftResponse(TypedDict):

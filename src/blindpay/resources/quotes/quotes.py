@@ -56,6 +56,7 @@ class CreateQuoteResponse(TypedDict):
     contract: NotRequired[Optional[Contract]]
     customer_local_amount: NotRequired[Optional[float]]
     description: NotRequired[Optional[str]]
+    billing_fee_amount: NotRequired[Optional[int]]
 
 
 class GetFxRateInput(TypedDict):

@@ -606,6 +606,13 @@ VirtualAccountPreapprovalStatus = Literal["in_review", "approved", "rejected"]
 VirtualAccountPreapprovalBankingPartner = Literal["jpmorgan", "portage"]
 
 
+class AdditionalInfoItem(TypedDict):
+    """An extra document or note: ``label`` is a known category, ``value`` a file URL or free text."""
+
+    label: str
+    value: str
+
+
 class CustomerCnaeCode(TypedDict):
     code: str
     description: str
@@ -686,6 +693,10 @@ class IndividualWithStandardKYC(TypedDict):
     cnae_condition: NotRequired[Optional[CustomerCnaeCondition]]
     is_nested: NotRequired[Optional[bool]]
     virtual_account_preapproval: NotRequired[Optional[CustomerVirtualAccountPreapproval]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    customer_id: NotRequired[str]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class IndividualWithEnhancedKYC(TypedDict):
@@ -744,6 +755,10 @@ class IndividualWithEnhancedKYC(TypedDict):
     cnae_condition: NotRequired[Optional[CustomerCnaeCondition]]
     is_nested: NotRequired[Optional[bool]]
     virtual_account_preapproval: NotRequired[Optional[CustomerVirtualAccountPreapproval]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    customer_id: NotRequired[str]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class BusinessWithStandardKYB(TypedDict):
@@ -797,6 +812,10 @@ class BusinessWithStandardKYB(TypedDict):
     cnae_condition: NotRequired[Optional[CustomerCnaeCondition]]
     is_nested: NotRequired[Optional[bool]]
     virtual_account_preapproval: NotRequired[Optional[CustomerVirtualAccountPreapproval]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    customer_id: NotRequired[str]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class CreateIndividualWithStandardKYCInput(TypedDict):
@@ -826,6 +845,9 @@ class CreateIndividualWithStandardKYCInput(TypedDict):
     account_purpose: NotRequired[Optional[AccountPurpose]]
     account_purpose_other: NotRequired[Optional[str]]
     occupation: NotRequired[Optional[str]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class CreateIndividualWithStandardKYCResponse(TypedDict):
@@ -865,6 +887,9 @@ class CreateIndividualWithEnhancedKYCInput(TypedDict):
     account_purpose: NotRequired[Optional[AccountPurpose]]
     account_purpose_other: NotRequired[Optional[str]]
     occupation: NotRequired[Optional[str]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class CreateIndividualWithEnhancedKYCResponse(TypedDict):
@@ -904,6 +929,9 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     source_of_wealth: NotRequired[Optional[SourceOfWealth]]
     publicly_traded: NotRequired[Optional[bool]]
     occupation: NotRequired[Optional[str]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class CreateBusinessWithStandardKYBResponse(TypedDict):
@@ -1000,6 +1028,9 @@ class UpdateCustomerInput(TypedDict):
     source_of_wealth: NotRequired[Optional[SourceOfWealth]]
     publicly_traded: NotRequired[Optional[bool]]
     occupation: NotRequired[Optional[str]]
+    additional_info: NotRequired[Optional[List[AdditionalInfoItem]]]
+    latitude: NotRequired[Optional[float]]
+    longitude: NotRequired[Optional[float]]
 
 
 class PayinLimit(TypedDict):
@@ -1044,6 +1075,9 @@ class LimitIncreaseRequest(TypedDict):
     created_at: NotRequired[Optional[str]]
     updated_at: NotRequired[Optional[str]]
     supporting_documents: NotRequired[Optional[List[LimitIncreaseSupportingDocumentOut]]]
+    approved_daily: NotRequired[Optional[int]]
+    approved_monthly: NotRequired[Optional[int]]
+    approved_per_transaction: NotRequired[Optional[int]]
 
 
 GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]
