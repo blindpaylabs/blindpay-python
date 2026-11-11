@@ -2,15 +2,21 @@
     "packages": {
       ".": {
         "changelog-path": "CHANGELOG.md",
-        "release-type": "python",
+        "release-type": "simple",
         "bump-minor-pre-major": true,
         "bump-patch-for-minor-pre-major": false,
         "draft": false,
         "prerelease": false,
         "include-v-in-tag": true,
+        "include-component-in-tag": false,
         "package-name": "blindpay",
         "extra-files": [
-          "src/blindpay/_version.py"
+          "src/blindpay/_version.py",
+          {
+            "type": "toml",
+            "path": "pyproject.toml",
+            "jsonpath": "$.project.version"
+          }
         ]
       }
     }

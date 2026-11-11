@@ -669,9 +669,14 @@ pyright src/blindpay/
 The project uses [release-please](https://github.com/googleapis/release-please) for automated versioning.
 
 **Config:** `release-please-config.json`
-- Release type: `python`
-- Tags include `v` prefix (e.g., `v1.3.0`)
-- Bumps `pyproject.toml` (python strategy) and `src/blindpay/_version.py` (via `extra-files`, Generic updater)
+- Release type: `simple`, so release-please touches only the files listed in `extra-files` plus the changelog.
+  The `python` type also rewrites `src/blindpay/__init__.py`, and in 4.0.0 it wrote back a stale copy that dropped
+  every export.
+- Tags are `vX.Y.Z` (`include-component-in-tag: false`). `publish.yaml` checks out that tag.
+- Bumps `pyproject.toml` (toml updater, `$.project.version`) and `src/blindpay/_version.py` (Generic updater)
+
+**Auto-merge:** `publish.yaml` merges the release PR itself. It first waits for the PR's checks to pass, then
+refuses if the PR changes any line outside `CHANGELOG.md` other than a version line.
 
 **Manifest:** `.release-please-manifest.json`
 - Tracks the current version at the root path `.`
