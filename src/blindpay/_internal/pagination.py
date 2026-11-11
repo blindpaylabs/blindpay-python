@@ -1,4 +1,4 @@
-"""Auto-pagination shared by every ``list_auto_paging`` method, in both clients (plan C5, D3, D4).
+"""Auto-pagination shared by every ``list_auto_paging`` method, in both clients.
 
 A pager sends ``limit`` (default 100) so the API answers with the ``{data, pagination}`` envelope, yields every item
 of the page, then requests the next page with ``starting_after = pagination.next_page`` while ``has_more`` is true.

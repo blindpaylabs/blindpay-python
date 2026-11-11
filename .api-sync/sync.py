@@ -1661,7 +1661,7 @@ def append_method(source: str, class_name: str, method_source: str) -> str:
 
 def build_path_fstring(path: str, module: ResourceModule) -> str:
     """The f-string body for an operation's path. Caller-supplied params are percent-encoded with
-    `path_param(...)` (plan C9); the instance id comes from the client config."""
+    `path_param(...)`; the instance id comes from the client config."""
     path_wo_v1 = path[3:] if path.startswith("/v1/") else path
     names = path_param_names(path)
     if module.uses_instance_id and names:
@@ -1673,7 +1673,7 @@ def build_path_fstring(path: str, module: ResourceModule) -> str:
 
 
 def render_method(plan: OperationInsertPlan, is_sync: bool) -> str:
-    """Generated methods follow the hand-written conventions (plan §6): mutating methods take a trailing
+    """Generated methods follow the hand-written conventions: mutating methods take a trailing
     `options: Optional[RequestOptions] = None` and forward it; path params go through `path_param`."""
     args = [f"{a}: str" for a in plan.path_args]
     if plan.input_type_name:

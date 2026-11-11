@@ -25,7 +25,7 @@ blindpay-python/
     _internal/
       api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync,
                                           #   MultipartFile (get/post/put/patch/delete/post_multipart)
-      http.py                             # RequestOptions, retry decision table (plan A2), error mapping,
+      http.py                             # RequestOptions, retry decision table, error mapping,
                                           #   path_param() and build_query() helpers. Pure, no I/O
       pagination.py                       # auto_paging_iter / async_auto_paging_iter (list_auto_paging)
       exceptions.py                       # BlindPayError, BlindPayApiError
@@ -112,7 +112,7 @@ resources/custodial_wallets/
 - Use `List[X]` from `typing`, not `list[X]`.
 - Use `Literal[...]` from `typing_extensions` for resource-local literals, or from `typing` if already imported.
 - Docstrings on resource methods only where the signature can't say it: units, "exactly one of" inputs, a `None`
-  result, the `/e/*` tracking endpoints' production 401 (plan D19), one-time settings.
+  result, the `/e/*` tracking endpoints' production 401, one-time settings.
 - All methods return `BlindpayApiResponse[T]` where T is the response TypedDict.
 - Double quotes for strings.
 - Imports: standard library first, then third-party, then relative. Sorted by ruff isort.
@@ -444,7 +444,7 @@ against every variant of its shared fixture, and `tests/test_request_types.py` c
 |---|---|---|
 | Response field | not in `required` | `NotRequired[...]` |
 | Response field | nullable | `Optional[...]` |
-| Response field | string enum | `Union[<Literal alias>, str]` (known values + forward compatibility, plan C7) |
+| Response field | string enum | `Union[<Literal alias>, str]` (known values, and new API values still type-check) |
 | Request field | in `required` | required key (in a `total=False` class: `Required[...]`) |
 | Request field | not in `required` | `NotRequired[...]` (or a `total=False` class) |
 | Either | wire key is a Python keyword (`from`, `yield`) | declare it in a functional base: `_X = TypedDict("_X", {"from": ...})`, then `class X(_X)` |
@@ -801,13 +801,13 @@ python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --ch
 ```
 
 Nested types are named `{Event}WebhookEvent{Property}`, enums are typed `str`, and provider-named fields
-(`circle_*`, `checkbook_*`, `onemoney_*`, `aiprise_*`, `infinitus_*`, `jpm_*`) are skipped (plan rule 8).
+(`circle_*`, `checkbook_*`, `onemoney_*`, `aiprise_*`, `infinitus_*`, `jpm_*`) are skipped (provider names stay out of the public SDK surface).
 `check_contract.py` skips this module (`GENERATED_FILES`).
 
 ### HTTP layer and retries
 
 `_internal/http.py` holds every transport rule as pure functions shared by both clients: the retry decision table
-(plan Appendix A2: GETs retry on connection errors/408/429/5xx; mutations only without a response, on 429 and on
+(GETs retry on connection errors/408/429/5xx; mutations only without a response, on 429 and on
 409 `idempotency_key_in_flight`, never on 5xx), auto idempotency keys (UUIDv4 before the first attempt for every
 non-multipart mutation when `max_retries > 0`), and the `ErrorResponse` mapping. The clients only run the loop:
 `time.sleep` in `ApiClientImplSync`, `asyncio.sleep` in `ApiClientImpl` (`_sleep` is the test seam). Never retry a

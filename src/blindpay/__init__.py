@@ -4,7 +4,7 @@ from ._internal.http import RequestOptions
 from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
 
-# Resource types: every input, output, enum and resource class, importable from the package root (plan C11).
+# Resource types: every input, output, enum and resource class, importable from the package root.
 from .resources.available.available import (
     AvailableResource as AvailableResource,
     AvailableResourceSync as AvailableResourceSync,
