@@ -9,8 +9,8 @@ Stdlib only, deterministic. Usage:
     python3 .api-sync/gen_webhook_events.py --spec <openapi.json> --check   # exit 1 if it would change
 
 Mapping: required keys stay required, others are NotRequired; nullable types are Optional; string enums are typed
-`str` (responses must tolerate values the SDK doesn't know yet); nested objects become their own TypedDicts,
-shared across events when their shape is identical.
+`str` (responses must tolerate values the SDK doesn't know yet); nested objects become their own TypedDicts named
+after their owner and property (e.g. `PayoutCompleteWebhookEventTrackingPayment`), so names stay stable across syncs.
 """
 
 import argparse
@@ -22,6 +22,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Plan rule 8 (blindpay-v2 AGENTS.md): no new typed fields named after a provider. They still arrive at runtime;
+# they're just not modelled. Reason recorded for each: "provider-named field; pending blindpay-v2 decision".
+PROVIDER_NAMED = re.compile(r"^(checkbook|onemoney|circle|aiprise|infinitus|jpm)_")
 OUTPUT = ROOT / "src" / "blindpay" / "webhook_events.py"
 
 HEADER = '''"""Typed BlindPay webhook payloads, one TypedDict per event.
@@ -49,7 +53,6 @@ class Generator:
         self.schemas: Dict[str, Any] = spec.get("components", {}).get("schemas", {})
         self.webhooks: Dict[str, Any] = spec.get("webhooks", {})
         self.classes: List[str] = []
-        self.by_shape: Dict[str, str] = {}
         self.names: set[str] = set()
 
     def resolve(self, schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -78,15 +81,19 @@ class Generator:
                 non_null = [o for o in options if o.get("type") != "null"]
                 if len(non_null) < len(options):
                     nullable = True
+                kinds = {o.get("type") for o in non_null}
                 if len(non_null) == 1:
                     schema = {**{k: v for k, v in schema.items() if k != combinator}, **non_null[0]}
+                elif len(kinds) == 1 and next(iter(kinds)) in ("string", "integer", "number", "boolean"):
+                    # e.g. a date-time string or "" / a 9-digit string: one wire type, several formats.
+                    schema = {**{k: v for k, v in schema.items() if k != combinator}, "type": next(iter(kinds))}
         return schema, nullable
 
     def annotation(self, schema: Dict[str, Any], hint: str) -> str:
         schema, nullable = self.split_null(self.resolve(schema))
         schema = self.resolve(schema)
         base = self.base_annotation(schema, hint)
-        return f"Optional[{base}]" if nullable and base != "Any" else base
+        return f"Optional[{base}]" if nullable else base
 
     def base_annotation(self, schema: Dict[str, Any], hint: str) -> str:
         kind = schema.get("type")
@@ -113,24 +120,17 @@ class Generator:
         required = set(schema.get("required", []))
         fields: List[Tuple[str, str]] = []
         for prop, prop_schema in properties.items():
+            if PROVIDER_NAMED.match(prop):
+                continue
             if prop == "webhook_event" and discriminator is not None:
                 annotation = f'Literal["{discriminator}"]'
             else:
-                annotation = self.annotation(prop_schema, f"Webhook{pascal(prop)}")
+                annotation = self.annotation(prop_schema, f"{name}{pascal(prop)}")
             if prop not in required:
                 annotation = f"NotRequired[{annotation}]"
             fields.append((prop, annotation))
-        if discriminator is None:
-            shape = json.dumps(fields)
-            if shape in self.by_shape:
-                return self.by_shape[shape]
-            unique = name
-            counter = 2
-            while unique in self.names:
-                unique = f"{name}{counter}"
-                counter += 1
-            name = unique
-            self.by_shape[shape] = name
+        if name in self.names:
+            raise SystemExit(f"generated TypedDict name collision: {name}")
         self.names.add(name)
         self.classes.append(self.render(name, fields))
         return name
@@ -164,7 +164,11 @@ class Generator:
             "WEBHOOK_EVENT_TYPES: Dict[str, Any] = {\n" + mapping + "}\n"
             '"""Known event name -> its TypedDict."""\n'
         )
-        return HEADER + "\n\n".join(self.classes) + "\n\n" + footer
+        exported = sorted(
+            self.names | {"UnknownWebhookEvent", "WebhookEvent", "WebhookEventName", "WEBHOOK_EVENT_TYPES"}
+        )
+        all_block = "__all__ = [\n" + "".join(f'    "{name}",\n' for name in exported) + "]\n\n\n"
+        return HEADER + all_block + "\n\n".join(self.classes) + "\n\n" + footer
 
 
 def main() -> int:

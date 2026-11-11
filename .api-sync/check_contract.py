@@ -32,6 +32,11 @@ WEBHOOKS_LITERAL_NAME = "WebhookEvents"
 
 REQUIRED_ALLOWLIST_KEYS = {"schema", "field", "reason", "owner"}
 
+# Modules generated from the spec itself; their gate is the generator's own --check mode
+# (`gen_webhook_events.py --check --spec <spec>`), so Direction A would only double-check them against an
+# older snapshot.
+GENERATED_FILES = {"webhook_events.py"}
+
 
 def load_snapshot() -> dict:
     with SNAPSHOT_PATH.open() as f:
@@ -171,7 +176,9 @@ def main() -> int:
     allowset = {(e["schema"], e["field"]) for e in allowlist}
 
     known = collect_known_property_names(spec) | collect_param_names(spec)
-    typeddict_fields = find_typeddict_fields(SRC_ROOT)
+    typeddict_fields = {
+        key: fields for key, fields in find_typeddict_fields(SRC_ROOT).items() if key[0] not in GENERATED_FILES
+    }
 
     failures: list[str] = []
     for (rel_file, class_name), fields in typeddict_fields.items():

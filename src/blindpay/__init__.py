@@ -1,4 +1,4 @@
-from . import webhooks as webhooks
+from . import webhook_events as _webhook_events, webhooks as webhooks
 from ._internal.exceptions import BlindPayApiError, BlindPayError
 from ._internal.http import RequestOptions
 from ._version import __version__ as __version__
@@ -32,6 +32,8 @@ from .types import (
     TransactionDocumentType,
     TransactionStatus,
 )
+from .webhook_events import *  # noqa: F403 (typed webhook payloads; names listed in webhook_events.__all__)
+from .webhooks import WebhookVerificationError, construct_event as construct_webhook_event
 
 __all__ = [
     "BlindPay",
@@ -40,6 +42,8 @@ __all__ = [
     "BlindPayApiError",
     "RequestOptions",
     "webhooks",
+    "construct_webhook_event",
+    "WebhookVerificationError",
     "AccountClass",
     "AipriseDocumentType",
     "ApprovalRate",
@@ -68,3 +72,4 @@ __all__ = [
     "TrackingPayment",
     "TrackingTransaction",
 ]
+__all__ += _webhook_events.__all__
