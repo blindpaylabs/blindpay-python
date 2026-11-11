@@ -4,7 +4,7 @@ from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BankingPartner, BlindpayApiResponse, StablecoinToken
+from ...types import BankingPartner, BlindpayApiResponse, Network, StablecoinToken
 
 
 class BankAccountInfo(TypedDict):
@@ -64,6 +64,13 @@ class CreateVirtualAccountBreB(TypedDict):
     gender: Literal["male", "female"]
 
 
+class VirtualAccountBlockchainWallet(TypedDict):
+    """The wallet the virtual account settles to."""
+
+    network: Union[Network, str]
+    address: NotRequired[Optional[str]]
+
+
 class VirtualAccount(TypedDict):
     id: str
     us: NotRequired[Optional[USBankDetails]]
@@ -71,7 +78,7 @@ class VirtualAccount(TypedDict):
     blockchain_wallet_id: NotRequired[Optional[str]]
     banking_partner: Optional[Union[BankingPartner, str]]
     kyc_status: Optional[str]
-    blockchain_wallet: NotRequired[Optional[str]]
+    blockchain_wallet: NotRequired[Optional[VirtualAccountBlockchainWallet]]
     co: NotRequired[Optional[VirtualAccountCo]]
     mx: NotRequired[Optional[VirtualAccountMx]]
     partner_fee_id: NotRequired[Optional[str]]
@@ -101,8 +108,8 @@ class UpdateVirtualAccountInput(TypedDict):
     partner_fee_id: NotRequired[Optional[str]]
 
 
-class ListVirtualAccountsResponse(TypedDict):
-    data: List[VirtualAccount]
+ListVirtualAccountsResponse = List[VirtualAccount]
+"""The API returns a bare array (``get.instances.[instance_id].customers.[customer_id].virtual-accounts.ts``)."""
 
 
 class VirtualAccountsResource:

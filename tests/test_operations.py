@@ -155,21 +155,9 @@ def response_type(op: Op) -> Any:
     raise AssertionError(f"{op.method} doesn't return BlindpayApiResponse[...]")
 
 
-# Response types that don't yet match their spec fixtures (C7 open enums, C8 optional/nullable fields).
-# Strict: fixing a type makes its entry fail until it's removed here. Must be empty when M3 is done.
-KNOWN_DRIFT: Set[str] = {
-    "virtual_accounts.create",
-    "virtual_accounts.get",
-    "virtual_accounts.list",
-}
-
-
 @pytest.mark.parametrize("op", OPS, ids=[op.method for op in OPS])
 def test_response_type_matches_every_fixture_variant(op: Op):
     """The static "decode" (plan §1.2, A8): each variant of the op's fixture against the method's response type.
     Required keys, nullability, open enums for ``unknown_enum``, decimals, and no fields the spec lacks."""
     errors = variant_errors(response_type(op), fixture_variants(op.operation))
-    if op.method in KNOWN_DRIFT:
-        assert errors, f"{op.method} now matches the spec: remove it from KNOWN_DRIFT"
-        return
     assert not errors, "\n".join(sorted(set(errors)))
