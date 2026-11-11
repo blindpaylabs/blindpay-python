@@ -98,8 +98,10 @@ def test_async_methods_are_coroutines(name: str, async_cls: type, sync_cls: type
             assert "AsyncIterator" in str(inspect.signature(fn).return_annotation)
             assert "AsyncIterator" not in str(inspect.signature(getattr(sync_cls, method)).return_annotation)
             continue
-        assert inspect.iscoroutinefunction(fn), f"{name}.{method} must be async"
-        assert not inspect.iscoroutinefunction(getattr(sync_cls, method)), f"{name}Sync.{method} must be sync"
+        # unwrap: older typing_extensions' @deprecated wrapper doesn't keep the coroutine-function marker
+        assert inspect.iscoroutinefunction(inspect.unwrap(fn)), f"{name}.{method} must be async"
+        sync_fn = inspect.unwrap(getattr(sync_cls, method))
+        assert not inspect.iscoroutinefunction(sync_fn), f"{name}Sync.{method} must be sync"
 
 
 def test_namespaces_expose_their_base_resource_with_types() -> None:
