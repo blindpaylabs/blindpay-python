@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.4.1](https://github.com/blindpaylabs/blindpay-python/compare/v3.4.0...v3.4.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **bank-accounts:** type bank_accounts.get's response as BankAccountOut ([48df625](https://github.com/blindpaylabs/blindpay-python/commit/48df625318eb8e423b3d16ab826f17b071e4f647))
+* **deps:** drop the unused pydantic runtime dependency ([93cffef](https://github.com/blindpaylabs/blindpay-python/commit/93cffef143c85bb051f12ac1c8f40bc121cde0e2))
+* **packaging:** report the real SDK version in the User-Agent ([9b7ca97](https://github.com/blindpaylabs/blindpay-python/commit/9b7ca977753a1bdad828bda27ecd25d4413a4de7))
+* **packaging:** ship py.typed inside the blindpay package ([2b69201](https://github.com/blindpaylabs/blindpay-python/commit/2b6920162f1549db2272dccdce428ab44d0fd6d0))
+* **payouts,payins:** deprecate export(), which calls a route that doesn't exist ([241194e](https://github.com/blindpaylabs/blindpay-python/commit/241194e3183c7e2750593441c468bca1f13e09a3))
+* **transfers:** type transfers.create's response as CreateTransferOut ([06b6853](https://github.com/blindpaylabs/blindpay-python/commit/06b6853e0e8073824862fffb72f53ed7b86a0509))
+* **upload:** send upload and analyze as multipart/form-data ([eb3db4e](https://github.com/blindpaylabs/blindpay-python/commit/eb3db4e15977f7dbace242d42aec7e6a0c748585))
+* verify real Svix webhooks, send multipart uploads, fix packaging and response types ([a7d047c](https://github.com/blindpaylabs/blindpay-python/commit/a7d047c0db0c323211fd112f503c86547439d29a))
+* **wallets:** key custodial wallet balances by uppercase token symbol ([deb273c](https://github.com/blindpaylabs/blindpay-python/commit/deb273c2e149d5d0d7ce5437da192afed6de44ce))
+* **webhooks:** let verify_webhook_signature widen its timestamp tolerance ([5dce36e](https://github.com/blindpaylabs/blindpay-python/commit/5dce36e141eeee729b79c9428d5377d0157ca6b3))
+* **webhooks:** verify real Svix signatures ([841e00a](https://github.com/blindpaylabs/blindpay-python/commit/841e00ae62d66fb22b6d21d7f1fc5b93b2cd4cc7))
+
+
+### Documentation
+
+* document webhook verification, multipart uploads and the version source ([6bda212](https://github.com/blindpaylabs/blindpay-python/commit/6bda21237091c004c2003a767aaa6c0b666dab2f))
+
 ## [3.4.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.3.0...v3.4.0) (2026-08-04)
 
 
