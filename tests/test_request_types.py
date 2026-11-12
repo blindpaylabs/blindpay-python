@@ -145,3 +145,29 @@ def test_inline_body_keys_match_the_spec(operation: str, schema: Dict[str, Any])
     assert not set(properties) - set(fields), f"{op.method}: doesn't model {sorted(set(properties) - set(fields))}"
     integers = sorted(k for k in in_spec if properties[k].get("type") == "integer" and not _admits_int(fields[k]))
     assert not integers, f"{op.method}: the spec types {integers} as integer"
+
+
+def test_spec_correct_inline_inputs_type_check():
+    """pyright and mypy (strict, over tests/) reject this module if a spec-correct literal stops type-checking."""
+    from blindpay import (
+        CreateOfframpWalletInput,
+        CreatePartnerFeeInput,
+        GetFxRateInput,
+        MintUsdbStellarInput,
+        PrepareSolanaDelegationTransactionInput,
+    )
+
+    fee: CreatePartnerFeeInput = {
+        "name": "fee",
+        "payin_flat_fee": 0,
+        "payin_percentage_fee": 100,
+        "payout_flat_fee": 50,
+        "payout_percentage_fee": 0,
+    }
+    legacy_fee: CreatePartnerFeeInput = {**fee, "evm_wallet_address": "0x0", "payin_flat_fee": 1.0}
+    offramp: CreateOfframpWalletInput = {"customer_id": "cu_1", "bank_account_id": "ba_1", "network": "tron"}
+    delegation: PrepareSolanaDelegationTransactionInput = {"owner_address": "So1", "quote_id": "qu_1"}
+    mint: MintUsdbStellarInput = {"address": "G0", "amount": "1"}
+    fx: GetFxRateInput = {"currency_type": "sender", "from_currency": "USDC", "to": "BRL", "request_amount": 1000}
+
+    assert [fee, legacy_fee, offramp, delegation, mint, fx]

@@ -44,6 +44,14 @@ class Op:
 
 
 V1 = "/v1"
+# Only the spec's required keys: no wallet addresses, no virtual_account_set.
+PARTNER_FEE = {
+    "name": "fee",
+    "payin_flat_fee": 0,
+    "payin_percentage_fee": 100,
+    "payout_flat_fee": 50,
+    "payout_percentage_fee": 0,
+}
 INST = f"{V1}/instances/{INSTANCE}"
 CUST = f"{INST}/customers/{CUSTOMER}"
 
@@ -263,9 +271,10 @@ OPS: List[Op] = [
         "POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
         "wallets.offramp.create",
         lambda c, o: c.wallets.offramp.create(
-            {"customer_id": CUSTOMER, "bank_account_id": BANK_ACCOUNT, "network": "tron", "external_id": "x"}, o
+            {"customer_id": CUSTOMER, "bank_account_id": BANK_ACCOUNT, "network": "tron", "partner_fee_id": "pf_1"}, o
         ),
         f"{CUST}/bank-accounts/{BANK_ACCOUNT}/offramp-wallets",
+        body={"network": "tron", "partner_fee_id": "pf_1"},
     ),
     Op(
         "GET /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets",
@@ -283,8 +292,9 @@ OPS: List[Op] = [
     Op(
         "POST /v1/instances/{instance_id}/partner-fees",
         "partner_fees.create",
-        lambda c, o: c.partner_fees.create({"name": "fee"}, o),
+        lambda c, o: c.partner_fees.create(PARTNER_FEE, o),
         f"{INST}/partner-fees",
+        body=PARTNER_FEE,
     ),
     Op(
         "GET /v1/instances/{instance_id}/partner-fees",
@@ -410,8 +420,11 @@ OPS: List[Op] = [
     Op(
         "POST /v1/instances/{instance_id}/prepare-delegate-solana",
         "wallets.blockchain.prepare_solana_delegation_transaction",
-        lambda c, o: c.wallets.blockchain.prepare_solana_delegation_transaction({"owner_address": "So1"}, o),
+        lambda c, o: c.wallets.blockchain.prepare_solana_delegation_transaction(
+            {"owner_address": "So1", "quote_id": "qu_1"}, o
+        ),
         f"{INST}/prepare-delegate-solana",
+        body={"owner_address": "So1", "quote_id": "qu_1"},
     ),
     Op(
         "POST /v1/instances/{instance_id}/create-asset-trustline",
@@ -424,6 +437,7 @@ OPS: List[Op] = [
         "wallets.blockchain.mint_usdb_stellar",
         lambda c, o: c.wallets.blockchain.mint_usdb_stellar({"address": "G0", "amount": "1"}, o),
         f"{INST}/mint-usdb-stellar",
+        body={"address": "G0", "amount": "1"},
     ),
     # terms of service
     Op(

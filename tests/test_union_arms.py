@@ -18,8 +18,8 @@ CUSTOMER_OP = "GET /v1/instances/{instance_id}/customers/{id}"
 PHANTOM_KEYS = {"aiprise_validation_key", "individual_holding_doc_front_file"}
 
 # Fields these arms type stricter than the spec's CustomerOut (required keys the spec makes optional, nullable
-# fields typed non-null, closed Literals). Relaxing a response field breaks callers that index it under pyright, so
-# these wait for the next major. The ledger must stay true: a fix that removes a gap deletes its entry.
+# fields typed non-null, closed Literals). Tracked, not fixed here: see the proposal in the round-2 PR. The ledger
+# must stay true: a fix that removes a gap deletes its entry, and a new gap fails the test.
 KNOWN_ARM_GAPS: Dict[str, FrozenSet[str]] = {
     "IndividualWithEnhancedKYC": frozenset(
         """account_purpose account_purpose_other address_line_1 address_line_2 aml_hits aml_status
