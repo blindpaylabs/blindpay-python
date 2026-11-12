@@ -672,6 +672,9 @@ pyright src/blindpay/
 
 ## 9. Versioning
 
+The release runbook (what a merge triggers, secrets, re-running a stuck release, verifying PyPI) is
+[RELEASING.md](RELEASING.md).
+
 ### release-please with conventional commits
 
 The project uses [release-please](https://github.com/googleapis/release-please) for automated versioning.

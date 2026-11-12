@@ -329,6 +329,11 @@ This SDK uses:
 - `httpx` for HTTP (one pooled client per BlindPay client)
 - `typing_extensions` for typing
 
+## Releases
+
+Merging to `main` publishes to PyPI through release-please. [RELEASING.md](RELEASING.md) covers the flow, the secrets,
+how to unstick a release and how to verify a published version.
+
 ## License
 
 MIT
