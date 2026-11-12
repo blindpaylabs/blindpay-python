@@ -29,6 +29,8 @@ class CreateTransferQuoteInput(TypedDict, total=False):
     customer_token: Required[StablecoinToken]
     customer_network: Required[Network]
     request_amount: Required[int]
+    """Integer cents (1000 = 10.00). A swap between different tokens needs at least 100 USDC, measured on the USDC
+    side; below that the API returns 400 ``TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM``."""
     amount_reference: Required[AmountReference]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]

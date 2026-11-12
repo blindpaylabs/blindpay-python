@@ -75,6 +75,15 @@ Every input, output and enum type is importable from the package root (`from bli
 - Payout, payin, quote, payable and limit amounts are **integer cents** (`1000` = 10.00).
 - Partner percentage fees are **basis points** (`100` = 1%); flat fees are cents.
 - Managed-wallet balances (`wallets.custodial.get_balance`) are **whole tokens** (`10.5` = 10.5 USDC).
+- Transfers that swap between different tokens need at least **100 USDC**, measured on the USDC side. Below that,
+  `transfers.create_quote` returns a 400 with code `TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM` (see Error codes).
+
+### Limit increases
+
+`customers.get_limit_increase_requests` and the `limitIncrease.new` / `limitIncrease.update` webhooks carry
+`review_reason`: why compliance rejected the request or approved lower limits than requested, and what to send to get
+the full amount. It is set when the status is rejected or the approval is below the requested limits, and `None`
+otherwise.
 
 ### "Exactly one of" inputs
 
@@ -87,8 +96,9 @@ The SDK doesn't validate these; the API answers 400.
 ### Testing on a development instance
 
 Development instances simulate settlement (test token `USDB`). Payouts of `66600` cents fail and `77700` are refunded;
-dev payins complete in about 30 s; quotes expire after 5 minutes (OTC payin quotes after 10 s); development instances
-allow 40 requests per minute (the SDK retries the 429 for you, honouring `Retry-After`).
+dev payins complete in about 30 s; quotes expire after 5 minutes (OTC payin quotes after 10 s). Development instances
+are rate limited per instance on every route; a limited call returns 429 `AUTH_RATE_LIMITED` with a `Retry-After`
+header, which the SDK honours when it retries.
 
 ## Configuration
 
@@ -178,6 +188,9 @@ response = await blindpay.payouts.create_evm(
 - Reads take the same argument, e.g. `await blindpay.payouts.get("pa_000000000000", {"timeout": 10})`. They use
   `timeout` and `headers` and never send an `Idempotency-Key`.
 
+Indicative FX quote endpoints are rate limited per instance; a limited call returns 429 `AUTH_RATE_LIMITED` with a
+`Retry-After` header, which the SDK honours when it retries.
+
 What the SDK retries, with exponential backoff (0.5 s doubling up to 8 s, with jitter) or the server's
 `Retry-After` when it is 60 s or less:
 
@@ -265,7 +278,7 @@ The API checks the file's MIME type, which the SDK guesses from the filename (or
 `upload.presign({"file_url": file_url})` returns a short-lived signed URL (`file_url`, `expires_at`) to download an
 uploaded file.
 
-## Upgrading to this release
+## Upgrading from 3.x to 4.x
 
 No public method or type was removed. Things that behave differently:
 
