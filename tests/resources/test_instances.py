@@ -36,7 +36,7 @@ class TestInstances:
     @pytest.mark.asyncio
     async def test_update_instance(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.instances.update(
                 {
@@ -45,37 +45,37 @@ class TestInstances:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     @pytest.mark.asyncio
     async def test_delete_instance(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.instances.delete()
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     @pytest.mark.asyncio
     async def test_delete_instance_member(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.instances.delete_member("us_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     @pytest.mark.asyncio
     async def test_update_instance_member_role(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.instances.update_member_role("us_000000000000", "checker")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
 
 class TestInstancesSync:
@@ -107,7 +107,7 @@ class TestInstancesSync:
 
     def test_update_instance(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.instances.update(
                 {
@@ -116,31 +116,31 @@ class TestInstancesSync:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     def test_delete_instance(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.instances.delete()
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     def test_delete_instance_member(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.instances.delete_member("us_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
     def test_update_instance_member_role(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.instances.update_member_role("us_000000000000", "checker")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}

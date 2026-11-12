@@ -5,7 +5,7 @@ from typing_extensions import Literal, NotRequired, TypedDict
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, build_query, path_param
 from ..._internal.pagination import async_auto_paging_iter, auto_paging_iter
-from ...types import BlindpayApiResponse, Network, PaginationMetadata
+from ...types import BlindpayApiResponse, Network, PaginationMetadata, SuccessResponse
 
 YieldStatus = Literal["disabled", "enabled", "disabling"]
 
@@ -136,7 +136,7 @@ class CustodialWalletsResource:
 
     async def delete(
         self, data: DeleteCustodialWalletInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
             options=options,
@@ -195,7 +195,7 @@ class CustodialWalletsResourceSync:
 
     def delete(
         self, data: DeleteCustodialWalletInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
             options=options,

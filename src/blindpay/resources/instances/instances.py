@@ -4,7 +4,7 @@ from typing_extensions import NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BlindpayApiResponse
+from ...types import BlindpayApiResponse, SuccessResponse
 
 InstanceMemberRole = Literal["owner", "admin", "finance", "checker", "operations", "developer", "viewer"]
 InstanceType = Literal["production", "development"]
@@ -79,22 +79,22 @@ class InstancesResource:
 
     async def update(
         self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.put(f"/instances/{self._instance_id}", data, options=options)
 
-    async def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    async def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(f"/instances/{self._instance_id}", options=options)
 
     async def delete_member(
         self, member_id: str, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/members/{path_param(member_id)}", options=options
         )
 
     async def update_member_role(
         self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.put(
             f"/instances/{self._instance_id}/members/{path_param(member_id)}", {"user_role": role}, options=options
         )
@@ -116,18 +116,22 @@ class InstancesResourceSync:
     def get_members(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetInstanceMembersResponse]:
         return self._client.get(f"/instances/{self._instance_id}/members", options=options)
 
-    def update(self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def update(
+        self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.put(f"/instances/{self._instance_id}", data, options=options)
 
-    def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(f"/instances/{self._instance_id}", options=options)
 
-    def delete_member(self, member_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete_member(
+        self, member_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(f"/instances/{self._instance_id}/members/{path_param(member_id)}", options=options)
 
     def update_member_role(
         self, member_id: str, role: InstanceMemberRole, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.put(
             f"/instances/{self._instance_id}/members/{path_param(member_id)}", {"user_role": role}, options=options
         )

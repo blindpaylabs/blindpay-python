@@ -436,12 +436,12 @@ class TestBankAccounts:
     @pytest.mark.asyncio
     async def test_delete_bank_account(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.customers.bank_accounts.delete("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
 
 class TestBankAccountsSync:
@@ -853,9 +853,9 @@ class TestBankAccountsSync:
 
     def test_delete_bank_account(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.customers.bank_accounts.delete("re_000000000000", "ba_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}

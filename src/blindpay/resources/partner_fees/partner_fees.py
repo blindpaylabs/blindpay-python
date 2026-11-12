@@ -4,7 +4,7 @@ from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BlindpayApiResponse
+from ...types import BlindpayApiResponse, SuccessResponse
 
 
 class PartnerFee(TypedDict):
@@ -81,7 +81,9 @@ class PartnerFeesResource:
     ) -> BlindpayApiResponse[GetPartnerFeeResponse]:
         return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
-    async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    async def delete(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options
         )
@@ -103,7 +105,9 @@ class PartnerFeesResourceSync:
     def get(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetPartnerFeeResponse]:
         return self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
-    def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
 

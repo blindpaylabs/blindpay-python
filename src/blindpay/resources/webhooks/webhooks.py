@@ -4,7 +4,7 @@ from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BlindpayApiResponse
+from ...types import BlindpayApiResponse, SuccessResponse
 
 WebhookEvents = Literal[
     "customer.new",
@@ -81,7 +81,9 @@ class WebhookEndpointsResource:
     ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    async def delete(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
         )
@@ -114,7 +116,9 @@ class WebhookEndpointsResourceSync:
     ) -> BlindpayApiResponse[CreateWebhookEndpointResponse]:
         return self._client.post(f"/instances/{self._instance_id}/webhook-endpoints", data, options=options)
 
-    def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(
             f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
         )

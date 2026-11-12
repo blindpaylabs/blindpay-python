@@ -10,6 +10,7 @@ from ...types import (
     Country,
     PaginationMetadata,
     PaginationParams,
+    SuccessResponse,
 )
 
 IndividualType = Literal["individual"]
@@ -1193,14 +1194,16 @@ class CustomersResource:
 
     async def update(
         self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return await self._client.put(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", payload, options=options
         )
 
-    async def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    async def delete(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )
@@ -1268,14 +1271,18 @@ class CustomersResourceSync:
     ) -> BlindpayApiResponse[GetCustomerResponse]:
         return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options)
 
-    def update(self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def update(
+        self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         customer_id = data["customer_id"]
         payload = {k: v for k, v in data.items() if k != "customer_id"}
         return self._client.put(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", payload, options=options
         )
 
-    def delete(self, customer_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )

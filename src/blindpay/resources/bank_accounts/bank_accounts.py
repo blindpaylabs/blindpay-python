@@ -13,6 +13,7 @@ from ...types import (
     Rail,
     RecipientRelationship,
     SpeiProtocol,
+    SuccessResponse,
 )
 
 ArgentinaTransfers = Literal["CVU", "CBU", "ALIAS"]
@@ -553,7 +554,7 @@ class BankAccountsResource:
 
     async def delete(
         self, customer_id: str, id: str, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
             options=options,
@@ -736,7 +737,9 @@ class BankAccountsResourceSync:
             options=options,
         )
 
-    def delete(self, customer_id: str, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(
+        self, customer_id: str, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
             options=options,

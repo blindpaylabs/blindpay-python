@@ -157,7 +157,7 @@ class TestBlockchainWallets:
     @pytest.mark.asyncio
     async def test_delete_blockchain_wallet(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.wallets.blockchain.delete(
                 {
@@ -167,7 +167,7 @@ class TestBlockchainWallets:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
             mock_request.assert_called_once_with(
                 "DELETE",
                 "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000",
@@ -435,7 +435,7 @@ class TestBlockchainWalletsSync:
 
     def test_delete_blockchain_wallet(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.wallets.blockchain.delete(
                 {
@@ -445,7 +445,7 @@ class TestBlockchainWalletsSync:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
             mock_request.assert_called_once_with(
                 "DELETE",
                 "/instances/in_000000000000/customers/re_000000000000/blockchain-wallets/bw_000000000000",
