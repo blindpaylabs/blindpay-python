@@ -24,7 +24,7 @@
     "kind": "property",
     "schema": "CreateBankAccountIn",
     "field": "status",
-    "reason": "Server-managed verification status; not something a caller sets on create.",
+    "reason": "Server-managed verification status: the create route overwrites it (blindpay-v2 apps/api/src/modules/bank-accounts/lib/create-bank-account.ts sets status: 'approved'), so a caller-sent value is ignored.",
     "owner": "sdk-maintainers"
   },
   {
