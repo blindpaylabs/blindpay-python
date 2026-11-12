@@ -12,6 +12,7 @@ from ._internal.http import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_TIMEOUT,
     HttpMethod,
+    Redacted,
     RequestOptions,
     api_root,
     body_read_failure,
@@ -464,7 +465,7 @@ class BlindPay:
 
         _validate_settings(timeout, max_retries)
 
-        self._api_key = api_key
+        self._api_key = Redacted(api_key)
         self._instance_id = instance_id
         self._base_url = api_root(base_url)
 
@@ -473,7 +474,7 @@ class BlindPay:
         self._headers = {
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": Redacted(f"Bearer {self._api_key}"),
         }
 
         self._api = ApiClientImpl(
@@ -732,7 +733,7 @@ class BlindPaySync:
 
         _validate_settings(timeout, max_retries)
 
-        self._api_key = api_key
+        self._api_key = Redacted(api_key)
         self._instance_id = instance_id
         self._base_url = api_root(base_url)
 
@@ -741,7 +742,7 @@ class BlindPaySync:
         self._headers = {
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": Redacted(f"Bearer {self._api_key}"),
         }
 
         self._api = ApiClientImplSync(
