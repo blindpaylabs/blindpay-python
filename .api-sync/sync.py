@@ -1934,12 +1934,9 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
         if op_plans:
             MAP_PATH.write_text(json.dumps(map_data, indent=2) + "\n")
 
-    bump: Optional[str] = None
-    if not needs_human:
-        if any(a.kind in ("enum", "operation-insert") for a in applied):
-            bump = "minor"
-        elif applied:
-            bump = "patch"
+    # Every applied change adds something (an enum member, an optional field, an operation): a feature, so a minor
+    # release. A `fix:` commit would ship new public fields as a patch.
+    bump: Optional[str] = "minor" if applied and not needs_human else None
 
     report = {
         "mode": "apply",
@@ -1969,6 +1966,11 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
         print(f"Applied {len(applied)} change(s); bump={bump}")
         for a in applied:
             print(f"  [{a.kind}] {a.file}: {a.detail}")
+    elif spec_path.read_bytes() != SNAPSHOT_PATH.read_bytes():
+        # Nothing for this patcher, but the spec moved (an error-code row, a webhook-only field, docs). Refresh the
+        # snapshot so gen_webhook_events.py / gen_error_codes.py regenerate from it.
+        SNAPSHOT_PATH.write_bytes(spec_path.read_bytes())
+        print("No SDK changes; spec snapshot refreshed.")
     else:
         print("No changes.")
     return 0

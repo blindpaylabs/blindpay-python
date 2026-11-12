@@ -1098,7 +1098,7 @@ class TestApplyFlow:
         snapshot_bytes = (repo / ".api-sync/spec-snapshot.json").read_bytes()
         assert snapshot_bytes == weird_bytes
 
-    def test_property_only_change_bumps_patch(self, repo: Path):
+    def test_property_only_change_bumps_minor(self, repo: Path):
         self._setup(repo)
         new_spec = json.loads((repo / ".api-sync/spec-snapshot.json").read_text())
         new_spec["components"]["schemas"]["PlainOut"]["properties"]["extra"] = {"type": "string"}
@@ -1109,13 +1109,31 @@ class TestApplyFlow:
         exit_code = sync.cmd_apply(sync.DEFAULT_SPEC_PATH, report_path)
         assert exit_code == 0
         report = json.loads(report_path.read_text())
-        assert report["bump"] == "patch"
+        assert report["bump"] == "minor"
 
         # Plain is total=True, so the newly added field must be NotRequired --
         # a bare "extra: str" would make it a required key and break every
         # existing caller that omits it.
         sample_src = (repo / "src/blindpay/resources/sample.py").read_text()
         assert "extra: NotRequired[str]" in sample_src
+
+    def test_spec_only_drift_refreshes_the_snapshot(self, repo: Path):
+        """A new error-code row or webhook-only field gives the patcher nothing to apply, but the generators read
+        the snapshot, so it must still move to the delivered spec."""
+        self._setup(repo)
+        new_spec = json.loads((repo / ".api-sync/spec-snapshot.json").read_text())
+        new_spec["tags"] = [{"name": "Errors", "description": "| `ZZ_NEW` | 400 | actionable | New. |"}]
+        write(repo, ".api-sync/spec-current.json", json.dumps(new_spec, indent=2))
+
+        report_path = repo / "report.json"
+        sync = load_sync(repo)
+        assert sync.cmd_apply(sync.DEFAULT_SPEC_PATH, report_path) == 0
+
+        report = json.loads(report_path.read_text())
+        assert report["applied"] == [] and report["bump"] is None
+        assert (repo / ".api-sync/spec-snapshot.json").read_bytes() == (
+            repo / ".api-sync/spec-current.json"
+        ).read_bytes()
 
     def test_apply_twice_is_idempotent(self, repo: Path):
         self._setup(repo)

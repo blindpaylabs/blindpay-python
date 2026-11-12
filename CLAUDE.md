@@ -18,6 +18,7 @@ blindpay-python/
     py.typed                              # PEP 561 marker (must stay inside the package)
     webhooks.py                           # Standalone Svix verifier: webhooks.verify / webhooks.construct_event
     webhook_events.py                     # GENERATED typed webhook payloads (.api-sync/gen_webhook_events.py)
+    error_codes.py                        # GENERATED ErrorCode/RetryClass/ErrorCodeInfo (.api-sync/gen_error_codes.py)
     client.py                             # BlindPay (async) and BlindPaySync classes,
                                           #   ApiClientImpl / ApiClientImplSync (HTTP layer + retry loop),
                                           #   _*Namespace / _*NamespaceSync classes (sub-resources)
@@ -848,8 +849,20 @@ python3 .api-sync/sync.py --validate-map
 python3 .api-sync/sync.py --check [--spec <openapi.json>]   # state reconciliation (default: the snapshot)
 python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json   # METHOD+path: every x-sdk op has a method
 python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
+python3 .api-sync/gen_error_codes.py --spec .api-sync/spec-snapshot.json --check
 python3 .api-sync/check_contract.py
 ```
+
+`src/blindpay/error_codes.py` is generated from the snapshot's `Errors` tag table (`| `CODE` | status | retry |
+description |`); never edit it by hand. The generator fails on an empty table, an unparseable row, a duplicate code or
+an unknown retry class. `ErrorResponse["code"]` stays a plain `str` (unknown codes still arrive); `retry_class` is
+informational and never feeds the transport retry table in `_internal/http.py`. `tests/fixtures/error-codes.json` is
+the cross-SDK oracle `tests/test_error_codes.py` compares against.
+
+`--apply` reports `bump=minor` for any applied change (each one adds an enum member, an optional field or an
+operation). When it applies nothing but the delivered spec differs (an error-code row, a webhook-only field), it still
+refreshes the snapshot, and `api-sync.yml` counts generator-only diffs (`webhook_events.py`, `error_codes.py`) as a
+minor change, so they open a PR instead of being dropped.
 
 Operations marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators) must never
 get a method; `--coverage` fails if one does. `--apply` generates enum members, simple fields and standard operations
