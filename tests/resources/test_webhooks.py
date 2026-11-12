@@ -59,7 +59,7 @@ class TestWebhookEndpoints:
 
     @pytest.mark.asyncio
     async def test_delete_webhook_endpoint(self):
-        mocked_response = {"data": None}
+        mocked_response = {"success": True}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_response, "error": None}
@@ -152,7 +152,7 @@ class TestWebhookEndpointsSync:
             mock_request.assert_called_once_with("GET", "/instances/in_000000000000/webhook-endpoints")
 
     def test_delete_webhook_endpoint(self):
-        mocked_response = {"data": None}
+        mocked_response = {"success": True}
 
         with patch.object(self.blindpay._api, "_request") as mock_request:
             mock_request.return_value = {"data": mocked_response, "error": None}

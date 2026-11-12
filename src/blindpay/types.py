@@ -34,6 +34,12 @@ class ErrorResponse(TypedDict):
     retry_class: NotRequired[RetryClass]
 
 
+class SuccessResponse(TypedDict):
+    """``{"success": true}``: what deletes and most updates return (the spec's ``Success`` schema)."""
+
+    success: bool
+
+
 class BlindpayErrorResponse(TypedDict):
     data: None
     error: ErrorResponse

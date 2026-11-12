@@ -4,7 +4,7 @@ from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BlindpayApiResponse, Network
+from ...types import BlindpayApiResponse, Network, SuccessResponse
 
 
 class GetBlockchainWalletMessageResponse(TypedDict):
@@ -147,7 +147,7 @@ class BlockchainWalletsResource:
 
     async def delete(
         self, data: DeleteBlockchainWalletInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         customer_id = data["customer_id"]
         id = data["id"]
         return await self._client.delete(
@@ -164,7 +164,7 @@ class BlockchainWalletsResource:
 
     async def mint_usdb_stellar(
         self, data: MintUsdbStellarInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.post(f"/instances/{self._instance_id}/mint-usdb-stellar", data, options=options)
 
     async def mint_usdb_solana(
@@ -247,7 +247,7 @@ class BlockchainWalletsResourceSync:
 
     def delete(
         self, data: DeleteBlockchainWalletInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         customer_id = data["customer_id"]
         id = data["id"]
         return self._client.delete(
@@ -264,7 +264,7 @@ class BlockchainWalletsResourceSync:
 
     def mint_usdb_stellar(
         self, data: MintUsdbStellarInput, options: Optional[RequestOptions] = None
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.post(f"/instances/{self._instance_id}/mint-usdb-stellar", data, options=options)
 
     def mint_usdb_solana(

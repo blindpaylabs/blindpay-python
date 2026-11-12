@@ -160,6 +160,8 @@ def value_errors(hint: Any, value: Any, path: str = "$") -> List[str]:
     """
     if hint is Any:
         return []
+    if hint is type(None):
+        return [] if value is None else [f"{path}: the type is None but the spec returns {type(value).__name__}"]
     arms = _union_args(hint)
     if len(arms) > 1:
         if value is None:

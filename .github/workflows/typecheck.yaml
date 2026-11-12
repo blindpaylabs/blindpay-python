@@ -27,3 +27,8 @@ jobs:
       - name: Type check
         run: uv run mypy .
 
+      - name: README snippets type-check (rendered by tests/test_readme_snippets.py)
+        run: |
+          uv run pyright tests/readme_snippets.py
+          uv run mypy --strict tests/readme_snippets.py
+

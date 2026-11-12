@@ -107,6 +107,28 @@ class TestAutoPaging:
 
         assert pages.queries == []
 
+    async def test_repeated_cursor_raises_instead_of_looping(self, kind: str, resource: str):
+        requests: List[str] = []
+
+        def stuck(request: httpx.Request) -> httpx.Response:
+            requests.append(request.url.query.decode())
+            envelope = {"data": [{"id": "a1"}], "pagination": {"has_more": True, "next_page": "pi_123"}}
+            return httpx.Response(200, content=json.dumps(envelope).encode())
+
+        with pytest.raises(BlindPayError, match="pi_123"):
+            await collect(kind, stuck, resource, None)
+
+        assert len(requests) == 2  # the first page, then starting_after=pi_123 once
+        assert "starting_after=pi_123" in requests[1]
+
+    async def test_cursor_equal_to_the_callers_raises(self, kind: str, resource: str):
+        def stuck(_request: httpx.Request) -> httpx.Response:
+            envelope = {"data": [{"id": "a1"}], "pagination": {"has_more": True, "next_page": "a0"}}
+            return httpx.Response(200, content=json.dumps(envelope).encode())
+
+        with pytest.raises(BlindPayError, match="again"):
+            await collect(kind, stuck, resource, {"starting_after": "a0"})
+
     async def test_bare_array_is_yielded_whole(self, kind: str, resource: str):
         def bare(_request: httpx.Request) -> httpx.Response:
             return httpx.Response(200, content=json.dumps([{"id": "a1"}, {"id": "a2"}]).encode())

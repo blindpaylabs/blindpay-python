@@ -92,12 +92,12 @@ class TestPartnerFees:
     @pytest.mark.asyncio
     async def test_delete_partner_fee(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.partner_fees.delete("fe_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
 
 
 class TestPartnerFeesSync:
@@ -183,9 +183,9 @@ class TestPartnerFeesSync:
 
     def test_delete_partner_fee(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.partner_fees.delete("fe_000000000000")
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}

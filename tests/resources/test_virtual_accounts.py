@@ -13,7 +13,7 @@ class TestVirtualAccounts:
     @pytest.mark.asyncio
     async def test_update_virtual_account(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = await self.blindpay.virtual_accounts.update(
                 "re_000000000000",
@@ -25,7 +25,7 @@ class TestVirtualAccounts:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
             mock_request.assert_called_once_with(
                 "PUT",
                 "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000",
@@ -139,7 +139,7 @@ class TestVirtualAccountsSync:
 
     def test_update_virtual_account(self):
         with patch.object(self.blindpay._api, "_request") as mock_request:
-            mock_request.return_value = {"data": {"data": None}, "error": None}
+            mock_request.return_value = {"data": {"success": True}, "error": None}
 
             response = self.blindpay.virtual_accounts.update(
                 "re_000000000000",
@@ -151,7 +151,7 @@ class TestVirtualAccountsSync:
             )
 
             assert response["error"] is None
-            assert response["data"] == {"data": None}
+            assert response["data"] == {"success": True}
             mock_request.assert_called_once_with(
                 "PUT",
                 "/instances/in_000000000000/customers/re_000000000000/virtual-accounts/va_000000000000",

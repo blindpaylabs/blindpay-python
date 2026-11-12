@@ -4,7 +4,7 @@ from typing_extensions import Literal, NotRequired, Required, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
 from ..._internal.http import RequestOptions, path_param
-from ...types import BankingPartner, BlindpayApiResponse, Network, StablecoinToken
+from ...types import BankingPartner, BlindpayApiResponse, Network, StablecoinToken, SuccessResponse
 
 
 class BankAccountInfo(TypedDict):
@@ -131,7 +131,7 @@ class VirtualAccountsResource:
         virtual_account_id: str,
         data: UpdateVirtualAccountInput,
         options: Optional[RequestOptions] = None,
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.put(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
             data,
@@ -176,7 +176,7 @@ class VirtualAccountsResourceSync:
         virtual_account_id: str,
         data: UpdateVirtualAccountInput,
         options: Optional[RequestOptions] = None,
-    ) -> BlindpayApiResponse[None]:
+    ) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.put(
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
             data,

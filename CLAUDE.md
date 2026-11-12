@@ -31,6 +31,7 @@ blindpay-python/
                                           #   repr hides the API key), strip_url_queries(). Pure, no I/O
       pagination.py                       # auto_paging_iter / async_auto_paging_iter (list_auto_paging)
       exceptions.py                       # BlindPayError, BlindPayApiError
+      results.py                          # unwrap(response) -> T (raises BlindPayApiError on an error result)
     resources/
       __init__.py                         # Barrel re-exports of all create_*_resource factory functions
       <resource_name>/
@@ -57,6 +58,9 @@ blindpay-python/
     test_review_reason.py                 # review_reason on the limit-increase GET and limitIncrease.* webhooks
     test_secret_hygiene.py                # No API key in client dumps, no query strings in transport errors
     test_union_arms.py                    # Every customer union arm vs CustomerOut (KNOWN_ARM_GAPS ledger)
+    test_unwrap.py                        # unwrap() data/error behaviour and its types
+    test_readme_snippets.py               # Renders every README ```python block into readme_snippets.py
+    readme_snippets.py                    # GENERATED; pyright strict + mypy --strict check it in CI
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
 ```
@@ -221,7 +225,7 @@ class {EntityName}Resource:
     ) -> BlindpayApiResponse[Create{EntityName}Response]:
         return await self._client.post(f"/instances/{self._instance_id}/{api_path}", data, options=options)
 
-    async def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    async def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return await self._client.delete(
             f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
         )
@@ -247,7 +251,7 @@ class {EntityName}ResourceSync:
     ) -> BlindpayApiResponse[Create{EntityName}Response]:
         return self._client.post(f"/instances/{self._instance_id}/{api_path}", data, options=options)
 
-    def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+    def delete(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[SuccessResponse]]:
         return self._client.delete(
             f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
         )
@@ -441,7 +445,7 @@ async def create(self, data: CreateInput, options: Optional[RequestOptions] = No
 
 **Method that extracts an ID from input to build the URL:**
 ```python
-async def update(self, data: UpdateInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
+async def update(self, data: UpdateInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[SuccessResponse]]:
     entity_id = data["entity_id"]
     payload = {k: v for k, v in data.items() if k != "entity_id"}
     return await self._client.put(
@@ -478,6 +482,13 @@ helpers require fields the merged spec schema marks optional, because the route 
 schema (`PER_VARIANT_HELPERS` in `tests/test_request_types.py`). Amount fields in cents are `int`; decimal fields
 (quotations, whole-token amounts) are `float`. Input amount fields that were `float` before 4.1 are
 `Union[int, float]` until the next major.
+
+Operations whose spec response is the `Success` schema (`{"success": true}`: deletes and most updates) return
+`BlindpayApiResponse[Optional[SuccessResponse]]`, never `[None]`: the fixture check rejects a `None` type for a body.
+
+README `python` blocks are type-checked: after editing one, re-render with
+`uv run --python 3.13 python tests/test_readme_snippets.py` (the test fails until you do). Show `unwrap(response)`
+for reading `data`: pyright doesn't narrow the result union on `response["error"] is not None`.
 
 Every public name in a resource module must also be exported from `src/blindpay/__init__.py` (the "Resource types"
 block) and from its package `__init__.py`; `tests/test_packaging.py` fails otherwise.
