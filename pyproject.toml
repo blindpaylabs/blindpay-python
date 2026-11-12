@@ -63,6 +63,8 @@ test = [
 
 [tool.ruff]
 line-length = 120
+# Generated from README.md by tests/test_readme_snippets.py; the README is the source to format.
+extend-exclude = ["tests/readme_snippets.py"]
 target-version = "py312"
 output-format = "grouped"
 

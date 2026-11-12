@@ -24,16 +24,18 @@ pip install blindpay
 ```python
 import asyncio
 
-from blindpay import BlindPay
+from blindpay import BlindPay, unwrap
 
 
 async def main() -> None:
     async with BlindPay(api_key="your_api_key", instance_id="in_000000000000") as blindpay:
         response = await blindpay.payouts.get("po_000000000000")
-        if response["error"] is not None:
-            print(response["error"]["code"], response["error"]["message"])
+        error = response["error"]
+        if error is not None:
+            print(error.get("code"), error["message"])
             return
-        print(response["data"]["status"])
+        payout = unwrap(response)  # the data, typed for mypy and pyright alike (see Type checkers)
+        print(payout["status"])
 
 
 asyncio.run(main())
@@ -82,8 +84,8 @@ Every input, output and enum type is importable from the package root (`from bli
 
 `customers.get_limit_increase_requests` and the `limitIncrease.new` / `limitIncrease.update` webhooks carry
 `review_reason`: why compliance rejected the request or approved lower limits than requested, and what to send to get
-the full amount. It is set when the status is rejected or the approval is below the requested limits, and `None`
-otherwise.
+the full amount. It is set when the status is rejected or the approval is below the requested limits; otherwise it
+is `None` or absent, so read it with `.get("review_reason")`.
 
 ### "Exactly one of" inputs
 
@@ -120,6 +122,8 @@ When you pass `http_client`, closing the BlindPay client leaves it open: you own
 Methods never raise for API or network errors. They return a dict with either `data` or `error`:
 
 ```python
+from blindpay import unwrap
+
 response = await blindpay.customers.get("cu_000000000000")
 
 if response["error"] is not None:
@@ -133,7 +137,7 @@ if response["error"] is not None:
     print(error.get("retryable"))  # True when resending with the same idempotency_key may succeed
     print(error.get("retry_class"))  # the API's class for this code: retryable, terminal, actionable or unknown
 else:
-    customer = response["data"]
+    customer = unwrap(response)  # typed data; see Type checkers below
 ```
 
 ### Error codes
@@ -162,8 +166,17 @@ exact request and is the one to act on (the SDK never auto-retries a payout that
 look the payout up before resending).
 `ErrorCodeInfo.status` is the status a code typically comes with; each endpoint can use another.
 
+### Type checkers
+
+mypy narrows `response` after `if response["error"] is not None: return`, but pyright (and Pylance) doesn't narrow a
+union of `TypedDict`s on `is None`, so `response["data"]` stays `T | None` there and `response["data"]["status"]` is
+an error. Read the data with `unwrap(response)`: it returns `data` typed as `T` in both checkers, and raises
+`BlindPayApiError` (the same fields as the error dict) if the response holds an error, which can't happen after you
+checked `error`. Read optional error fields with `.get()` (`error.get("code")`): only `message` is always present.
+Deletes and most updates return `{"success": True}` (`Optional[SuccessResponse]`).
+
 `BlindPayError` is raised only for programming errors caught before a request is sent (a missing API key, an
-invalid `idempotency_key`). `list_auto_paging` iterators raise `BlindPayApiError`, which carries the same fields as
+invalid `idempotency_key`, or an `Authorization`, `User-Agent` or `Idempotency-Key` header in `options["headers"]`). `list_auto_paging` iterators raise `BlindPayApiError`, which carries the same fields as
 attributes, because an iterator can't return an error dict.
 
 ## Idempotency and retries
@@ -186,7 +199,7 @@ response = await blindpay.payouts.create_evm(
   doesn't deduplicate multipart requests.
 - `timeout` overrides the client's per-attempt timeout; `headers` adds headers to this request only (names are
   case-insensitive; `Authorization`, `User-Agent` and `Idempotency-Key` can't be set this way).
-- Reads take the same argument, e.g. `await blindpay.payouts.get("pa_000000000000", {"timeout": 10})`. They use
+- Reads take the same argument, e.g. `await blindpay.payouts.get("po_000000000000", {"timeout": 10})`. They use
   `timeout` and `headers` and never send an `Idempotency-Key`.
 
 Indicative FX quote endpoints are rate limited per instance; a limited call returns 429 `AUTH_RATE_LIMITED` with a
@@ -210,8 +223,8 @@ with the same `idempotency_key` from the error.**
 
 Payouts, payins, payables, customers, transfers and managed-wallet deposits have cursor pagination. `list` returns one page: the
 `{"data": [...], "pagination": {"has_more", "next_page", "prev_page"}}` envelope when you pass `limit`,
-`starting_after` or `ending_before`, and (for payouts, payins, payables and customers) a bare list of **every** row
-when you pass none of them. Transfers and deposits always return the envelope. For large collections use the auto-pager, which requests pages of 100 and follows
+`starting_after` or `ending_before`. With none of them, payouts, payins, payables and customers may instead return a
+bare list of **every** row (the spec allows either shape, and the return type covers both). Transfers and deposits always return the envelope. For large collections use the auto-pager, which requests pages of 100 and follows
 `pagination.next_page` for you:
 
 ```python
@@ -242,9 +255,10 @@ if not webhooks.verify(raw_body, request.headers, secret):  # secret: "whsec_...
 ```
 
 `verify` checks the Svix `v1` signatures in `svix-signature` and rejects timestamps more than 5 minutes from now
-(`tolerance=` changes that). Deduplicate deliveries on the `svix-id` header, and never log the secret.
+(`tolerance=` changes that; `now=` sets the clock, in Unix seconds, for tests). Deduplicate deliveries on the `svix-id` header, and never log the secret.
 
-To verify and parse in one step, use `construct_event`. It returns a typed `WebhookEvent`, a union of one
+To verify and parse in one step, use `construct_event` (also importable as `from blindpay import
+construct_webhook_event`). It returns a typed `WebhookEvent`, a union of one
 `TypedDict` per event that type checkers narrow on `webhook_event`. It raises `WebhookVerificationError` when the
 signature or timestamp doesn't verify:
 
@@ -267,10 +281,12 @@ Events this SDK version doesn't know yet are returned as-is (`UnknownWebhookEven
 `upload.create` and `upload.analyze` send `multipart/form-data`. Pass bytes or a binary file object:
 
 ```python
+from blindpay import unwrap
+
 with open("proof_of_address.pdf", "rb") as f:
     response = await blindpay.upload.create({"bucket": "onboarding", "file": f})
 
-file_url = response["data"]["file_url"]
+file_url = unwrap(response)["file_url"]  # raises BlindPayApiError if the upload failed
 ```
 
 The API checks the file's MIME type, which the SDK guesses from the filename (or the file's first bytes). Pass
