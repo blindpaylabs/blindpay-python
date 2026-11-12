@@ -1,6 +1,7 @@
 from . import webhook_events as _webhook_events, webhooks as webhooks
 from ._internal.exceptions import BlindPayApiError, BlindPayError
 from ._internal.http import RequestOptions
+from ._internal.results import unwrap
 from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
 from .error_codes import ErrorCode, ErrorCodeInfo, RetryClass, error_code_info
@@ -434,6 +435,7 @@ __all__ = [
     "BlindPayError",
     "BlindPayApiError",
     "RequestOptions",
+    "unwrap",
     "webhooks",
     "construct_webhook_event",
     "WebhookVerificationError",
