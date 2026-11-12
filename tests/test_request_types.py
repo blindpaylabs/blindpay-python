@@ -1,7 +1,9 @@
 """Request inputs follow the spec's ``required`` list , checked through spec-map.json's type mapping."""
 
 import importlib
+import inspect
 import json
+import typing
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple, cast
 
@@ -79,3 +81,67 @@ def test_input_required_keys_match_the_spec(schema: str, file: str, symbol: str)
     assert not not_in_spec, f"{symbol}: requires {not_in_spec}, which the spec doesn't have"
     if symbol not in PER_VARIANT_HELPERS:
         assert not over_required, f"{symbol}: the spec makes {over_required} optional"
+
+
+# Inline request bodies (no ``$ref``, so spec-map.json can't name them): matched to the SDK method through op_table.
+RENAMED = {"from_currency": "from"}  # Python keyword: the method sends the key under its wire name
+
+
+def inline_bodies() -> List[Tuple[str, Dict[str, Any]]]:
+    out: List[Tuple[str, Dict[str, Any]]] = []
+    for path, item in cast(Dict[str, Dict[str, Any]], SPEC["paths"]).items():
+        for verb, op in item.items():
+            if not isinstance(op, dict) or cast(Dict[str, Any], op).get("x-sdk") is False:
+                continue
+            body = cast(Dict[str, Any], cast(Dict[str, Any], op).get("requestBody", {}))
+            for content in cast(Dict[str, Dict[str, Any]], body.get("content", {})).values():
+                schema = cast(Dict[str, Any], content.get("schema", {}))
+                if "$ref" not in schema:
+                    out.append((f"{verb.upper()} {path}", schema))
+    return out
+
+
+def _admits_int(hint: Any) -> bool:
+    return hint is int or int in typing.get_args(hint)
+
+
+def _declared_body(method: Any) -> Tuple[Dict[str, Any], Set[str]]:
+    """``(wire key -> hint, required wire keys)`` for the method's body: its ``data`` TypedDict, or its plain params."""
+    hints = typing.get_type_hints(method)
+    if "data" in hints:
+        cls = hints["data"]
+        fields: Dict[str, Any] = {RENAMED.get(k, k): v for k, v in typing.get_type_hints(cls).items()}
+        required_keys: Set[str] = {RENAMED.get(str(k), str(k)) for k in cls.__required_keys__}
+        return fields, required_keys
+    params = [p for p in inspect.signature(method).parameters.values() if p.name != "options"]
+    return {p.name: hints[p.name] for p in params}, {p.name for p in params if p.default is inspect.Parameter.empty}
+
+
+INLINE = inline_bodies()
+
+
+def test_every_inline_body_is_found():
+    assert len(INLINE) == 10
+
+
+@pytest.mark.parametrize("operation,schema", INLINE, ids=[o for o, _ in INLINE])
+def test_inline_body_keys_match_the_spec(operation: str, schema: Dict[str, Any]):
+    from tests.http_mock import Recorder, sync_client
+    from tests.op_table import OPS
+    from tests.test_operations import resolve
+
+    (op,) = [op for op in OPS if op.operation == operation]
+    properties: Dict[str, Any] = schema.get("properties", {})
+    if not properties:  # RFI submit: a free-form map of field ids to answers
+        return
+    required = set(schema.get("required", []))
+    fields, sdk_required = _declared_body(resolve(sync_client(Recorder()), op.method))
+    in_spec = set(fields) & set(properties)
+
+    assert not required - sdk_required, f"{op.method}: the spec requires {sorted(required - sdk_required)}"
+    over_required = sorted((sdk_required & in_spec) - required)
+    assert not over_required, f"{op.method}: the spec makes {over_required} optional"
+    assert not (sdk_required - set(properties) - PATH_PARAMS), f"{op.method}: requires keys the spec doesn't have"
+    assert not set(properties) - set(fields), f"{op.method}: doesn't model {sorted(set(properties) - set(fields))}"
+    integers = sorted(k for k in in_spec if properties[k].get("type") == "integer" and not _admits_int(fields[k]))
+    assert not integers, f"{op.method}: the spec types {integers} as integer"
