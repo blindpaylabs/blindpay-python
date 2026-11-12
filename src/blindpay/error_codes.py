@@ -23,7 +23,7 @@ class RetryClass(str, Enum):
     - ``UNKNOWN``: no code, an ``SDK_*`` code, or a code this SDK version doesn't know.
 
     This is the API's classification. ``ErrorResponse["retryable"]`` is the SDK's transport decision for this exact
-    request (a mutation that got a 5xx is never retryable, whatever its code says).
+    request (it never auto-retries a mutation that got a 5xx, whatever its code says).
     """
 
     RETRYABLE = "retryable"

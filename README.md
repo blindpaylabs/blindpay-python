@@ -158,7 +158,8 @@ if error is not None:
 
 `retry_class` (`RetryClass.RETRYABLE`, `TERMINAL`, `ACTIONABLE`, or `UNKNOWN` for no code, an `SDK_*` code or a
 code this version doesn't know) is the API's classification of the code. `retryable` is the SDK's decision for this
-exact request and is the one to act on: a payout that got a 5xx is never `retryable`, whatever its code says.
+exact request and is the one to act on (the SDK never auto-retries a payout that got a 5xx, whatever its code says;
+look the payout up before resending).
 `ErrorCodeInfo.status` is the status a code typically comes with; each endpoint can use another.
 
 `BlindPayError` is raised only for programming errors caught before a request is sent (a missing API key, an
@@ -167,7 +168,7 @@ attributes, because an iterator can't return an error dict.
 
 ## Idempotency and retries
 
-Every method takes a trailing `options` argument:
+Every resource method (except the `list_auto_paging` iterators) takes a trailing `options` argument:
 
 ```python
 response = await blindpay.payouts.create_evm(
