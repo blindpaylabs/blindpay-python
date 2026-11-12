@@ -121,9 +121,35 @@ if response["error"] is not None:
     print(error.get("request_id"))  # the X-Request-Id response header; quote it to support
     print(error.get("idempotency_key"))  # the key this request carried (see below)
     print(error.get("retryable"))  # True when resending with the same idempotency_key may succeed
+    print(error.get("retry_class"))  # the API's class for this code: retryable, terminal, actionable or unknown
 else:
     customer = response["data"]
 ```
+
+### Error codes
+
+Branch on `code`, the stable identifier; `message` is a legacy machine string kept for compatibility, and a few
+bodies (idempotency conflicts) carry no `code` at all. `ErrorCode` lists every code in the API spec, and because it is
+a `str` enum it compares equal to the plain string in `error["code"]`. Codes added to the API after your SDK version
+still arrive as strings.
+
+```python
+from blindpay import ErrorCode, RetryClass, error_code_info
+
+response = await blindpay.transfers.create_quote(quote_input)
+error = response["error"]
+if error is not None:
+    if error.get("code") == ErrorCode.TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM:
+        ...  # swaps between different tokens need at least 100 USDC, measured on the USDC side
+    elif error.get("retry_class") == RetryClass.ACTIONABLE:
+        ...  # fix something first (fund the balance, correct the bank details), then try again
+    info = error_code_info(error.get("code"))  # ErrorCodeInfo(status=400, retry=RetryClass.ACTIONABLE), or None
+```
+
+`retry_class` (`RetryClass.RETRYABLE`, `TERMINAL`, `ACTIONABLE`, or `UNKNOWN` for no code, an `SDK_*` code or a
+code this version doesn't know) is the API's classification of the code. `retryable` is the SDK's decision for this
+exact request and is the one to act on: a payout that got a 5xx is never `retryable`, whatever its code says.
+`ErrorCodeInfo.status` is the status a code typically comes with; each endpoint can use another.
 
 `BlindPayError` is raised only for programming errors caught before a request is sent (a missing API key, an
 invalid `idempotency_key`). `list_auto_paging` iterators raise `BlindPayApiError`, which carries the same fields as

@@ -15,7 +15,7 @@ import httpx
 from typing_extensions import Literal, TypedDict
 
 from ..types import BlindpayApiResponse, ErrorResponse
-from .exceptions import BlindPayError
+from .exceptions import BlindPayError, retry_class_of
 
 HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
 
@@ -260,6 +260,7 @@ def _error(
         "request_id": request_id,
         "idempotency_key": idempotency_key,
         "retryable": retryable,
+        "retry_class": retry_class_of(code),
     }
 
 

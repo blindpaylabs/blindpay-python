@@ -24,6 +24,9 @@ jobs:
       - name: Typed webhook events match the spec
         run: python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
 
+      - name: Typed error codes match the spec's Errors table
+        run: python3 .api-sync/gen_error_codes.py --spec .api-sync/spec-snapshot.json --check
+
       - name: Operation coverage (every x-sdk op has a method, no x-sdk:false op does)
         run: python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json
 

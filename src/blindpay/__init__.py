@@ -3,6 +3,7 @@ from ._internal.exceptions import BlindPayApiError, BlindPayError
 from ._internal.http import RequestOptions
 from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
+from .error_codes import ErrorCode, ErrorCodeInfo, RetryClass, error_code_info
 
 # Resource types: every input, output, enum and resource class, importable from the package root.
 from .resources.available.available import (
@@ -433,6 +434,10 @@ __all__ = [
     "webhooks",
     "construct_webhook_event",
     "WebhookVerificationError",
+    "ErrorCode",
+    "ErrorCodeInfo",
+    "RetryClass",
+    "error_code_info",
     "AccountClass",
     "AipriseDocumentType",
     "ApprovalRate",
