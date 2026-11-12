@@ -68,16 +68,18 @@ class PartnerFeesResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/partner-fees")
+    async def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListPartnerFeesResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/partner-fees", options=options)
 
     async def create(
         self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
-    async def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}")
+    async def get(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPartnerFeeResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
     async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return await self._client.delete(
@@ -90,16 +92,16 @@ class PartnerFeesResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/partner-fees")
+    def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListPartnerFeesResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/partner-fees", options=options)
 
     def create(
         self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
         return self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
-    def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}")
+    def get(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetPartnerFeeResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
     def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return self._client.delete(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)

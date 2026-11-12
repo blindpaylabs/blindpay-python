@@ -3,6 +3,7 @@ from typing import Dict, Optional
 from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse
 
 
@@ -56,8 +57,8 @@ class FeesResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get(self) -> BlindpayApiResponse[FeesResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/billing/fees")
+    async def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[FeesResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/billing/fees", options=options)
 
 
 class FeesResourceSync:
@@ -65,8 +66,8 @@ class FeesResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get(self) -> BlindpayApiResponse[FeesResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/billing/fees")
+    def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[FeesResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/billing/fees", options=options)
 
 
 def create_fees_resource(instance_id: str, client: InternalApiClient) -> FeesResource:

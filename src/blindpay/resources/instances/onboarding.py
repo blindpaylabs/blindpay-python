@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 from typing_extensions import Literal, NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
+from ..._internal.http import RequestOptions
 from ...types import BlindpayApiResponse, Country
 
 OnboardingEntityType = Literal[
@@ -84,14 +85,20 @@ class OnboardingResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get_business_details(self) -> BlindpayApiResponse[OnboardingBusinessDetails]:
-        return await self._client.get(f"/instances/{self._instance_id}/onboarding/business_details")
+    async def get_business_details(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingBusinessDetails]:
+        return await self._client.get(f"/instances/{self._instance_id}/onboarding/business_details", options=options)
 
-    async def get_business_profile(self) -> BlindpayApiResponse[OnboardingBusinessProfile]:
-        return await self._client.get(f"/instances/{self._instance_id}/onboarding/business_profile")
+    async def get_business_profile(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingBusinessProfile]:
+        return await self._client.get(f"/instances/{self._instance_id}/onboarding/business_profile", options=options)
 
-    async def get_ownership_documents(self) -> BlindpayApiResponse[OnboardingOwnershipDocuments]:
-        return await self._client.get(f"/instances/{self._instance_id}/onboarding/ownership_documents")
+    async def get_ownership_documents(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingOwnershipDocuments]:
+        return await self._client.get(f"/instances/{self._instance_id}/onboarding/ownership_documents", options=options)
 
 
 class OnboardingResourceSync:
@@ -101,14 +108,20 @@ class OnboardingResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get_business_details(self) -> BlindpayApiResponse[OnboardingBusinessDetails]:
-        return self._client.get(f"/instances/{self._instance_id}/onboarding/business_details")
+    def get_business_details(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingBusinessDetails]:
+        return self._client.get(f"/instances/{self._instance_id}/onboarding/business_details", options=options)
 
-    def get_business_profile(self) -> BlindpayApiResponse[OnboardingBusinessProfile]:
-        return self._client.get(f"/instances/{self._instance_id}/onboarding/business_profile")
+    def get_business_profile(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingBusinessProfile]:
+        return self._client.get(f"/instances/{self._instance_id}/onboarding/business_profile", options=options)
 
-    def get_ownership_documents(self) -> BlindpayApiResponse[OnboardingOwnershipDocuments]:
-        return self._client.get(f"/instances/{self._instance_id}/onboarding/ownership_documents")
+    def get_ownership_documents(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[OnboardingOwnershipDocuments]:
+        return self._client.get(f"/instances/{self._instance_id}/onboarding/ownership_documents", options=options)
 
 
 def create_onboarding_resource(instance_id: str, client: InternalApiClient) -> OnboardingResource:

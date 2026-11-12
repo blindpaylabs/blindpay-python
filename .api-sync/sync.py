@@ -1678,17 +1678,15 @@ def build_path_fstring(path: str, module: ResourceModule) -> str:
 
 
 def render_method(plan: OperationInsertPlan, is_sync: bool) -> str:
-    """Generated methods follow the hand-written conventions: mutating methods take a trailing
-    `options: Optional[RequestOptions] = None` and forward it; path params go through `path_param`."""
+    """Generated methods follow the hand-written conventions: every method takes a trailing
+    `options: Optional[RequestOptions] = None` and forwards it; path params go through `path_param`."""
     args = [f"{a}: str" for a in plan.path_args]
     if plan.input_type_name:
         args.append(f"data: {plan.input_type_name}")
-    mutating = plan.verb != "get"
-    if mutating:
-        args.append("options: Optional[RequestOptions] = None")
+    args.append("options: Optional[RequestOptions] = None")
     arg_str = ", ".join(["self", *args])
     fstring = build_path_fstring(plan.path, plan.module)
-    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + (", options=options" if mutating else "")
+    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + ", options=options"
     awaited = "" if is_sync else "await "
     async_kw = "" if is_sync else "async "
     client_call = f"self._client.{plan.verb}({call_args})"
@@ -1718,13 +1716,11 @@ def apply_operation_insert(plan: OperationInsertPlan, map_data: dict) -> Applied
         for kw in ("NotRequired", "Optional")
         if f"{kw}[" in f.annotation
     }
-    if plan.verb != "get":
-        needed_wrappers.add("Optional")
+    needed_wrappers.add("Optional")
     for kw in sorted(needed_wrappers):
         source = ensure_name_imported(source, kw)
     http_names = {"path_param"} if "path_param(" in build_path_fstring(plan.path, plan.module) else set()
-    if plan.verb != "get":
-        http_names.add("RequestOptions")
+    http_names.add("RequestOptions")
     source = ensure_internal_http_import(source, http_names)
 
     for spec in (plan.input_spec, plan.output_spec):

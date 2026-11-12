@@ -157,7 +157,7 @@ attributes, because an iterator can't return an error dict.
 
 ## Idempotency and retries
 
-Every method that creates, changes or deletes something takes a trailing `options` argument:
+Every method takes a trailing `options` argument:
 
 ```python
 response = await blindpay.payouts.create_evm(
@@ -175,6 +175,8 @@ response = await blindpay.payouts.create_evm(
   doesn't deduplicate multipart requests.
 - `timeout` overrides the client's per-attempt timeout; `headers` adds headers to this request only (names are
   case-insensitive; `Authorization`, `User-Agent` and `Idempotency-Key` can't be set this way).
+- Reads take the same argument, e.g. `await blindpay.payouts.get("pa_000000000000", {"timeout": 10})`. They use
+  `timeout` and `headers` and never send an `Idempotency-Key`.
 
 What the SDK retries, with exponential backoff (0.5 s doubling up to 8 s, with jitter) or the server's
 `Retry-After` when it is 60 s or less:

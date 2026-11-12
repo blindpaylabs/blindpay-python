@@ -1,7 +1,7 @@
 """Op-level tests driven by ``tests/op_table.py`` in both clients.
 
-- Guard: every mutating method forwards its request options (headers, timeout, idempotency key) to the wire,
-  and the table lists every mutating method in the SDK, so a new method can't skip ``options``.
+- Guard: every method forwards its request options (headers, timeout; the idempotency key on mutations) to the
+  wire, and the table lists every method in the SDK, so a new method can't skip ``options``.
 - Op coverage: every method sends the right HTTP method to the exact path, and every response fixture variant of
   its operation comes back as ``data`` without an error.
 """
@@ -24,6 +24,7 @@ from tests.spec_fixtures import SPEC_DIR, load_index, variant_errors
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "blindpay" / "resources"
 MUTATING_VERBS = {"post", "put", "patch", "delete", "post_multipart"}
+ALL_VERBS = MUTATING_VERBS | {"get"}
 KINDS = ["async", "sync"]
 
 GUARD_OPTIONS: RequestOptions = {"headers": {"X-Guard": "forwarded"}, "idempotency_key": "guard-key", "timeout": 7}
@@ -53,8 +54,8 @@ def resolve(client: Any, accessor: str) -> Any:
     return target
 
 
-def mutating_methods_in_source() -> Set[str]:
-    """``Class.method`` for every public resource method whose first client call is a mutating verb."""
+def methods_in_source(verbs: Set[str] = MUTATING_VERBS) -> Set[str]:
+    """``Class.method`` for every public resource method whose first client call is one of ``verbs``."""
     found: Set[str] = set()
     for path in SRC.rglob("*.py"):
         for cls in ast.parse(path.read_text()).body:
@@ -67,13 +68,14 @@ def mutating_methods_in_source() -> Set[str]:
                     func = node.func if isinstance(node, ast.Call) else None
                     if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Attribute):
                         if func.value.attr == "_client":
-                            if func.attr in MUTATING_VERBS:
+                            if func.attr in verbs:
                                 found.add(f"{cls.name}.{fn.name}")
                             break
     return found
 
 
 MUTATING = [op for op in OPS if op.mutating]
+READS = [op for op in OPS if not op.mutating]
 
 
 class TestGuard:
@@ -83,13 +85,26 @@ class TestGuard:
             for client in (async_client(Recorder()), sync_client(Recorder())):
                 listed.add(resolve(client, op.method).__func__.__qualname__)
 
-        assert listed == mutating_methods_in_source()
+        assert listed == methods_in_source()
 
-    @pytest.mark.parametrize("qualname", sorted(mutating_methods_in_source()))
-    def test_every_mutating_method_takes_options_last(self, qualname: str):
+    def test_table_lists_every_method_of_both_clients(self):
+        listed: Set[str] = set()
+        for op in OPS:
+            for client in (async_client(Recorder()), sync_client(Recorder())):
+                listed.add(resolve(client, op.method).__func__.__qualname__)
+
+        # export() is deprecated and calls a route the spec doesn't have, so the op table has no row for it.
+        deprecated = {
+            f"{cls}.export"
+            for cls in ("PayoutsResource", "PayoutsResourceSync", "PayinsResource", "PayinsResourceSync")
+        }
+        assert listed == methods_in_source(ALL_VERBS) - deprecated
+
+    @pytest.mark.parametrize("qualname", sorted(methods_in_source(ALL_VERBS)))
+    def test_every_method_takes_options_last(self, qualname: str):
         class_name, method = qualname.split(".")
         module_classes: Dict[str, Any] = {}
-        for op in MUTATING:
+        for op in OPS:
             for client in (async_client(Recorder()), sync_client(Recorder())):
                 bound = resolve(client, op.method)
                 module_classes[bound.__func__.__qualname__.split(".")[0]] = type(bound.__self__)
@@ -110,6 +125,19 @@ class TestGuard:
         assert request.extensions["timeout"]["read"] == 7
         expected_key = None if op.multipart else "guard-key"
         assert request.headers.get("Idempotency-Key") == expected_key
+
+    @pytest.mark.parametrize("kind", KINDS)
+    @pytest.mark.parametrize("op", READS, ids=[op.method for op in READS])
+    async def test_get_method_forwards_options_without_an_idempotency_key(self, kind: str, op: Op):
+        recorder = Recorder()
+
+        await run(kind, op, recorder, GUARD_OPTIONS)
+
+        request = recorder.requests[-1]
+        assert request.method == "GET"
+        assert request.headers["X-Guard"] == "forwarded"
+        assert request.extensions["timeout"]["read"] == 7
+        assert "Idempotency-Key" not in request.headers
 
 
 def fixture_variants(operation: str) -> Dict[str, Any]:

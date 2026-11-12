@@ -3,7 +3,7 @@ from typing import List, Literal, Optional, Union
 from typing_extensions import NotRequired, TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import build_query, path_param
+from ..._internal.http import RequestOptions, build_query, path_param
 from ...types import BlindpayApiResponse, Rail
 
 BankDetailKey = Literal[
@@ -108,17 +108,23 @@ class AvailableResource:
     def __init__(self, client: InternalApiClient):
         self._client = client
 
-    async def get_bank_details(self, rail: Rail) -> BlindpayApiResponse[GetBankDetailsResponse]:
-        return await self._client.get(f"/available/bank-details{build_query({'rail': rail})}")
+    async def get_bank_details(
+        self, rail: Rail, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBankDetailsResponse]:
+        return await self._client.get(f"/available/bank-details{build_query({'rail': rail})}", options=options)
 
-    async def get_rails(self) -> BlindpayApiResponse[GetRailsResponse]:
-        return await self._client.get("/available/rails")
+    async def get_rails(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetRailsResponse]:
+        return await self._client.get("/available/rails", options=options)
 
-    async def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
-        return await self._client.get(f"/available/swift/{path_param(swift)}")
+    async def get_swift_code_bank_details(
+        self, swift: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
+        return await self._client.get(f"/available/swift/{path_param(swift)}", options=options)
 
-    async def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
-        return await self._client.get("/available/naics")
+    async def get_naics_codes(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetNaicsCodesResponse]:
+        return await self._client.get("/available/naics", options=options)
 
 
 class AvailableResourceSync:
@@ -127,17 +133,21 @@ class AvailableResourceSync:
     def __init__(self, client: InternalApiClientSync):
         self._client = client
 
-    def get_bank_details(self, rail: Rail) -> BlindpayApiResponse[GetBankDetailsResponse]:
-        return self._client.get(f"/available/bank-details{build_query({'rail': rail})}")
+    def get_bank_details(
+        self, rail: Rail, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBankDetailsResponse]:
+        return self._client.get(f"/available/bank-details{build_query({'rail': rail})}", options=options)
 
-    def get_rails(self) -> BlindpayApiResponse[GetRailsResponse]:
-        return self._client.get("/available/rails")
+    def get_rails(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetRailsResponse]:
+        return self._client.get("/available/rails", options=options)
 
-    def get_swift_code_bank_details(self, swift: str) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
-        return self._client.get(f"/available/swift/{path_param(swift)}")
+    def get_swift_code_bank_details(
+        self, swift: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetSwiftCodeBankDetailsResponse]:
+        return self._client.get(f"/available/swift/{path_param(swift)}", options=options)
 
-    def get_naics_codes(self) -> BlindpayApiResponse[GetNaicsCodesResponse]:
-        return self._client.get("/available/naics")
+    def get_naics_codes(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetNaicsCodesResponse]:
+        return self._client.get("/available/naics", options=options)
 
 
 def create_available_resource(client: InternalApiClient) -> AvailableResource:

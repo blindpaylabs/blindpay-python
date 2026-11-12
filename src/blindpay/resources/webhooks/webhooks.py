@@ -73,8 +73,8 @@ class WebhookEndpointsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
+    async def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints", options=options)
 
     async def create(
         self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
@@ -86,11 +86,19 @@ class WebhookEndpointsResource:
             f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
         )
 
-    async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")
+    async def get_secret(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret", options=options
+        )
 
-    async def get_portal_access_url(self) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/portal-access")
+    async def get_portal_access_url(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/webhook-endpoints/portal-access", options=options
+        )
 
 
 class WebhookEndpointsResourceSync:
@@ -98,8 +106,8 @@ class WebhookEndpointsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints")
+    def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListWebhookEndpointsResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints", options=options)
 
     def create(
         self, data: CreateWebhookEndpointInput, options: Optional[RequestOptions] = None
@@ -111,11 +119,17 @@ class WebhookEndpointsResourceSync:
             f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}", options=options
         )
 
-    def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")
+    def get_secret(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret", options=options
+        )
 
-    def get_portal_access_url(self) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/portal-access")
+    def get_portal_access_url(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPortalAccessUrlResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/portal-access", options=options)
 
 
 def create_webhook_endpoints_resource(instance_id: str, client: InternalApiClient) -> WebhookEndpointsResource:

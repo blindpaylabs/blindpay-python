@@ -202,11 +202,13 @@ class {EntityName}Resource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[List{EntityName}Response]:
-        return await self._client.get(f"/instances/{self._instance_id}/{api_path}")
+    async def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[List{EntityName}Response]:
+        return await self._client.get(f"/instances/{self._instance_id}/{api_path}", options=options)
 
-    async def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return await self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
+    async def get(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[{EntityName}]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
     async def create(
         self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
@@ -226,11 +228,13 @@ class {EntityName}ResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[List{EntityName}Response]:
-        return self._client.get(f"/instances/{self._instance_id}/{api_path}")
+    def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[List{EntityName}Response]:
+        return self._client.get(f"/instances/{self._instance_id}/{api_path}", options=options)
 
-    def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
+    def get(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[{EntityName}]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
     def create(
         self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
@@ -254,8 +258,9 @@ def create_{snake_name}_resource_sync(instance_id: str, client: InternalApiClien
 ```
 
 Rules every method follows (enforced by `tests/test_operations.py` and `tests/test_client_parity.py`):
-- Every mutating method (POST/PUT/PATCH/DELETE, incl. `post_multipart`) takes a trailing
-  `options: Optional[RequestOptions] = None` and passes `options=options` to the client call.
+- Every method (GET included, and `post_multipart`) takes a trailing `options: Optional[RequestOptions] = None` and
+  passes `options=options` to the client call. GETs use its `timeout` and `headers`; they never send an
+  `Idempotency-Key`.
 - Every caller-supplied path segment goes through `path_param(...)` inside the f-string (`a/b` -> `a%2Fb`).
   `self._instance_id` is client config and stays raw. Keep the path a literal f-string: api-sync reads it.
 - Every query string comes from `build_query(params)` (drops `None`/`""`, booleans as `true`/`false`).
@@ -408,9 +413,11 @@ Add the new TypedDicts to both the import and `__all__` list in the resource's `
 
 **GET with query params:**
 ```python
-async def list(self, params: Optional[ListInput] = None) -> BlindpayApiResponse[ListResponse]:
+async def list(
+    self, params: Optional[ListInput] = None, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[ListResponse]:
     query_string = build_query(params)
-    return await self._client.get(f"/instances/{self._instance_id}/{path}{query_string}")
+    return await self._client.get(f"/instances/{self._instance_id}/{path}{query_string}", options=options)
 ```
 
 **Auto-pager** (for every list whose spec accepts `starting_after`). A plain `def` in BOTH classes, returning
@@ -438,8 +445,8 @@ async def update(self, data: UpdateInput, options: Optional[RequestOptions] = No
 
 **GET with path param:**
 ```python
-async def get(self, entity_id: str) -> BlindpayApiResponse[Entity]:
-    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}")
+async def get(self, entity_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Entity]:
+    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}", options=options)
 ```
 
 ---

@@ -1495,14 +1495,14 @@ class TestGeneratedMethodConventions:
             in source
         )
 
-    def test_get_takes_no_options(self, repo: Path):
+    def test_get_takes_options_too(self, repo: Path):
         sync = load_sync(repo)
         plan = self._plan(sync, "get", "/v1/instances/{instance_id}/things/{id}", ["id"], None)
 
         source = sync.render_method(plan, is_sync=True)
 
-        assert "options" not in source
-        assert "{path_param(id)}" in source
+        assert "def do_it(self, id: str, options: Optional[RequestOptions] = None)" in source
+        assert 'self._client.get(f"/instances/{self._instance_id}/things/{path_param(id)}", options=options)' in source
 
     def test_internal_http_import_is_added_or_merged(self, repo: Path):
         sync = load_sync(repo)

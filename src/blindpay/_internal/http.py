@@ -38,11 +38,11 @@ CONNECT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout)
 
 
 class RequestOptions(TypedDict, total=False):
-    """Per-request options, accepted as the trailing ``options`` argument of every mutating method.
+    """Per-request options, accepted as the trailing ``options`` argument of every resource method.
 
     - ``idempotency_key``: sent as ``Idempotency-Key`` (1-255 characters). When omitted and retries are on, the
-      SDK generates a UUIDv4 before the first attempt, so a retried request can't execute twice. Ignored for
-      multipart uploads, which the API never deduplicates.
+      SDK generates a UUIDv4 before the first attempt, so a retried request can't execute twice. Ignored for GET
+      requests (reads are already safe to repeat) and for multipart uploads, which the API never deduplicates.
     - ``timeout``: per-attempt timeout in seconds, overriding the client's.
     - ``headers``: extra headers for this request only.
     """

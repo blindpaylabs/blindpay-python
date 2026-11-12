@@ -258,26 +258,30 @@ class PayoutsResource:
         self._client = client
 
     async def list(
-        self, params: Optional[ListPayoutsInput] = None
+        self, params: Optional[ListPayoutsInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/payouts{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> AsyncIterator[Payout]:
         return async_auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
-    async def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
+    async def export(
+        self, params: Optional[ExportPayoutsInput] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ExportPayoutsResponse]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}", options=options)
 
-    async def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return await self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
+    async def get(self, payout_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payout]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}", options=options
+        )
 
-    async def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
+    async def get_track(self, payout_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payout]:
         """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
         Use ``payouts.get(payout_id)`` instead."""
-        return await self._client.get(f"/e/payouts/{path_param(payout_id)}")
+        return await self._client.get(f"/e/payouts/{path_param(payout_id)}", options=options)
 
     async def authorize_stellar_token(
         self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None
@@ -317,26 +321,28 @@ class PayoutsResourceSync:
         self._client = client
 
     def list(
-        self, params: Optional[ListPayoutsInput] = None
+        self, params: Optional[ListPayoutsInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListPayoutsResponse, List[Payout]]]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/payouts{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListPayoutsInput] = None) -> Iterator[Payout]:
         return auto_paging_iter(self.list, params)
 
     @deprecated(_EXPORT_DEPRECATION)
-    def export(self, params: Optional[ExportPayoutsInput] = None) -> BlindpayApiResponse[ExportPayoutsResponse]:
+    def export(
+        self, params: Optional[ExportPayoutsInput] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ExportPayoutsResponse]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/export/payouts{query_string}", options=options)
 
-    def get(self, payout_id: str) -> BlindpayApiResponse[Payout]:
-        return self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}")
+    def get(self, payout_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payout]:
+        return self._client.get(f"/instances/{self._instance_id}/payouts/{path_param(payout_id)}", options=options)
 
-    def get_track(self, payout_id: str) -> BlindpayApiResponse[Payout]:
+    def get_track(self, payout_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payout]:
         """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
         Use ``payouts.get(payout_id)`` instead."""
-        return self._client.get(f"/e/payouts/{path_param(payout_id)}")
+        return self._client.get(f"/e/payouts/{path_param(payout_id)}", options=options)
 
     def authorize_stellar_token(
         self, data: AuthorizeStellarTokenInput, options: Optional[RequestOptions] = None

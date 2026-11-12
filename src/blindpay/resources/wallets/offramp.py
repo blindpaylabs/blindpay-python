@@ -67,11 +67,14 @@ class OfframpWalletsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, data: ListOfframpWalletsInput) -> BlindpayApiResponse[ListOfframpWalletsResponse]:
+    async def list(
+        self, data: ListOfframpWalletsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListOfframpWalletsResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets",
+            options=options,
         )
 
     async def create(
@@ -86,12 +89,15 @@ class OfframpWalletsResource:
             options=options,
         )
 
-    async def get(self, data: GetOfframpWalletInput) -> BlindpayApiResponse[GetOfframpWalletResponse]:
+    async def get(
+        self, data: GetOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetOfframpWalletResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         id = data["id"]
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}",
+            options=options,
         )
 
     async def update(
@@ -111,11 +117,14 @@ class OfframpWalletsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, data: ListOfframpWalletsInput) -> BlindpayApiResponse[ListOfframpWalletsResponse]:
+    def list(
+        self, data: ListOfframpWalletsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListOfframpWalletsResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets",
+            options=options,
         )
 
     def create(
@@ -130,12 +139,15 @@ class OfframpWalletsResourceSync:
             options=options,
         )
 
-    def get(self, data: GetOfframpWalletInput) -> BlindpayApiResponse[GetOfframpWalletResponse]:
+    def get(
+        self, data: GetOfframpWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetOfframpWalletResponse]:
         customer_id = data["customer_id"]
         bank_account_id = data["bank_account_id"]
         id = data["id"]
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(bank_account_id)}/offramp-wallets/{path_param(id)}",
+            options=options,
         )
 
     def update(

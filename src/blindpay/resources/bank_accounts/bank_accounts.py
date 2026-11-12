@@ -535,16 +535,20 @@ class BankAccountsResource:
         self._client = client
 
     async def list(
-        self, customer_id: str, params: Optional[ListBankAccountsInput] = None
+        self, customer_id: str, params: Optional[ListBankAccountsInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[ListBankAccountsResponse]:
         query_string = build_query(params)
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}",
+            options=options,
         )
 
-    async def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
+    async def get(
+        self, customer_id: str, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBankAccountResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
         )
 
     async def delete(
@@ -716,16 +720,20 @@ class BankAccountsResourceSync:
         self._client = client
 
     def list(
-        self, customer_id: str, params: Optional[ListBankAccountsInput] = None
+        self, customer_id: str, params: Optional[ListBankAccountsInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[ListBankAccountsResponse]:
         query_string = build_query(params)
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts{query_string}",
+            options=options,
         )
 
-    def get(self, customer_id: str, id: str) -> BlindpayApiResponse[GetBankAccountResponse]:
+    def get(
+        self, customer_id: str, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBankAccountResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/bank-accounts/{path_param(id)}",
+            options=options,
         )
 
     def delete(self, customer_id: str, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:

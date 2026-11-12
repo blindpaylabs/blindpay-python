@@ -1106,10 +1106,10 @@ class CustomersResource:
         self._client = client
 
     async def list(
-        self, params: Optional[ListCustomersInput] = None
+        self, params: Optional[ListCustomersInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> AsyncIterator[GetCustomerResponse]:
         return async_auto_paging_iter(self.list, params)
@@ -1132,8 +1132,12 @@ class CustomersResource:
         payload = {"kyc_type": "standard", "type": "business", **data}
         return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
-    async def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
+    async def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
+        )
 
     async def update(
         self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
@@ -1149,14 +1153,18 @@ class CustomersResource:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )
 
-    async def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    async def get_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
     async def get_limit_increase_requests(
-        self, customer_id: str
+        self, customer_id: str, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase", options=options
         )
 
     async def request_limit_increase(
@@ -1177,10 +1185,10 @@ class CustomersResourceSync:
         self._client = client
 
     def list(
-        self, params: Optional[ListCustomersInput] = None
+        self, params: Optional[ListCustomersInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/customers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> Iterator[GetCustomerResponse]:
         return auto_paging_iter(self.list, params)
@@ -1203,8 +1211,10 @@ class CustomersResourceSync:
         payload = {"kyc_type": "standard", "type": "business", **data}
         return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
-    def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
+    def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options)
 
     def update(self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         customer_id = data["customer_id"]
@@ -1218,11 +1228,19 @@ class CustomersResourceSync:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )
 
-    def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    def get_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
-    def get_limit_increase_requests(self, customer_id: str) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase")
+    def get_limit_increase_requests(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase", options=options
+        )
 
     def request_limit_increase(
         self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None

@@ -69,11 +69,13 @@ class InstancesResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get(self) -> BlindpayApiResponse[Instance]:
-        return await self._client.get(f"/instances/{self._instance_id}")
+    async def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Instance]:
+        return await self._client.get(f"/instances/{self._instance_id}", options=options)
 
-    async def get_members(self) -> BlindpayApiResponse[GetInstanceMembersResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/members")
+    async def get_members(
+        self, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetInstanceMembersResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/members", options=options)
 
     async def update(
         self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None
@@ -108,11 +110,11 @@ class InstancesResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get(self) -> BlindpayApiResponse[Instance]:
-        return self._client.get(f"/instances/{self._instance_id}")
+    def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Instance]:
+        return self._client.get(f"/instances/{self._instance_id}", options=options)
 
-    def get_members(self) -> BlindpayApiResponse[GetInstanceMembersResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/members")
+    def get_members(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetInstanceMembersResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/members", options=options)
 
     def update(self, data: UpdateInstanceInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return self._client.put(f"/instances/{self._instance_id}", data, options=options)

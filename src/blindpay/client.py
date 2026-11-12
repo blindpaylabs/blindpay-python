@@ -103,8 +103,8 @@ class ApiClientImpl:
         self._client = http_client if http_client is not None else httpx.AsyncClient()
         self._sleep: Callable[[float], Awaitable[None]] = asyncio.sleep
 
-    async def get(self, path: str) -> BlindpayApiResponse[T]:
-        return await self._request("GET", path)
+    async def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[T]:
+        return await self._request("GET", path, **_options_kwarg(options))
 
     async def post(
         self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
@@ -234,8 +234,8 @@ class ApiClientImplSync:
         self.client = http_client if http_client is not None else httpx.Client()
         self._sleep: Callable[[float], None] = time.sleep
 
-    def get(self, path: str) -> BlindpayApiResponse[T]:
-        return self._request("GET", path)
+    def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[T]:
+        return self._request("GET", path, **_options_kwarg(options))
 
     def post(
         self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None

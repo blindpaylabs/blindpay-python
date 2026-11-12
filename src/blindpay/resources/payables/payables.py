@@ -116,16 +116,18 @@ class PayablesResource:
         return await self._client.post(f"/instances/{self._instance_id}/payables", data, options=options)
 
     async def list(
-        self, params: Optional[ListPayablesInput] = None
+        self, params: Optional[ListPayablesInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListPayablesResponse, List[Payable]]]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/payables{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/payables{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListPayablesInput] = None) -> AsyncIterator[Payable]:
         return async_auto_paging_iter(self.list, params)
 
-    async def get(self, payable_id: str) -> BlindpayApiResponse[Payable]:
-        return await self._client.get(f"/instances/{self._instance_id}/payables/{path_param(payable_id)}")
+    async def get(self, payable_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payable]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/payables/{path_param(payable_id)}", options=options
+        )
 
     async def delete(self, payable_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payable]:
         return await self._client.delete(
@@ -144,16 +146,16 @@ class PayablesResourceSync:
         return self._client.post(f"/instances/{self._instance_id}/payables", data, options=options)
 
     def list(
-        self, params: Optional[ListPayablesInput] = None
+        self, params: Optional[ListPayablesInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListPayablesResponse, List[Payable]]]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/payables{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/payables{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListPayablesInput] = None) -> Iterator[Payable]:
         return auto_paging_iter(self.list, params)
 
-    def get(self, payable_id: str) -> BlindpayApiResponse[Payable]:
-        return self._client.get(f"/instances/{self._instance_id}/payables/{path_param(payable_id)}")
+    def get(self, payable_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payable]:
+        return self._client.get(f"/instances/{self._instance_id}/payables/{path_param(payable_id)}", options=options)
 
     def delete(self, payable_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Payable]:
         return self._client.delete(f"/instances/{self._instance_id}/payables/{path_param(payable_id)}", options=options)
