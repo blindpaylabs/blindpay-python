@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from typing_extensions import NotRequired, Required, TypedDict
 
@@ -54,7 +54,8 @@ class GetPayinFxRateInput(TypedDict):
     currency_type: CurrencyType
     from_currency: Currency  # 'from' is a reserved keyword in Python
     to: Currency
-    request_amount: float
+    request_amount: Union[int, float]
+    """Integer cents (1000 = 10.00), minimum 500."""
 
 
 class GetPayinFxRateResponse(TypedDict):

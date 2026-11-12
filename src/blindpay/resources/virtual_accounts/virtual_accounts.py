@@ -118,9 +118,11 @@ class VirtualAccountsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, customer_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
+    async def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts", options=options
         )
 
     async def update(
@@ -147,9 +149,12 @@ class VirtualAccountsResource:
             options=options,
         )
 
-    async def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
+    async def get(
+        self, customer_id: str, virtual_account_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetVirtualAccountResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
+            options=options,
         )
 
 
@@ -158,8 +163,12 @@ class VirtualAccountsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, customer_id: str) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts")
+    def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListVirtualAccountsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts", options=options
+        )
 
     def update(
         self,
@@ -185,9 +194,12 @@ class VirtualAccountsResourceSync:
             options=options,
         )
 
-    def get(self, customer_id: str, virtual_account_id: str) -> BlindpayApiResponse[GetVirtualAccountResponse]:
+    def get(
+        self, customer_id: str, virtual_account_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetVirtualAccountResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/virtual-accounts/{path_param(virtual_account_id)}",
+            options=options,
         )
 
 

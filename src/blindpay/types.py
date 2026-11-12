@@ -2,6 +2,8 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 
 from typing_extensions import NotRequired, TypedDict
 
+from .error_codes import RetryClass
+
 T = TypeVar("T")
 
 
@@ -16,6 +18,8 @@ class ErrorResponse(TypedDict):
     - ``idempotency_key``: the key the request carried (yours or auto-generated). Resend with it to resume safely.
     - ``retryable``: the request may succeed if resent with the same ``idempotency_key``. For a create or payout
       that returned a 5xx, look the resource up before resending.
+    - ``retry_class``: the API's classification of ``code`` (``RetryClass``), ``UNKNOWN`` for no code, an ``SDK_*``
+      code or a code this SDK version doesn't know. ``retryable`` is the SDK's decision for this exact request.
     """
 
     message: str
@@ -27,6 +31,7 @@ class ErrorResponse(TypedDict):
     request_id: NotRequired[Optional[str]]
     idempotency_key: NotRequired[Optional[str]]
     retryable: NotRequired[bool]
+    retry_class: NotRequired[RetryClass]
 
 
 class BlindpayErrorResponse(TypedDict):

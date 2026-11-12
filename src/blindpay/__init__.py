@@ -3,6 +3,7 @@ from ._internal.exceptions import BlindPayApiError, BlindPayError
 from ._internal.http import RequestOptions
 from ._version import __version__ as __version__
 from .client import BlindPay, BlindPaySync
+from .error_codes import ErrorCode, ErrorCodeInfo, RetryClass, error_code_info
 
 # Resource types: every input, output, enum and resource class, importable from the package root.
 from .resources.available.available import (
@@ -93,6 +94,7 @@ from .resources.customers.customers import (
     BusinessWithStandardKYB as BusinessWithStandardKYB,
     CreateBusinessWithStandardKYBInput as CreateBusinessWithStandardKYBInput,
     CreateBusinessWithStandardKYBResponse as CreateBusinessWithStandardKYBResponse,
+    CreateCustomerOwnerInput as CreateCustomerOwnerInput,
     CreateIndividualWithEnhancedKYCInput as CreateIndividualWithEnhancedKYCInput,
     CreateIndividualWithEnhancedKYCResponse as CreateIndividualWithEnhancedKYCResponse,
     CreateIndividualWithStandardKYCInput as CreateIndividualWithStandardKYCInput,
@@ -144,6 +146,7 @@ from .resources.customers.customers import (
     TaxType as TaxType,
     TransactionLimit as TransactionLimit,
     UpdateCustomerInput as UpdateCustomerInput,
+    UpdateCustomerOwnerInput as UpdateCustomerOwnerInput,
     VirtualAccountPreapprovalBankingPartner as VirtualAccountPreapprovalBankingPartner,
     VirtualAccountPreapprovalStatus as VirtualAccountPreapprovalStatus,
 )
@@ -433,6 +436,10 @@ __all__ = [
     "webhooks",
     "construct_webhook_event",
     "WebhookVerificationError",
+    "ErrorCode",
+    "ErrorCodeInfo",
+    "RetryClass",
+    "error_code_info",
     "AccountClass",
     "AipriseDocumentType",
     "ApprovalRate",
@@ -582,6 +589,8 @@ __all__ += [
     "Owner",
     "OwnerRole",
     "OwnerUpdate",
+    "CreateCustomerOwnerInput",
+    "UpdateCustomerOwnerInput",
     "PayinLimit",
     "PayoutLimit",
     "ProofOfAddressDocType",

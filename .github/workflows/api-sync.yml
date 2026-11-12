@@ -85,9 +85,11 @@ jobs:
         continue-on-error: true
         run: python3 .api-sync/sync.py --apply --report /tmp/api-sync-report.json
 
-      - name: Regenerate the typed webhook events
+      - name: Regenerate the typed webhook events and error codes
         if: steps.patch.outcome == 'success'
-        run: python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json
+        run: |
+          python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json
+          python3 .api-sync/gen_error_codes.py --spec .api-sync/spec-snapshot.json
 
       - name: Show report
         if: always()
@@ -113,13 +115,22 @@ jobs:
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
+          import subprocess
 
           with open("/tmp/api-sync-report.json") as f:
               report = json.load(f)
           applied = report.get("applied", [])
           bump = report.get("bump")
+          # The generators (webhook events, error codes) change public types without an `applied` entry: a new
+          # webhook field or error code is a feature, so their output alone still opens a minor PR.
+          generated = subprocess.run(
+              ["git", "status", "--porcelain", "--", "src/blindpay/webhook_events.py", "src/blindpay/error_codes.py"],
+              capture_output=True, text=True, check=True,
+          ).stdout.strip()
+          if generated and bump not in ("minor", "major"):
+              bump = "minor"
           prefix = {"minor": "feat", "patch": "fix"}.get(bump, "chore")
-          print(f"has_changes={'true' if applied else 'false'}")
+          print(f"has_changes={'true' if applied or generated else 'false'}")
           print(f"bump={bump or ''}")
           print(f"prefix={prefix}")
           PY

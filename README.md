@@ -75,6 +75,15 @@ Every input, output and enum type is importable from the package root (`from bli
 - Payout, payin, quote, payable and limit amounts are **integer cents** (`1000` = 10.00).
 - Partner percentage fees are **basis points** (`100` = 1%); flat fees are cents.
 - Managed-wallet balances (`wallets.custodial.get_balance`) are **whole tokens** (`10.5` = 10.5 USDC).
+- Transfers that swap between different tokens need at least **100 USDC**, measured on the USDC side. Below that,
+  `transfers.create_quote` returns a 400 with code `TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM` (see Error codes).
+
+### Limit increases
+
+`customers.get_limit_increase_requests` and the `limitIncrease.new` / `limitIncrease.update` webhooks carry
+`review_reason`: why compliance rejected the request or approved lower limits than requested, and what to send to get
+the full amount. It is set when the status is rejected or the approval is below the requested limits, and `None`
+otherwise.
 
 ### "Exactly one of" inputs
 
@@ -87,8 +96,9 @@ The SDK doesn't validate these; the API answers 400.
 ### Testing on a development instance
 
 Development instances simulate settlement (test token `USDB`). Payouts of `66600` cents fail and `77700` are refunded;
-dev payins complete in about 30 s; quotes expire after 5 minutes (OTC payin quotes after 10 s); development instances
-allow 40 requests per minute (the SDK retries the 429 for you, honouring `Retry-After`).
+dev payins complete in about 30 s; quotes expire after 5 minutes (OTC payin quotes after 10 s). Development instances
+are rate limited per instance on every route; a limited call returns 429 `AUTH_RATE_LIMITED` with a `Retry-After`
+header, which the SDK honours when it retries.
 
 ## Configuration
 
@@ -121,9 +131,36 @@ if response["error"] is not None:
     print(error.get("request_id"))  # the X-Request-Id response header; quote it to support
     print(error.get("idempotency_key"))  # the key this request carried (see below)
     print(error.get("retryable"))  # True when resending with the same idempotency_key may succeed
+    print(error.get("retry_class"))  # the API's class for this code: retryable, terminal, actionable or unknown
 else:
     customer = response["data"]
 ```
+
+### Error codes
+
+Branch on `code`, the stable identifier; `message` is a legacy machine string kept for compatibility, and a few
+bodies (idempotency conflicts) carry no `code` at all. `ErrorCode` lists every code in the API spec, and because it is
+a `str` enum it compares equal to the plain string in `error["code"]`. Codes added to the API after your SDK version
+still arrive as strings.
+
+```python
+from blindpay import ErrorCode, RetryClass, error_code_info
+
+response = await blindpay.transfers.create_quote(quote_input)
+error = response["error"]
+if error is not None:
+    if error.get("code") == ErrorCode.TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM:
+        ...  # swaps between different tokens need at least 100 USDC, measured on the USDC side
+    elif error.get("retry_class") == RetryClass.ACTIONABLE:
+        ...  # fix something first (fund the balance, correct the bank details), then try again
+    info = error_code_info(error.get("code"))  # ErrorCodeInfo(status=400, retry=RetryClass.ACTIONABLE), or None
+```
+
+`retry_class` (`RetryClass.RETRYABLE`, `TERMINAL`, `ACTIONABLE`, or `UNKNOWN` for no code, an `SDK_*` code or a
+code this version doesn't know) is the API's classification of the code. `retryable` is the SDK's decision for this
+exact request and is the one to act on (the SDK never auto-retries a payout that got a 5xx, whatever its code says;
+look the payout up before resending).
+`ErrorCodeInfo.status` is the status a code typically comes with; each endpoint can use another.
 
 `BlindPayError` is raised only for programming errors caught before a request is sent (a missing API key, an
 invalid `idempotency_key`). `list_auto_paging` iterators raise `BlindPayApiError`, which carries the same fields as
@@ -131,7 +168,7 @@ attributes, because an iterator can't return an error dict.
 
 ## Idempotency and retries
 
-Every method that creates, changes or deletes something takes a trailing `options` argument:
+Every resource method (except the `list_auto_paging` iterators) takes a trailing `options` argument:
 
 ```python
 response = await blindpay.payouts.create_evm(
@@ -149,6 +186,11 @@ response = await blindpay.payouts.create_evm(
   doesn't deduplicate multipart requests.
 - `timeout` overrides the client's per-attempt timeout; `headers` adds headers to this request only (names are
   case-insensitive; `Authorization`, `User-Agent` and `Idempotency-Key` can't be set this way).
+- Reads take the same argument, e.g. `await blindpay.payouts.get("pa_000000000000", {"timeout": 10})`. They use
+  `timeout` and `headers` and never send an `Idempotency-Key`.
+
+Indicative FX quote endpoints are rate limited per instance; a limited call returns 429 `AUTH_RATE_LIMITED` with a
+`Retry-After` header, which the SDK honours when it retries.
 
 What the SDK retries, with exponential backoff (0.5 s doubling up to 8 s, with jitter) or the server's
 `Retry-After` when it is 60 s or less:
@@ -237,7 +279,7 @@ The API checks the file's MIME type, which the SDK guesses from the filename (or
 `upload.presign({"file_url": file_url})` returns a short-lived signed URL (`file_url`, `expires_at`) to download an
 uploaded file.
 
-## Upgrading to this release
+## Upgrading from 3.x to 4.x
 
 No public method or type was removed. Things that behave differently:
 
@@ -287,6 +329,11 @@ This SDK uses:
 - `uv` for package management
 - `httpx` for HTTP (one pooled client per BlindPay client)
 - `typing_extensions` for typing
+
+## Releases
+
+Merging to `main` publishes to PyPI through release-please. [RELEASING.md](RELEASING.md) covers the flow, the secrets,
+how to unstick a release and how to verify a published version.
 
 ## License
 

@@ -13,7 +13,7 @@ from typing import Any, AsyncIterator, Callable, Dict, Iterator, List, Optional,
 import httpx
 import pytest
 
-from blindpay import BlindPayError
+from blindpay import BlindPayError, RetryClass
 from blindpay._internal.http import backoff
 from tests.http_mock import async_client, sync_client
 
@@ -366,6 +366,7 @@ class TestErrors:
             "request_id": "req_000000000000",
             "idempotency_key": None,
             "retryable": False,
+            "retry_class": RetryClass.ACTIONABLE,
         }
 
     async def test_auth_error_without_trace_id(self, kind: str):

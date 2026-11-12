@@ -6,6 +6,7 @@ Everything here is pure (no I/O), so both clients run the same rules and tests c
 
 import json
 import random
+import re
 import uuid
 from typing import Any, Dict, List, Mapping, Optional, Tuple, cast
 from urllib.parse import quote, urlencode
@@ -14,7 +15,7 @@ import httpx
 from typing_extensions import Literal, TypedDict
 
 from ..types import BlindpayApiResponse, ErrorResponse
-from .exceptions import BlindPayError
+from .exceptions import BlindPayError, retry_class_of
 
 HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
 
@@ -37,11 +38,11 @@ CONNECT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout)
 
 
 class RequestOptions(TypedDict, total=False):
-    """Per-request options, accepted as the trailing ``options`` argument of every mutating method.
+    """Per-request options, accepted as the trailing ``options`` argument of every resource method.
 
     - ``idempotency_key``: sent as ``Idempotency-Key`` (1-255 characters). When omitted and retries are on, the
-      SDK generates a UUIDv4 before the first attempt, so a retried request can't execute twice. Ignored for
-      multipart uploads, which the API never deduplicates.
+      SDK generates a UUIDv4 before the first attempt, so a retried request can't execute twice. Ignored for GET
+      requests (reads are already safe to repeat) and for multipart uploads, which the API never deduplicates.
     - ``timeout``: per-attempt timeout in seconds, overriding the client's.
     - ``headers``: extra headers for this request only.
     """
@@ -49,6 +50,26 @@ class RequestOptions(TypedDict, total=False):
     idempotency_key: str
     timeout: float
     headers: Mapping[str, str]
+
+
+class Redacted(str):
+    """A ``str`` whose ``repr`` hides it, so dumping a client (``vars(client)``, its headers) never prints the key.
+
+    It is still a plain ``str`` to everything else: equality, formatting and httpx header encoding see the value.
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        return "'***'"
+
+
+_URL_QUERY = re.compile(r"(\b[a-zA-Z][a-zA-Z0-9+.-]*://[^\s?#'\"<>]*)\?[^\s#'\"<>]*")
+
+
+def strip_url_queries(message: str) -> str:
+    """Drop the query string from every URL in ``message``: list filters can carry PII (emails, names)."""
+    return _URL_QUERY.sub(r"\1", message)
 
 
 def api_root(base_url: str) -> str:
@@ -239,6 +260,7 @@ def _error(
         "request_id": request_id,
         "idempotency_key": idempotency_key,
         "retryable": retryable,
+        "retry_class": retry_class_of(code),
     }
 
 
@@ -277,7 +299,7 @@ def body_read_failure(
     # A 4xx is an answer about the request itself, so its status decides; for a 2xx/5xx the lost body is what failed.
     retryable = _is_retryable(method, idempotency_key, status if 400 <= status < 500 else 0)
     return delay, _error(
-        f"The response body couldn't be read: {error or type(error).__name__}",
+        f"The response body couldn't be read: {strip_url_queries(str(error)) or type(error).__name__}",
         status,
         "SDK_RESPONSE_READ_ERROR",
         retryable=retryable,
@@ -309,7 +331,7 @@ def error_from_exception(error: Exception, idempotency_key: Optional[str], metho
     timeout = isinstance(error, httpx.TimeoutException)
     network = timeout or isinstance(error, (httpx.NetworkError, httpx.RemoteProtocolError))
     return _error(
-        str(error) or type(error).__name__,
+        strip_url_queries(str(error)) or type(error).__name__,
         0,
         "SDK_TIMEOUT" if timeout else ("SDK_CONNECTION_ERROR" if network else "SDK_ERROR"),
         retryable=network and _is_retryable(method, idempotency_key, 0),

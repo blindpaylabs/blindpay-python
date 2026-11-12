@@ -60,7 +60,7 @@ class CreateAssetTrustlineResponse(TypedDict):
 class MintUsdbStellarInput(TypedDict):
     address: str
     amount: str
-    signedXdr: str
+    signedXdr: NotRequired[str]
 
 
 class MintUsdbSolanaInput(TypedDict):
@@ -74,9 +74,10 @@ class MintUsdbSolanaResponse(TypedDict):
 
 
 class PrepareSolanaDelegationTransactionInput(TypedDict):
-    amount: str
+    amount: NotRequired[str]
     owner_address: str
-    token_address: str
+    token_address: NotRequired[str]
+    quote_id: NotRequired[str]
 
 
 class PrepareSolanaDelegationTransactionResponse(TypedDict):
@@ -95,9 +96,11 @@ class BlockchainWalletsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
+    async def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets", options=options
         )
 
     async def create_with_address(
@@ -124,16 +127,22 @@ class BlockchainWalletsResource:
             options=options,
         )
 
-    async def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
+    async def get_wallet_message(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message",
+            options=options,
         )
 
-    async def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
+    async def get(
+        self, data: GetBlockchainWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
         customer_id = data["customer_id"]
         id = data["id"]
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}",
+            options=options,
         )
 
     async def delete(
@@ -187,9 +196,11 @@ class BlockchainWalletsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, customer_id: str) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
+    def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListBlockchainWalletsResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets", options=options
         )
 
     def create_with_address(
@@ -216,16 +227,22 @@ class BlockchainWalletsResourceSync:
             options=options,
         )
 
-    def get_wallet_message(self, customer_id: str) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
+    def get_wallet_message(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBlockchainWalletMessageResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/sign-message",
+            options=options,
         )
 
-    def get(self, data: GetBlockchainWalletInput) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
+    def get(
+        self, data: GetBlockchainWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetBlockchainWalletResponse]:
         customer_id = data["customer_id"]
         id = data["id"]
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/blockchain-wallets/{path_param(id)}",
+            options=options,
         )
 
     def delete(

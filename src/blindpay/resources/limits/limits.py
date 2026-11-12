@@ -1,7 +1,9 @@
+from typing import Optional
+
 from typing_extensions import TypedDict
 
 from ..._internal.api_client import InternalApiClient, InternalApiClientSync
-from ..._internal.http import path_param
+from ..._internal.http import RequestOptions, path_param
 from ...types import BlindpayApiResponse
 
 
@@ -32,8 +34,12 @@ class LimitsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get_customer_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    async def get_customer_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
 
 # --- Sync resource ---
@@ -44,8 +50,12 @@ class LimitsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get_customer_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    def get_customer_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
 
 # --- Factory functions ---

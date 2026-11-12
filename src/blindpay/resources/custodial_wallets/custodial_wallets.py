@@ -102,12 +102,19 @@ class CustodialWalletsResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self, customer_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets")
-
-    async def get(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWallet]:
+    async def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets", options=options
+        )
+
+    async def get(
+        self, data: GetCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CustodialWallet]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
+            options=options,
         )
 
     async def create(
@@ -119,9 +126,12 @@ class CustodialWalletsResource:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets", payload, options=options
         )
 
-    async def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
+    async def get_balance(
+        self, data: GetCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CustodialWalletBalance]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}/balance"
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}/balance",
+            options=options,
         )
 
     async def delete(
@@ -132,11 +142,14 @@ class CustodialWalletsResource:
             options=options,
         )
 
-    async def get_deposits(self, data: GetWalletDepositsInput) -> BlindpayApiResponse[ListWalletDepositsResponse]:
+    async def get_deposits(
+        self, data: GetWalletDepositsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListWalletDepositsResponse]:
         query_string = build_query({k: v for k, v in data.items() if k not in ("customer_id", "id")})
         return await self._client.get(
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
-            f"/wallets/{path_param(data['id'])}/deposits{query_string}"
+            f"/wallets/{path_param(data['id'])}/deposits{query_string}",
+            options=options,
         )
 
     def get_deposits_auto_paging(self, data: GetWalletDepositsInput) -> AsyncIterator[WalletDeposit]:
@@ -148,12 +161,19 @@ class CustodialWalletsResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self, customer_id: str) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets")
-
-    def get(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWallet]:
+    def list(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListCustodialWalletsResponse]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets", options=options
+        )
+
+    def get(
+        self, data: GetCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CustodialWallet]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}",
+            options=options,
         )
 
     def create(
@@ -165,9 +185,12 @@ class CustodialWalletsResourceSync:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/wallets", payload, options=options
         )
 
-    def get_balance(self, data: GetCustodialWalletInput) -> BlindpayApiResponse[CustodialWalletBalance]:
+    def get_balance(
+        self, data: GetCustodialWalletInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[CustodialWalletBalance]:
         return self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}/balance"
+            f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}/wallets/{path_param(data['id'])}/balance",
+            options=options,
         )
 
     def delete(
@@ -178,11 +201,14 @@ class CustodialWalletsResourceSync:
             options=options,
         )
 
-    def get_deposits(self, data: GetWalletDepositsInput) -> BlindpayApiResponse[ListWalletDepositsResponse]:
+    def get_deposits(
+        self, data: GetWalletDepositsInput, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListWalletDepositsResponse]:
         query_string = build_query({k: v for k, v in data.items() if k not in ("customer_id", "id")})
         return self._client.get(
             f"/instances/{self._instance_id}/customers/{path_param(data['customer_id'])}"
-            f"/wallets/{path_param(data['id'])}/deposits{query_string}"
+            f"/wallets/{path_param(data['id'])}/deposits{query_string}",
+            options=options,
         )
 
     def get_deposits_auto_paging(self, data: GetWalletDepositsInput) -> Iterator[WalletDeposit]:

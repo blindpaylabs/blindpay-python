@@ -12,6 +12,7 @@ from ._internal.http import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_TIMEOUT,
     HttpMethod,
+    Redacted,
     RequestOptions,
     api_root,
     body_read_failure,
@@ -102,8 +103,8 @@ class ApiClientImpl:
         self._client = http_client if http_client is not None else httpx.AsyncClient()
         self._sleep: Callable[[float], Awaitable[None]] = asyncio.sleep
 
-    async def get(self, path: str) -> BlindpayApiResponse[T]:
-        return await self._request("GET", path)
+    async def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[T]:
+        return await self._request("GET", path, **_options_kwarg(options))
 
     async def post(
         self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
@@ -233,8 +234,8 @@ class ApiClientImplSync:
         self.client = http_client if http_client is not None else httpx.Client()
         self._sleep: Callable[[float], None] = time.sleep
 
-    def get(self, path: str) -> BlindpayApiResponse[T]:
-        return self._request("GET", path)
+    def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[T]:
+        return self._request("GET", path, **_options_kwarg(options))
 
     def post(
         self, path: str, body: Mapping[str, Any], options: Optional[RequestOptions] = None
@@ -464,7 +465,7 @@ class BlindPay:
 
         _validate_settings(timeout, max_retries)
 
-        self._api_key = api_key
+        self._api_key = Redacted(api_key)
         self._instance_id = instance_id
         self._base_url = api_root(base_url)
 
@@ -473,7 +474,7 @@ class BlindPay:
         self._headers = {
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": Redacted(f"Bearer {self._api_key}"),
         }
 
         self._api = ApiClientImpl(
@@ -732,7 +733,7 @@ class BlindPaySync:
 
         _validate_settings(timeout, max_retries)
 
-        self._api_key = api_key
+        self._api_key = Redacted(api_key)
         self._instance_id = instance_id
         self._base_url = api_root(base_url)
 
@@ -741,7 +742,7 @@ class BlindPaySync:
         self._headers = {
             "Accept": "application/json",
             "User-Agent": f"blindpay-python/{__version__}",
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": Redacted(f"Bearer {self._api_key}"),
         }
 
         self._api = ApiClientImplSync(

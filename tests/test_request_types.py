@@ -1,7 +1,9 @@
 """Request inputs follow the spec's ``required`` list , checked through spec-map.json's type mapping."""
 
 import importlib
+import inspect
 import json
+import typing
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple, cast
 
@@ -79,3 +81,173 @@ def test_input_required_keys_match_the_spec(schema: str, file: str, symbol: str)
     assert not not_in_spec, f"{symbol}: requires {not_in_spec}, which the spec doesn't have"
     if symbol not in PER_VARIANT_HELPERS:
         assert not over_required, f"{symbol}: the spec makes {over_required} optional"
+
+
+# Inline request bodies (no ``$ref``, so spec-map.json can't name them): matched to the SDK method through op_table.
+RENAMED = {"from_currency": "from"}  # Python keyword: the method sends the key under its wire name
+
+
+def inline_bodies() -> List[Tuple[str, Dict[str, Any]]]:
+    out: List[Tuple[str, Dict[str, Any]]] = []
+    for path, item in cast(Dict[str, Dict[str, Any]], SPEC["paths"]).items():
+        for verb, op in item.items():
+            if not isinstance(op, dict) or cast(Dict[str, Any], op).get("x-sdk") is False:
+                continue
+            body = cast(Dict[str, Any], cast(Dict[str, Any], op).get("requestBody", {}))
+            for content in cast(Dict[str, Dict[str, Any]], body.get("content", {})).values():
+                schema = cast(Dict[str, Any], content.get("schema", {}))
+                if "$ref" not in schema:
+                    out.append((f"{verb.upper()} {path}", schema))
+    return out
+
+
+def _admits_int(hint: Any) -> bool:
+    return hint is int or int in typing.get_args(hint)
+
+
+def _declared_body(method: Any) -> Tuple[Dict[str, Any], Set[str]]:
+    """``(wire key -> hint, required wire keys)`` for the method's body: its ``data`` TypedDict, or its plain params."""
+    hints = typing.get_type_hints(method)
+    if "data" in hints:
+        cls = hints["data"]
+        fields: Dict[str, Any] = {RENAMED.get(k, k): v for k, v in typing.get_type_hints(cls).items()}
+        required_keys: Set[str] = {RENAMED.get(str(k), str(k)) for k in cls.__required_keys__}
+        return fields, required_keys
+    params = [p for p in inspect.signature(method).parameters.values() if p.name != "options"]
+    return {p.name: hints[p.name] for p in params}, {p.name for p in params if p.default is inspect.Parameter.empty}
+
+
+INLINE = inline_bodies()
+
+
+def test_every_inline_body_is_found():
+    assert len(INLINE) == 10
+
+
+@pytest.mark.parametrize("operation,schema", INLINE, ids=[o for o, _ in INLINE])
+def test_inline_body_keys_match_the_spec(operation: str, schema: Dict[str, Any]):
+    from tests.http_mock import Recorder, sync_client
+    from tests.op_table import OPS
+    from tests.test_operations import resolve
+
+    (op,) = [op for op in OPS if op.operation == operation]
+    properties: Dict[str, Any] = schema.get("properties", {})
+    if not properties:  # RFI submit: a free-form map of field ids to answers
+        return
+    required = set(schema.get("required", []))
+    fields, sdk_required = _declared_body(resolve(sync_client(Recorder()), op.method))
+    in_spec = set(fields) & set(properties)
+
+    assert not required - sdk_required, f"{op.method}: the spec requires {sorted(required - sdk_required)}"
+    over_required = sorted((sdk_required & in_spec) - required)
+    assert not over_required, f"{op.method}: the spec makes {over_required} optional"
+    assert not (sdk_required - set(properties) - PATH_PARAMS), f"{op.method}: requires keys the spec doesn't have"
+    assert not set(properties) - set(fields), f"{op.method}: doesn't model {sorted(set(properties) - set(fields))}"
+    integers = sorted(k for k in in_spec if properties[k].get("type") == "integer" and not _admits_int(fields[k]))
+    assert not integers, f"{op.method}: the spec types {integers} as integer"
+
+
+def test_spec_correct_inline_inputs_type_check():
+    """pyright and mypy (strict, over tests/) reject this module if a spec-correct literal stops type-checking."""
+    from blindpay import (
+        CreateOfframpWalletInput,
+        CreatePartnerFeeInput,
+        GetFxRateInput,
+        MintUsdbStellarInput,
+        PrepareSolanaDelegationTransactionInput,
+    )
+
+    fee: CreatePartnerFeeInput = {
+        "name": "fee",
+        "payin_flat_fee": 0,
+        "payin_percentage_fee": 100,
+        "payout_flat_fee": 50,
+        "payout_percentage_fee": 0,
+    }
+    legacy_fee: CreatePartnerFeeInput = {**fee, "evm_wallet_address": "0x0", "payin_flat_fee": 1.0}
+    offramp: CreateOfframpWalletInput = {"customer_id": "cu_1", "bank_account_id": "ba_1", "network": "tron"}
+    delegation: PrepareSolanaDelegationTransactionInput = {"owner_address": "So1", "quote_id": "qu_1"}
+    mint: MintUsdbStellarInput = {"address": "G0", "amount": "1"}
+    fx: GetFxRateInput = {"currency_type": "sender", "from_currency": "USDC", "to": "BRL", "request_amount": 1000}
+
+    assert [fee, legacy_fee, offramp, delegation, mint, fx]
+
+
+def _resolve(schema: Dict[str, Any]) -> Dict[str, Any]:
+    while "$ref" in schema:
+        schema = SPEC["components"]["schemas"][str(schema["$ref"]).split("/")[-1]]
+    for arm in cast(List[Dict[str, Any]], schema.get("anyOf", [])):
+        if arm.get("type") == "array" or "properties" in arm:
+            return _resolve(arm)
+    return schema
+
+
+def nested_cases() -> List[Tuple[str, Dict[str, Any], str, str]]:
+    """Inline shapes inside request bodies (``specPath`` entries of spec-map.json), e.g. ``owners.items``."""
+    out: List[Tuple[str, Dict[str, Any], str, str]] = []
+    wanted = request_schemas()
+    for entry in MAP["types"]:
+        name = entry["spec"][0] if isinstance(entry["spec"], list) else entry["spec"]
+        if not entry.get("specPath") or name not in wanted:
+            continue
+        schema = SPEC["components"]["schemas"][name]
+        for part in entry["specPath"].split("."):
+            schema = _resolve(schema)
+            schema = schema["items"] if part == "items" else schema["properties"][part]
+        out.extend(
+            (f"{entry['spec']}#{entry['specPath']}", _resolve(schema), s["file"], s["symbol"]) for s in entry["sdk"]
+        )
+    return out
+
+
+NESTED = nested_cases()
+
+
+def test_nested_request_shapes_are_mapped():
+    assert {name for name, _, _, _ in NESTED} == {"CreateCustomerIn#owners.items", "UpdateCustomerIn#owners.items"}
+
+
+@pytest.mark.parametrize("where,schema,file,symbol", NESTED, ids=[c[3] for c in NESTED])
+def test_nested_request_shape_matches_the_spec(where: str, schema: Dict[str, Any], file: str, symbol: str):
+    cls = getattr(importlib.import_module(file[len("src/") : -len(".py")].replace("/", ".")), symbol)
+    properties, required = set(schema.get("properties", {})), set(schema.get("required", []))
+
+    assert set(cls.__required_keys__) == required, f"{symbol} ({where})"
+    assert set(typing.get_type_hints(cls)) == properties, f"{symbol} ({where})"
+
+
+def test_spec_correct_owners_type_check():
+    """New owners need no ``id``/``instance_id``, update owners need only ``id``, and ``List[Owner]`` still works."""
+    from blindpay import (
+        CreateBusinessWithStandardKYBInput,
+        CreateCustomerOwnerInput,
+        Owner,
+        UpdateCustomerInput,
+    )
+
+    owner: CreateCustomerOwnerInput = {
+        "role": "beneficial_owner",
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "date_of_birth": "1990-01-01",
+        "tax_id": "123",
+        "address_line_1": "1 Main St",
+        "city": "Austin",
+        "state_province_region": "TX",
+        "country": "US",
+        "postal_code": "78701",
+        "id_doc_country": "US",
+        "id_doc_type": "PASSPORT",
+        "id_doc_front_file": "https://example.com/id.png",
+    }
+    business: CreateBusinessWithStandardKYBInput = {"email": "a@example.com", "country": "US", "owners": [owner]}
+    existing: List[Owner] = []
+    legacy: CreateBusinessWithStandardKYBInput = {"email": "a@example.com", "country": "US", "owners": existing}
+    update: UpdateCustomerInput = {
+        "customer_id": "cu_1",
+        "email": "a@example.com",
+        "country": "US",
+        "owners": [{"id": "ow_1", "title": "CEO"}],
+    }
+
+    assert [business, legacy, update]

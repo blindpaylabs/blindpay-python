@@ -87,9 +87,9 @@ class InstanceRfiResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get(self) -> BlindpayApiResponse[Optional[InstanceRfi]]:
+    async def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[InstanceRfi]]:
         """The open RFI for this instance, or ``None`` when there is none."""
-        return await self._client.get(f"/instances/{self._instance_id}/rfi")
+        return await self._client.get(f"/instances/{self._instance_id}/rfi", options=options)
 
     async def submit(
         self, data: SubmitInstanceRfiInput, options: Optional[RequestOptions] = None
@@ -103,9 +103,9 @@ class InstanceRfiResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get(self) -> BlindpayApiResponse[Optional[InstanceRfi]]:
+    def get(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Optional[InstanceRfi]]:
         """The open RFI for this instance, or ``None`` when there is none."""
-        return self._client.get(f"/instances/{self._instance_id}/rfi")
+        return self._client.get(f"/instances/{self._instance_id}/rfi", options=options)
 
     def submit(
         self, data: SubmitInstanceRfiInput, options: Optional[RequestOptions] = None
@@ -119,9 +119,13 @@ class CustomerRfiResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def get(self, customer_id: str) -> BlindpayApiResponse[Optional[CustomerRfi]]:
+    async def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[CustomerRfi]]:
         """The customer's open RFI, or ``None`` when there is none."""
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/rfi")
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/rfi", options=options
+        )
 
     async def submit(
         self, data: SubmitCustomerRfiInput, options: Optional[RequestOptions] = None
@@ -139,9 +143,13 @@ class CustomerRfiResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def get(self, customer_id: str) -> BlindpayApiResponse[Optional[CustomerRfi]]:
+    def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[Optional[CustomerRfi]]:
         """The customer's open RFI, or ``None`` when there is none."""
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/rfi")
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/rfi", options=options
+        )
 
     def submit(
         self, data: SubmitCustomerRfiInput, options: Optional[RequestOptions] = None

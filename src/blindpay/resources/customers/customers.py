@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator, List, Optional, Union
+from typing import AsyncIterator, Iterator, List, Optional, Sequence, Union
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
@@ -601,6 +601,31 @@ class Owner(TypedDict):
     tax_type: Optional[TaxType]
 
 
+class CreateCustomerOwnerInput(TypedDict):
+    """An owner sent with ``customers.create_business_with_standard_kyb``. ``owners`` also still accepts ``Owner``."""
+
+    role: OwnerRole
+    first_name: str
+    last_name: str
+    date_of_birth: str
+    tax_id: str
+    address_line_1: str
+    address_line_2: NotRequired[Optional[str]]
+    city: str
+    state_province_region: str
+    country: Country
+    postal_code: str
+    id_doc_country: Country
+    id_doc_type: IdentificationDocument
+    id_doc_front_file: str
+    id_doc_back_file: NotRequired[Optional[str]]
+    proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
+    proof_of_address_doc_file: NotRequired[Optional[str]]
+    ownership_percentage: NotRequired[Optional[int]]
+    title: NotRequired[Optional[str]]
+    tax_type: NotRequired[Optional[TaxType]]
+
+
 CustomerCnaeConditionStatus = Literal["pending", "passed", "failed", "cancelled"]
 VirtualAccountPreapprovalStatus = Literal["in_review", "approved", "rejected"]
 VirtualAccountPreapprovalBankingPartner = Literal["jpmorgan", "portage"]
@@ -725,11 +750,11 @@ class IndividualWithEnhancedKYC(TypedDict):
     id_doc_type: Optional[IdentificationDocument]
     id_doc_front_file: Optional[str]
     id_doc_back_file: Optional[str]
-    aiprise_validation_key: str
+    aiprise_validation_key: NotRequired[str]
     instance_id: str
     source_of_funds_doc_type: Optional[str]
     source_of_funds_doc_file: Optional[str]
-    individual_holding_doc_front_file: str
+    individual_holding_doc_front_file: NotRequired[str]
     purpose_of_transactions: Optional[PurposeOfTransactions]
     purpose_of_transactions_explanation: Optional[str]
     tos_id: Optional[str]
@@ -790,7 +815,7 @@ class BusinessWithStandardKYB(TypedDict):
     external_id: Optional[str]
     instance_id: str
     tos_id: Optional[str]
-    aiprise_validation_key: str
+    aiprise_validation_key: NotRequired[str]
     created_at: Optional[str]
     updated_at: Optional[str]
     limit: TransactionLimit
@@ -907,7 +932,7 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     formation_date: NotRequired[str]
     incorporation_doc_file: NotRequired[Optional[str]]
     legal_name: NotRequired[Optional[str]]
-    owners: NotRequired[Optional[List[Owner]]]
+    owners: NotRequired[Optional[Sequence[Union[CreateCustomerOwnerInput, Owner]]]]
     postal_code: NotRequired[Optional[str]]
     proof_of_address_doc_file: NotRequired[Optional[str]]
     proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
@@ -982,6 +1007,33 @@ class OwnerUpdate(TypedDict):
     proof_of_address_doc_file: Optional[str]
 
 
+class UpdateCustomerOwnerInput(TypedDict):
+    """An owner sent with ``customers.update``: ``id`` names the owner, every other key is optional. ``owners`` also
+    still accepts ``OwnerUpdate``."""
+
+    id: str
+    role: NotRequired[OwnerRole]
+    first_name: NotRequired[str]
+    last_name: NotRequired[str]
+    date_of_birth: NotRequired[str]
+    tax_id: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[str]
+    state_province_region: NotRequired[str]
+    country: NotRequired[Country]
+    postal_code: NotRequired[str]
+    id_doc_country: NotRequired[Country]
+    id_doc_type: NotRequired[IdentificationDocument]
+    id_doc_front_file: NotRequired[str]
+    id_doc_back_file: NotRequired[Optional[str]]
+    proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
+    proof_of_address_doc_file: NotRequired[Optional[str]]
+    ownership_percentage: NotRequired[Optional[int]]
+    title: NotRequired[Optional[str]]
+    tax_type: NotRequired[Optional[TaxType]]
+
+
 class UpdateCustomerInput(TypedDict):
     customer_id: str
     email: Optional[str]
@@ -1008,7 +1060,7 @@ class UpdateCustomerInput(TypedDict):
     alternate_name: NotRequired[Optional[str]]
     formation_date: NotRequired[Optional[str]]
     website: NotRequired[Optional[str]]
-    owners: NotRequired[Optional[List[OwnerUpdate]]]
+    owners: NotRequired[Optional[Sequence[Union[UpdateCustomerOwnerInput, OwnerUpdate]]]]
     incorporation_doc_file: NotRequired[Optional[str]]
     proof_of_ownership_doc_file: NotRequired[Optional[str]]
     source_of_funds_doc_type: NotRequired[Optional[SourceOfFundsDocType]]
@@ -1078,6 +1130,9 @@ class LimitIncreaseRequest(TypedDict):
     approved_daily: NotRequired[Optional[int]]
     approved_monthly: NotRequired[Optional[int]]
     approved_per_transaction: NotRequired[Optional[int]]
+    review_reason: NotRequired[Optional[str]]
+    """Why compliance rejected the request or approved lower limits than requested, and what to send to get the full
+    amount. Set when status is rejected or approved below the requested limits."""
 
 
 GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]
@@ -1103,10 +1158,10 @@ class CustomersResource:
         self._client = client
 
     async def list(
-        self, params: Optional[ListCustomersInput] = None
+        self, params: Optional[ListCustomersInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/customers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> AsyncIterator[GetCustomerResponse]:
         return async_auto_paging_iter(self.list, params)
@@ -1129,8 +1184,12 @@ class CustomersResource:
         payload = {"kyc_type": "standard", "type": "business", **data}
         return await self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
-    async def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
+    async def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
+        )
 
     async def update(
         self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None
@@ -1146,14 +1205,18 @@ class CustomersResource:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )
 
-    async def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    async def get_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
     async def get_limit_increase_requests(
-        self, customer_id: str
+        self, customer_id: str, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
         return await self._client.get(
-            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase"
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase", options=options
         )
 
     async def request_limit_increase(
@@ -1174,10 +1237,10 @@ class CustomersResourceSync:
         self._client = client
 
     def list(
-        self, params: Optional[ListCustomersInput] = None
+        self, params: Optional[ListCustomersInput] = None, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[Union[ListCustomersResponse, ListCustomersPaginatedResponse]]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/customers{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/customers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListCustomersInput] = None) -> Iterator[GetCustomerResponse]:
         return auto_paging_iter(self.list, params)
@@ -1200,8 +1263,10 @@ class CustomersResourceSync:
         payload = {"kyc_type": "standard", "type": "business", **data}
         return self._client.post(f"/instances/{self._instance_id}/customers", payload, options=options)
 
-    def get(self, customer_id: str) -> BlindpayApiResponse[GetCustomerResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}")
+    def get(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options)
 
     def update(self, data: UpdateCustomerInput, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         customer_id = data["customer_id"]
@@ -1215,11 +1280,19 @@ class CustomersResourceSync:
             f"/instances/{self._instance_id}/customers/{path_param(customer_id)}", options=options
         )
 
-    def get_limits(self, customer_id: str) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}")
+    def get_limits(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetCustomerLimitsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/limits/customers/{path_param(customer_id)}", options=options
+        )
 
-    def get_limit_increase_requests(self, customer_id: str) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase")
+    def get_limit_increase_requests(
+        self, customer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetLimitIncreaseRequestsResponse]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/customers/{path_param(customer_id)}/limit-increase", options=options
+        )
 
     def request_limit_increase(
         self, data: RequestLimitIncreaseInput, options: Optional[RequestOptions] = None

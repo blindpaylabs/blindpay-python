@@ -29,6 +29,8 @@ class CreateTransferQuoteInput(TypedDict, total=False):
     customer_token: Required[StablecoinToken]
     customer_network: Required[Network]
     request_amount: Required[int]
+    """Integer cents (1000 = 10.00). A swap between different tokens needs at least 100 USDC, measured on the USDC
+    side; below that the API returns 400 ``TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM``."""
     amount_reference: Required[AmountReference]
     cover_fees: Optional[bool]
     partner_fee_id: Optional[str]
@@ -141,20 +143,28 @@ class TransfersResource:
     ) -> BlindpayApiResponse[CreateTransferResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
-    async def list(self, params: Optional[ListTransfersInput] = None) -> BlindpayApiResponse[ListTransfersResponse]:
+    async def list(
+        self, params: Optional[ListTransfersInput] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListTransfersResponse]:
         query_string = build_query(params)
-        return await self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
+        return await self._client.get(f"/instances/{self._instance_id}/transfers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListTransfersInput] = None) -> AsyncIterator[Transfer]:
         return async_auto_paging_iter(self.list, params)
 
-    async def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
+    async def get(
+        self, transfer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetTransferResponse]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}", options=options
+        )
 
-    async def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
+    async def get_track(
+        self, transfer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetTransferResponse]:
         """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
         Use ``transfers.get(transfer_id)`` instead."""
-        return await self._client.get(f"/e/transfers/{path_param(transfer_id)}")
+        return await self._client.get(f"/e/transfers/{path_param(transfer_id)}", options=options)
 
 
 class TransfersResourceSync:
@@ -172,20 +182,26 @@ class TransfersResourceSync:
     ) -> BlindpayApiResponse[CreateTransferResponse]:
         return self._client.post(f"/instances/{self._instance_id}/transfers", data, options=options)
 
-    def list(self, params: Optional[ListTransfersInput] = None) -> BlindpayApiResponse[ListTransfersResponse]:
+    def list(
+        self, params: Optional[ListTransfersInput] = None, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[ListTransfersResponse]:
         query_string = build_query(params)
-        return self._client.get(f"/instances/{self._instance_id}/transfers{query_string}")
+        return self._client.get(f"/instances/{self._instance_id}/transfers{query_string}", options=options)
 
     def list_auto_paging(self, params: Optional[ListTransfersInput] = None) -> Iterator[Transfer]:
         return auto_paging_iter(self.list, params)
 
-    def get(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}")
+    def get(
+        self, transfer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetTransferResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/transfers/{path_param(transfer_id)}", options=options)
 
-    def get_track(self, transfer_id: str) -> BlindpayApiResponse[GetTransferResponse]:
+    def get_track(
+        self, transfer_id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetTransferResponse]:
         """Public tracking endpoint for BlindPay's web and iOS apps; server-side calls get 401 in production.
         Use ``transfers.get(transfer_id)`` instead."""
-        return self._client.get(f"/e/transfers/{path_param(transfer_id)}")
+        return self._client.get(f"/e/transfers/{path_param(transfer_id)}", options=options)
 
 
 def create_transfers_resource(instance_id: str, client: InternalApiClient) -> TransfersResource:

@@ -13,7 +13,7 @@ class InternalApiClient(Protocol):
     This interface is not exposed to SDK users.
     """
 
-    async def get(self, path: str) -> BlindpayApiResponse[Any]:
+    async def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Any]:
         """Make a GET request"""
         ...
 
@@ -55,7 +55,7 @@ class InternalApiClient(Protocol):
 class InternalApiClientSync(Protocol):
     """Synchronous version of InternalApiClient"""
 
-    def get(self, path: str) -> BlindpayApiResponse[Any]:
+    def get(self, path: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Any]:
         """Make a GET request"""
         ...
 

@@ -214,5 +214,11 @@
     "field": "retryable",
     "reason": "SDK-side error metadata, not an error-body field: computed by the SDK from the plan's retry table (status, code, idempotency_key_in_flight).",
     "owner": "sdk-maintainers"
+  },
+  {
+    "schema": "ErrorResponse",
+    "field": "retry_class",
+    "reason": "SDK-side error metadata, not an error-body field: the code's retry class from the spec's Errors tag table (src/blindpay/error_codes.py).",
+    "owner": "sdk-maintainers"
   }
 ]

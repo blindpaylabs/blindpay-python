@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -23,14 +23,20 @@ ListPartnerFeesResponse = List[PartnerFee]
 
 
 class CreatePartnerFeeInput(TypedDict):
-    virtual_account_set: Optional[bool]
-    evm_wallet_address: str
+    virtual_account_set: NotRequired[Optional[bool]]
+    evm_wallet_address: NotRequired[Optional[str]]
+    """Not in the public spec; optional, and kept only so existing calls still type-check."""
     name: str
-    payin_flat_fee: float
-    payin_percentage_fee: float
-    payout_flat_fee: float
-    payout_percentage_fee: float
-    stellar_wallet_address: Optional[str]
+    payin_flat_fee: Union[int, float]
+    """Integer cents (1000 = 10.00)."""
+    payin_percentage_fee: Union[int, float]
+    """Integer basis points (100 = 1%)."""
+    payout_flat_fee: Union[int, float]
+    """Integer cents (1000 = 10.00)."""
+    payout_percentage_fee: Union[int, float]
+    """Integer basis points (100 = 1%)."""
+    stellar_wallet_address: NotRequired[Optional[str]]
+    """Not in the public spec; optional, and kept only so existing calls still type-check."""
 
 
 class CreatePartnerFeeResponse(TypedDict):
@@ -62,16 +68,18 @@ class PartnerFeesResource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/partner-fees")
+    async def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListPartnerFeesResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/partner-fees", options=options)
 
     async def create(
         self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
         return await self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
-    async def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
-        return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}")
+    async def get(
+        self, id: str, options: Optional[RequestOptions] = None
+    ) -> BlindpayApiResponse[GetPartnerFeeResponse]:
+        return await self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
     async def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return await self._client.delete(
@@ -84,16 +92,16 @@ class PartnerFeesResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[ListPartnerFeesResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/partner-fees")
+    def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[ListPartnerFeesResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/partner-fees", options=options)
 
     def create(
         self, data: CreatePartnerFeeInput, options: Optional[RequestOptions] = None
     ) -> BlindpayApiResponse[CreatePartnerFeeResponse]:
         return self._client.post(f"/instances/{self._instance_id}/partner-fees", data, options=options)
 
-    def get(self, id: str) -> BlindpayApiResponse[GetPartnerFeeResponse]:
-        return self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}")
+    def get(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[GetPartnerFeeResponse]:
+        return self._client.get(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)
 
     def delete(self, id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[None]:
         return self._client.delete(f"/instances/{self._instance_id}/partner-fees/{path_param(id)}", options=options)

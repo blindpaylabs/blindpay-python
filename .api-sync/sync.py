@@ -1678,17 +1678,15 @@ def build_path_fstring(path: str, module: ResourceModule) -> str:
 
 
 def render_method(plan: OperationInsertPlan, is_sync: bool) -> str:
-    """Generated methods follow the hand-written conventions: mutating methods take a trailing
-    `options: Optional[RequestOptions] = None` and forward it; path params go through `path_param`."""
+    """Generated methods follow the hand-written conventions: every method takes a trailing
+    `options: Optional[RequestOptions] = None` and forwards it; path params go through `path_param`."""
     args = [f"{a}: str" for a in plan.path_args]
     if plan.input_type_name:
         args.append(f"data: {plan.input_type_name}")
-    mutating = plan.verb != "get"
-    if mutating:
-        args.append("options: Optional[RequestOptions] = None")
+    args.append("options: Optional[RequestOptions] = None")
     arg_str = ", ".join(["self", *args])
     fstring = build_path_fstring(plan.path, plan.module)
-    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + (", options=options" if mutating else "")
+    call_args = f'f"{fstring}"' + (", data" if plan.input_type_name else "") + ", options=options"
     awaited = "" if is_sync else "await "
     async_kw = "" if is_sync else "async "
     client_call = f"self._client.{plan.verb}({call_args})"
@@ -1718,13 +1716,11 @@ def apply_operation_insert(plan: OperationInsertPlan, map_data: dict) -> Applied
         for kw in ("NotRequired", "Optional")
         if f"{kw}[" in f.annotation
     }
-    if plan.verb != "get":
-        needed_wrappers.add("Optional")
+    needed_wrappers.add("Optional")
     for kw in sorted(needed_wrappers):
         source = ensure_name_imported(source, kw)
     http_names = {"path_param"} if "path_param(" in build_path_fstring(plan.path, plan.module) else set()
-    if plan.verb != "get":
-        http_names.add("RequestOptions")
+    http_names.add("RequestOptions")
     source = ensure_internal_http_import(source, http_names)
 
     for spec in (plan.input_spec, plan.output_spec):
@@ -1934,12 +1930,9 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
         if op_plans:
             MAP_PATH.write_text(json.dumps(map_data, indent=2) + "\n")
 
-    bump: Optional[str] = None
-    if not needs_human:
-        if any(a.kind in ("enum", "operation-insert") for a in applied):
-            bump = "minor"
-        elif applied:
-            bump = "patch"
+    # Every applied change adds something (an enum member, an optional field, an operation): a feature, so a minor
+    # release. A `fix:` commit would ship new public fields as a patch.
+    bump: Optional[str] = "minor" if applied and not needs_human else None
 
     report = {
         "mode": "apply",
@@ -1969,6 +1962,11 @@ def cmd_apply(spec_path: Path, report_path: Optional[Path]) -> int:
         print(f"Applied {len(applied)} change(s); bump={bump}")
         for a in applied:
             print(f"  [{a.kind}] {a.file}: {a.detail}")
+    elif spec_path.read_bytes() != SNAPSHOT_PATH.read_bytes():
+        # Nothing for this patcher, but the spec moved (an error-code row, a webhook-only field, docs). Refresh the
+        # snapshot so gen_webhook_events.py / gen_error_codes.py regenerate from it.
+        SNAPSHOT_PATH.write_bytes(spec_path.read_bytes())
+        print("No SDK changes; spec snapshot refreshed.")
     else:
         print("No changes.")
     return 0

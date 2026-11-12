@@ -18,6 +18,7 @@ blindpay-python/
     py.typed                              # PEP 561 marker (must stay inside the package)
     webhooks.py                           # Standalone Svix verifier: webhooks.verify / webhooks.construct_event
     webhook_events.py                     # GENERATED typed webhook payloads (.api-sync/gen_webhook_events.py)
+    error_codes.py                        # GENERATED ErrorCode/RetryClass/ErrorCodeInfo (.api-sync/gen_error_codes.py)
     client.py                             # BlindPay (async) and BlindPaySync classes,
                                           #   ApiClientImpl / ApiClientImplSync (HTTP layer + retry loop),
                                           #   _*Namespace / _*NamespaceSync classes (sub-resources)
@@ -26,7 +27,8 @@ blindpay-python/
       api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync,
                                           #   MultipartFile (get/post/put/patch/delete/post_multipart)
       http.py                             # RequestOptions, retry decision table, error mapping,
-                                          #   path_param() and build_query() helpers. Pure, no I/O
+                                          #   path_param() and build_query() helpers, Redacted (a str whose
+                                          #   repr hides the API key), strip_url_queries(). Pure, no I/O
       pagination.py                       # auto_paging_iter / async_auto_paging_iter (list_auto_paging)
       exceptions.py                       # BlindPayError, BlindPayApiError
     resources/
@@ -38,6 +40,7 @@ blindpay-python/
     conftest.py                           # Adds src/ to sys.path
     fixtures/spec/                        # Shared spec-shaped fixtures (all SDKs). Re-copy, never hand-edit
     fixtures/webhook-vectors.json         # Shared Svix verification vectors (14)
+    fixtures/error-codes.json             # Shared error-code oracle (175 codes, status + retry class)
     spec_fixtures.py                      # Loads fixtures; assert_matches_spec(TypedDict, variants)
     http_mock.py                          # Wire-level seam: clients backed by httpx.MockTransport + Recorder
     test_webhooks.py                      # The 14 vectors through webhooks.verify and both client wrappers
@@ -50,6 +53,10 @@ blindpay-python/
     test_client_parity.py                 # Every resource method exists in both clients; namespaces are typed
     test_request_types.py                 # Request inputs' required keys vs the spec (via spec-map.json)
     test_packaging.py                     # py.typed placement, version single source, User-Agent
+    test_error_codes.py                   # Generated ErrorCode/RetryClass vs fixtures/error-codes.json; generator
+    test_review_reason.py                 # review_reason on the limit-increase GET and limitIncrease.* webhooks
+    test_secret_hygiene.py                # No API key in client dumps, no query strings in transport errors
+    test_union_arms.py                    # Every customer union arm vs CustomerOut (KNOWN_ARM_GAPS ledger)
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
 ```
@@ -201,11 +208,13 @@ class {EntityName}Resource:
         self._instance_id = instance_id
         self._client = client
 
-    async def list(self) -> BlindpayApiResponse[List{EntityName}Response]:
-        return await self._client.get(f"/instances/{self._instance_id}/{api_path}")
+    async def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[List{EntityName}Response]:
+        return await self._client.get(f"/instances/{self._instance_id}/{api_path}", options=options)
 
-    async def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return await self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
+    async def get(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[{EntityName}]:
+        return await self._client.get(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
     async def create(
         self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
@@ -225,11 +234,13 @@ class {EntityName}ResourceSync:
         self._instance_id = instance_id
         self._client = client
 
-    def list(self) -> BlindpayApiResponse[List{EntityName}Response]:
-        return self._client.get(f"/instances/{self._instance_id}/{api_path}")
+    def list(self, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[List{EntityName}Response]:
+        return self._client.get(f"/instances/{self._instance_id}/{api_path}", options=options)
 
-    def get(self, {id_param}: str) -> BlindpayApiResponse[{EntityName}]:
-        return self._client.get(f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}")
+    def get(self, {id_param}: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[{EntityName}]:
+        return self._client.get(
+            f"/instances/{self._instance_id}/{api_path}/{path_param({id_param})}", options=options
+        )
 
     def create(
         self, data: Create{EntityName}Input, options: Optional[RequestOptions] = None
@@ -253,8 +264,9 @@ def create_{snake_name}_resource_sync(instance_id: str, client: InternalApiClien
 ```
 
 Rules every method follows (enforced by `tests/test_operations.py` and `tests/test_client_parity.py`):
-- Every mutating method (POST/PUT/PATCH/DELETE, incl. `post_multipart`) takes a trailing
-  `options: Optional[RequestOptions] = None` and passes `options=options` to the client call.
+- Every method (GET included, and `post_multipart`) takes a trailing `options: Optional[RequestOptions] = None` and
+  passes `options=options` to the client call. GETs use its `timeout` and `headers`; they never send an
+  `Idempotency-Key`.
 - Every caller-supplied path segment goes through `path_param(...)` inside the f-string (`a/b` -> `a%2Fb`).
   `self._instance_id` is client config and stays raw. Keep the path a literal f-string: api-sync reads it.
 - Every query string comes from `build_query(params)` (drops `None`/`""`, booleans as `true`/`false`).
@@ -407,9 +419,11 @@ Add the new TypedDicts to both the import and `__all__` list in the resource's `
 
 **GET with query params:**
 ```python
-async def list(self, params: Optional[ListInput] = None) -> BlindpayApiResponse[ListResponse]:
+async def list(
+    self, params: Optional[ListInput] = None, options: Optional[RequestOptions] = None
+) -> BlindpayApiResponse[ListResponse]:
     query_string = build_query(params)
-    return await self._client.get(f"/instances/{self._instance_id}/{path}{query_string}")
+    return await self._client.get(f"/instances/{self._instance_id}/{path}{query_string}", options=options)
 ```
 
 **Auto-pager** (for every list whose spec accepts `starting_after`). A plain `def` in BOTH classes, returning
@@ -437,8 +451,8 @@ async def update(self, data: UpdateInput, options: Optional[RequestOptions] = No
 
 **GET with path param:**
 ```python
-async def get(self, entity_id: str) -> BlindpayApiResponse[Entity]:
-    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}")
+async def get(self, entity_id: str, options: Optional[RequestOptions] = None) -> BlindpayApiResponse[Entity]:
+    return await self._client.get(f"/instances/{self._instance_id}/{path}/{path_param(entity_id)}", options=options)
 ```
 
 ---
@@ -462,7 +476,8 @@ against every variant of its shared fixture, and `tests/test_request_types.py` c
 Request enums stay closed Literals. Exception: the per-rail bank-account helpers and the two blockchain-wallet create
 helpers require fields the merged spec schema marks optional, because the route validates each variant with its own
 schema (`PER_VARIANT_HELPERS` in `tests/test_request_types.py`). Amount fields in cents are `int`; decimal fields
-(quotations, whole-token amounts) are `float`.
+(quotations, whole-token amounts) are `float`. Input amount fields that were `float` before 4.1 are
+`Union[int, float]` until the next major.
 
 Every public name in a resource module must also be exported from `src/blindpay/__init__.py` (the "Resource types"
 block) and from its package `__init__.py`; `tests/test_packaging.py` fails otherwise.
@@ -664,6 +679,9 @@ pyright src/blindpay/
 
 ## 9. Versioning
 
+The release runbook (what a merge triggers, secrets, re-running a stuck release, verifying PyPI) is
+[RELEASING.md](RELEASING.md).
+
 ### release-please with conventional commits
 
 The project uses [release-please](https://github.com/googleapis/release-please) for automated versioning.
@@ -673,7 +691,9 @@ The project uses [release-please](https://github.com/googleapis/release-please) 
   The `python` type also rewrites `src/blindpay/__init__.py`, and in 4.0.0 it wrote back a stale copy that dropped
   every export.
 - Tags are `vX.Y.Z` (`include-component-in-tag: false`). `publish.yaml` checks out that tag.
-- Bumps `pyproject.toml` (toml updater, `$.project.version`) and `src/blindpay/_version.py` (Generic updater)
+- Bumps `pyproject.toml` (toml updater, `$.project.version`), `uv.lock` (toml updater,
+  `$.package[?(@.name.value=='blindpay')].version`: release-please's TOML parser wraps scalars, hence `.value`) and
+  `src/blindpay/_version.py` (Generic updater)
 
 **Auto-merge:** `publish.yaml` merges the release PR itself. It first waits for the PR's checks to pass, then
 refuses if the PR changes any line outside `CHANGELOG.md` other than a version line.
@@ -681,13 +701,15 @@ refuses if the PR changes any line outside `CHANGELOG.md` other than a version l
 **Manifest:** `.release-please-manifest.json`
 - Tracks the current version at the root path `.`
 
-**The release version lives in three files that release-please moves together.** Never edit them by hand:
+**The release version lives in four files that release-please moves together.** Never edit them by hand:
 - `.release-please-manifest.json` -> `"."`
 - `pyproject.toml` -> `[project].version`
 - `src/blindpay/_version.py` -> `__version__`. Keep the `# x-release-please-version` marker on that line:
   the Generic updater only rewrites marked lines. `client.py` imports it for the `User-Agent` header.
 
-`tests/test_packaging.py` fails if the three drift. Regenerate `uv.lock` with `uv lock --python 3.13` only when
+- `uv.lock` -> the `blindpay` package's `version`. The release PR's auto-merge guard accepts it (a `version = ` line).
+
+`tests/test_packaging.py` fails if they drift. Regenerate `uv.lock` with `uv lock --python 3.13` only when
 dependencies change.
 
 ### Commit message format
@@ -841,15 +863,27 @@ fields/enums the SDK doesn't model) must stay true. When a fix makes an entry fa
 Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_*`, `aiprise_*`, `jpm_*`, ...) are never modelled:
 record them in `unmodeled.json` with reason "provider-named field; pending blindpay-v2 decision".
 
-`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@66144f3b2` (94 SDK operations). CI gates:
+`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@7e49addd9` (94 SDK operations). CI gates:
 
 ```bash
 python3 .api-sync/sync.py --validate-map
 python3 .api-sync/sync.py --check [--spec <openapi.json>]   # state reconciliation (default: the snapshot)
 python3 .api-sync/sync.py --coverage --spec .api-sync/spec-snapshot.json   # METHOD+path: every x-sdk op has a method
 python3 .api-sync/gen_webhook_events.py --spec .api-sync/spec-snapshot.json --check
+python3 .api-sync/gen_error_codes.py --spec .api-sync/spec-snapshot.json --check
 python3 .api-sync/check_contract.py
 ```
+
+`src/blindpay/error_codes.py` is generated from the snapshot's `Errors` tag table (`| `CODE` | status | retry |
+description |`); never edit it by hand. The generator fails on an empty table, any unparseable row (listing them all), a duplicate code or
+an unknown retry class. `ErrorResponse["code"]` stays a plain `str` (unknown codes still arrive); `retry_class` is
+informational and never feeds the transport retry table in `_internal/http.py`. `tests/fixtures/error-codes.json` is
+the cross-SDK oracle `tests/test_error_codes.py` compares against.
+
+`--apply` reports `bump=minor` for any applied change (each one adds an enum member, an optional field or an
+operation). When it applies nothing but the delivered spec differs (an error-code row, a webhook-only field), it still
+refreshes the snapshot, and `api-sync.yml` counts generator-only diffs (`webhook_events.py`, `error_codes.py`) as a
+minor change, so they open a PR instead of being dropped.
 
 Operations marked `x-sdk: false` (yield, card payment, ToS passthrough, upload/extract, deposit simulators) must never
 get a method; `--coverage` fails if one does. `--apply` generates enum members, simple fields and standard operations

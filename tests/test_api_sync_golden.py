@@ -93,12 +93,18 @@ def delete_get_secret(webhooks_py: Path) -> None:
     TypedDict."""
     src = webhooks_py.read_text()
     for pattern in (
-        "\n    async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
-        "        return await self._client.get("
-        'f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")\n',
-        "\n    def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
-        "        return self._client.get("
-        'f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")\n',
+        "\n    async def get_secret(\n"
+        "        self, id: str, options: Optional[RequestOptions] = None\n"
+        "    ) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
+        "        return await self._client.get(\n"
+        '            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret", options=options\n'
+        "        )\n",
+        "\n    def get_secret(\n"
+        "        self, id: str, options: Optional[RequestOptions] = None\n"
+        "    ) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:\n"
+        "        return self._client.get(\n"
+        '            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret", options=options\n'
+        "        )\n",
         "\n\nclass GetWebhookEndpointSecretResponse(TypedDict):\n    key: str\n",
     ):
         assert pattern in src, f"fixture assumption broken, pattern not found:\n{pattern}"
@@ -175,8 +181,15 @@ class TestGoldenRegeneration:
 
     def test_regenerated_get_secret_matches_original_route_verb_and_types(self, golden_repo: Path) -> None:
         src = (golden_repo / "src/blindpay/resources/webhooks/webhooks.py").read_text()
-        assert "async def get_secret(self, id: str) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:" in src
-        assert 'self._client.get(f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret")' in src
+        assert (
+            "async def get_secret(\n        self, id: str, options: Optional[RequestOptions] = None\n"
+            "    ) -> BlindpayApiResponse[GetWebhookEndpointSecretResponse]:" in src
+        )
+        assert (
+            "self._client.get(\n"
+            '            f"/instances/{self._instance_id}/webhook-endpoints/{path_param(id)}/secret", '
+            "options=options\n        )" in src
+        )
         assert "class GetWebhookEndpointSecretResponse(TypedDict):" in src
         assert "    key: str" in src
 

@@ -114,13 +114,49 @@ def _union_args(hint: Any) -> List[Any]:
     return list(get_args(hint)) if get_origin(hint) in (Union, types.UnionType) else [hint]
 
 
+def _literal_values(hint: Any) -> FrozenSet[Any]:
+    """The ``Literal`` values a hint names (``Literal[...]`` or ``Union[Literal[...], str]``); empty if none."""
+    found: List[Any] = []
+    for arm in _union_args(hint):
+        if get_origin(arm) is Literal:
+            found.extend(get_args(arm))
+    return frozenset(found)
+
+
+def discriminators(arms: List[Any]) -> Dict[str, Dict[Any, FrozenSet[Any]]]:
+    """Keys typed as a ``Literal`` in at least two TypedDict arms, with differing values: ``{key: {arm: values}}``."""
+    dict_arms = [arm for arm in arms if is_typeddict(arm)]
+    keys: Dict[str, Dict[Any, FrozenSet[Any]]] = {}
+    for arm in dict_arms:
+        for key, field_hint in get_type_hints(arm).items():
+            values = _literal_values(field_hint)
+            if values:
+                keys.setdefault(key, {})[arm] = values
+    return {key: by_arm for key, by_arm in keys.items() if len(by_arm) > 1 and len(set(by_arm.values())) > 1}
+
+
+def discriminated_arms(arms: List[Any], value: Any) -> List[Any]:
+    """The TypedDict arms whose every discriminator ``Literal`` admits ``value``'s value for that key."""
+    keys = discriminators(arms)
+    if not keys or not isinstance(value, dict):
+        return []
+    obj = cast(Dict[str, Any], value)
+    return [
+        arm
+        for arm in arms
+        if is_typeddict(arm) and all(arm in by_arm and obj.get(key) in by_arm[arm] for key, by_arm in keys.items())
+    ]
+
+
 def value_errors(hint: Any, value: Any, path: str = "$") -> List[str]:
     """Static "decode": every mismatch between a type hint and a JSON value, recursively.
 
     TypedDicts: required keys present, ``None`` only where the hint is ``Optional``. Strings: a closed ``Literal``
     must contain the value, and ``zz_unknown_value_from_future_api`` (the ``unknown_enum`` variant) needs a hint
     that admits ``str`` (response enums must accept values added later).
-    Numbers: a non-integral value needs ``float``. Unions pass if any arm does.
+    Numbers: a non-integral value needs ``float``. Unions of TypedDicts discriminated by ``Literal`` fields
+    (``type``/``kyc_type``, ``webhook_event``): every arm whose discriminators match the value must pass. Other
+    unions, and values no arm's discriminators match, pass if any arm does.
     """
     if hint is Any:
         return []
@@ -128,7 +164,11 @@ def value_errors(hint: Any, value: Any, path: str = "$") -> List[str]:
     if len(arms) > 1:
         if value is None:
             return [] if type(None) in arms else [f"{path}: null but the type doesn't allow None"]
-        results = [value_errors(arm, value, path) for arm in arms if arm is not type(None)]
+        candidates = [arm for arm in arms if arm is not type(None)]
+        matched = discriminated_arms(candidates, value)
+        if matched:
+            return [e for arm in matched for e in value_errors(arm, value, path)]
+        results = [value_errors(arm, value, path) for arm in candidates]
         return min(results, key=len) if all(results) else []
     if value is None:
         return [f"{path}: null but the type doesn't allow None"]
