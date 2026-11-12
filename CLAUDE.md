@@ -27,7 +27,8 @@ blindpay-python/
       api_client.py                       # Protocol interfaces: InternalApiClient, InternalApiClientSync,
                                           #   MultipartFile (get/post/put/patch/delete/post_multipart)
       http.py                             # RequestOptions, retry decision table, error mapping,
-                                          #   path_param() and build_query() helpers. Pure, no I/O
+                                          #   path_param() and build_query() helpers, Redacted (a str whose
+                                          #   repr hides the API key), strip_url_queries(). Pure, no I/O
       pagination.py                       # auto_paging_iter / async_auto_paging_iter (list_auto_paging)
       exceptions.py                       # BlindPayError, BlindPayApiError
     resources/
@@ -39,6 +40,7 @@ blindpay-python/
     conftest.py                           # Adds src/ to sys.path
     fixtures/spec/                        # Shared spec-shaped fixtures (all SDKs). Re-copy, never hand-edit
     fixtures/webhook-vectors.json         # Shared Svix verification vectors (14)
+    fixtures/error-codes.json             # Shared error-code oracle (175 codes, status + retry class)
     spec_fixtures.py                      # Loads fixtures; assert_matches_spec(TypedDict, variants)
     http_mock.py                          # Wire-level seam: clients backed by httpx.MockTransport + Recorder
     test_webhooks.py                      # The 14 vectors through webhooks.verify and both client wrappers
@@ -51,6 +53,10 @@ blindpay-python/
     test_client_parity.py                 # Every resource method exists in both clients; namespaces are typed
     test_request_types.py                 # Request inputs' required keys vs the spec (via spec-map.json)
     test_packaging.py                     # py.typed placement, version single source, User-Agent
+    test_error_codes.py                   # Generated ErrorCode/RetryClass vs fixtures/error-codes.json; generator
+    test_review_reason.py                 # review_reason on the limit-increase GET and limitIncrease.* webhooks
+    test_secret_hygiene.py                # No API key in client dumps, no query strings in transport errors
+    test_union_arms.py                    # Every customer union arm vs CustomerOut (KNOWN_ARM_GAPS ledger)
     resources/
       test_<resource_name>.py             # Per-resource test files (async + sync test classes)
 ```
@@ -470,7 +476,8 @@ against every variant of its shared fixture, and `tests/test_request_types.py` c
 Request enums stay closed Literals. Exception: the per-rail bank-account helpers and the two blockchain-wallet create
 helpers require fields the merged spec schema marks optional, because the route validates each variant with its own
 schema (`PER_VARIANT_HELPERS` in `tests/test_request_types.py`). Amount fields in cents are `int`; decimal fields
-(quotations, whole-token amounts) are `float`.
+(quotations, whole-token amounts) are `float`. Input amount fields that were `float` before 4.1 are
+`Union[int, float]` until the next major.
 
 Every public name in a resource module must also be exported from `src/blindpay/__init__.py` (the "Resource types"
 block) and from its package `__init__.py`; `tests/test_packaging.py` fails otherwise.
