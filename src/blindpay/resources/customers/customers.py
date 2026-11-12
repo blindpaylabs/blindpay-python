@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator, List, Optional, Union
+from typing import AsyncIterator, Iterator, List, Optional, Sequence, Union
 
 from typing_extensions import Literal, NotRequired, TypedDict
 
@@ -601,6 +601,31 @@ class Owner(TypedDict):
     tax_type: Optional[TaxType]
 
 
+class CreateCustomerOwnerInput(TypedDict):
+    """An owner sent with ``customers.create_business_with_standard_kyb``. ``owners`` also still accepts ``Owner``."""
+
+    role: OwnerRole
+    first_name: str
+    last_name: str
+    date_of_birth: str
+    tax_id: str
+    address_line_1: str
+    address_line_2: NotRequired[Optional[str]]
+    city: str
+    state_province_region: str
+    country: Country
+    postal_code: str
+    id_doc_country: Country
+    id_doc_type: IdentificationDocument
+    id_doc_front_file: str
+    id_doc_back_file: NotRequired[Optional[str]]
+    proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
+    proof_of_address_doc_file: NotRequired[Optional[str]]
+    ownership_percentage: NotRequired[Optional[int]]
+    title: NotRequired[Optional[str]]
+    tax_type: NotRequired[Optional[TaxType]]
+
+
 CustomerCnaeConditionStatus = Literal["pending", "passed", "failed", "cancelled"]
 VirtualAccountPreapprovalStatus = Literal["in_review", "approved", "rejected"]
 VirtualAccountPreapprovalBankingPartner = Literal["jpmorgan", "portage"]
@@ -907,7 +932,7 @@ class CreateBusinessWithStandardKYBInput(TypedDict):
     formation_date: NotRequired[str]
     incorporation_doc_file: NotRequired[Optional[str]]
     legal_name: NotRequired[Optional[str]]
-    owners: NotRequired[Optional[List[Owner]]]
+    owners: NotRequired[Optional[Sequence[Union[CreateCustomerOwnerInput, Owner]]]]
     postal_code: NotRequired[Optional[str]]
     proof_of_address_doc_file: NotRequired[Optional[str]]
     proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
@@ -982,6 +1007,33 @@ class OwnerUpdate(TypedDict):
     proof_of_address_doc_file: Optional[str]
 
 
+class UpdateCustomerOwnerInput(TypedDict):
+    """An owner sent with ``customers.update``: ``id`` names the owner, every other key is optional. ``owners`` also
+    still accepts ``OwnerUpdate``."""
+
+    id: str
+    role: NotRequired[OwnerRole]
+    first_name: NotRequired[str]
+    last_name: NotRequired[str]
+    date_of_birth: NotRequired[str]
+    tax_id: NotRequired[str]
+    address_line_1: NotRequired[str]
+    address_line_2: NotRequired[Optional[str]]
+    city: NotRequired[str]
+    state_province_region: NotRequired[str]
+    country: NotRequired[Country]
+    postal_code: NotRequired[str]
+    id_doc_country: NotRequired[Country]
+    id_doc_type: NotRequired[IdentificationDocument]
+    id_doc_front_file: NotRequired[str]
+    id_doc_back_file: NotRequired[Optional[str]]
+    proof_of_address_doc_type: NotRequired[Optional[ProofOfAddressDocType]]
+    proof_of_address_doc_file: NotRequired[Optional[str]]
+    ownership_percentage: NotRequired[Optional[int]]
+    title: NotRequired[Optional[str]]
+    tax_type: NotRequired[Optional[TaxType]]
+
+
 class UpdateCustomerInput(TypedDict):
     customer_id: str
     email: Optional[str]
@@ -1008,7 +1060,7 @@ class UpdateCustomerInput(TypedDict):
     alternate_name: NotRequired[Optional[str]]
     formation_date: NotRequired[Optional[str]]
     website: NotRequired[Optional[str]]
-    owners: NotRequired[Optional[List[OwnerUpdate]]]
+    owners: NotRequired[Optional[Sequence[Union[UpdateCustomerOwnerInput, OwnerUpdate]]]]
     incorporation_doc_file: NotRequired[Optional[str]]
     proof_of_ownership_doc_file: NotRequired[Optional[str]]
     source_of_funds_doc_type: NotRequired[Optional[SourceOfFundsDocType]]

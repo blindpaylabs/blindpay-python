@@ -171,3 +171,83 @@ def test_spec_correct_inline_inputs_type_check():
     fx: GetFxRateInput = {"currency_type": "sender", "from_currency": "USDC", "to": "BRL", "request_amount": 1000}
 
     assert [fee, legacy_fee, offramp, delegation, mint, fx]
+
+
+def _resolve(schema: Dict[str, Any]) -> Dict[str, Any]:
+    while "$ref" in schema:
+        schema = SPEC["components"]["schemas"][str(schema["$ref"]).split("/")[-1]]
+    for arm in cast(List[Dict[str, Any]], schema.get("anyOf", [])):
+        if arm.get("type") == "array" or "properties" in arm:
+            return _resolve(arm)
+    return schema
+
+
+def nested_cases() -> List[Tuple[str, Dict[str, Any], str, str]]:
+    """Inline shapes inside request bodies (``specPath`` entries of spec-map.json), e.g. ``owners.items``."""
+    out: List[Tuple[str, Dict[str, Any], str, str]] = []
+    wanted = request_schemas()
+    for entry in MAP["types"]:
+        name = entry["spec"][0] if isinstance(entry["spec"], list) else entry["spec"]
+        if not entry.get("specPath") or name not in wanted:
+            continue
+        schema = SPEC["components"]["schemas"][name]
+        for part in entry["specPath"].split("."):
+            schema = _resolve(schema)
+            schema = schema["items"] if part == "items" else schema["properties"][part]
+        out.extend(
+            (f"{entry['spec']}#{entry['specPath']}", _resolve(schema), s["file"], s["symbol"]) for s in entry["sdk"]
+        )
+    return out
+
+
+NESTED = nested_cases()
+
+
+def test_nested_request_shapes_are_mapped():
+    assert {name for name, _, _, _ in NESTED} == {"CreateCustomerIn#owners.items", "UpdateCustomerIn#owners.items"}
+
+
+@pytest.mark.parametrize("where,schema,file,symbol", NESTED, ids=[c[3] for c in NESTED])
+def test_nested_request_shape_matches_the_spec(where: str, schema: Dict[str, Any], file: str, symbol: str):
+    cls = getattr(importlib.import_module(file[len("src/") : -len(".py")].replace("/", ".")), symbol)
+    properties, required = set(schema.get("properties", {})), set(schema.get("required", []))
+
+    assert set(cls.__required_keys__) == required, f"{symbol} ({where})"
+    assert set(typing.get_type_hints(cls)) == properties, f"{symbol} ({where})"
+
+
+def test_spec_correct_owners_type_check():
+    """New owners need no ``id``/``instance_id``, update owners need only ``id``, and ``List[Owner]`` still works."""
+    from blindpay import (
+        CreateBusinessWithStandardKYBInput,
+        CreateCustomerOwnerInput,
+        Owner,
+        UpdateCustomerInput,
+    )
+
+    owner: CreateCustomerOwnerInput = {
+        "role": "beneficial_owner",
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "date_of_birth": "1990-01-01",
+        "tax_id": "123",
+        "address_line_1": "1 Main St",
+        "city": "Austin",
+        "state_province_region": "TX",
+        "country": "US",
+        "postal_code": "78701",
+        "id_doc_country": "US",
+        "id_doc_type": "PASSPORT",
+        "id_doc_front_file": "https://example.com/id.png",
+    }
+    business: CreateBusinessWithStandardKYBInput = {"email": "a@example.com", "country": "US", "owners": [owner]}
+    existing: List[Owner] = []
+    legacy: CreateBusinessWithStandardKYBInput = {"email": "a@example.com", "country": "US", "owners": existing}
+    update: UpdateCustomerInput = {
+        "customer_id": "cu_1",
+        "email": "a@example.com",
+        "country": "US",
+        "owners": [{"id": "ow_1", "title": "CEO"}],
+    }
+
+    assert [business, legacy, update]

@@ -2461,6 +2461,26 @@
           "symbol": "CustomerCnaeCode"
         }
       ]
+    },
+    {
+      "spec": "CreateCustomerIn",
+      "specPath": "owners.items",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "CreateCustomerOwnerInput"
+        }
+      ]
+    },
+    {
+      "spec": "UpdateCustomerIn",
+      "specPath": "owners.items",
+      "sdk": [
+        {
+          "file": "src/blindpay/resources/customers/customers.py",
+          "symbol": "UpdateCustomerOwnerInput"
+        }
+      ]
     }
   ],
   "ignore": {
