@@ -40,7 +40,7 @@ def fund_managed_wallet(blindpay: BlindPaySync, customer_id: str, network: Netwo
         blindpay.payins.quotes.create(
             {
                 "wallet_id": wallet["id"],
-                "currency_type": "sender",
+                "currency_type": "receiver",  # request_amount is what lands in the wallet, in token cents
                 "payment_method": "pix",
                 "request_amount": amount_cents,
                 "token": "USDB",
@@ -81,6 +81,8 @@ def pay_out(blindpay: BlindPaySync, wallet_id: str, bank_account_id: str, networ
 if __name__ == "__main__":
     network: Network = "base_sepolia"
     with BlindPaySync(api_key=os.environ["BLINDPAY_API_KEY"], instance_id=os.environ["BLINDPAY_INSTANCE_ID"]) as client:
-        wallet_id = fund_managed_wallet(client, os.environ["CUSTOMER_ID"], network, 100000)
-        for amount in (10000, FAILS, REFUNDS):
+        payouts = (10000, FAILS, REFUNDS)
+        # Fund enough for every payout, plus room for fees.
+        wallet_id = fund_managed_wallet(client, os.environ["CUSTOMER_ID"], network, 2 * sum(payouts))
+        for amount in payouts:
             print(amount, pay_out(client, wallet_id, os.environ["BANK_ACCOUNT_ID"], network, amount))
