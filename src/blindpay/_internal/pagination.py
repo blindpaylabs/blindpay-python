@@ -3,7 +3,8 @@
 A pager sends ``limit`` (default 100) so the API answers with the ``{data, pagination}`` envelope, yields every item
 of the page, then requests the next page with ``starting_after = pagination.next_page`` while ``has_more`` is true.
 It only pages forward. Each page goes through the client's normal retry policy; an error that survives it is raised
-as ``BlindPayApiError``, because an iterator can't return a result dict.
+as ``BlindPayApiError``, because an iterator can't return a result dict. A ``next_page`` cursor the pager has already
+requested raises ``BlindPayError`` instead of fetching the same page again forever.
 """
 
 from typing import (
@@ -16,6 +17,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Set,
     Tuple,
     cast,
 )
@@ -52,18 +54,29 @@ def _read_page(response: BlindpayApiResponse[Any]) -> Tuple[List[Any], Optional[
     return items, cursor if isinstance(cursor, str) and cursor else None
 
 
+def _next_query(query: Dict[str, Any], cursor: str, requested: Set[Optional[str]]) -> Dict[str, Any]:
+    if cursor in requested:
+        raise BlindPayError(
+            f"list_auto_paging stopped: the API returned next_page {cursor!r} again after it was already requested, "
+            "so the next request would repeat a page forever"
+        )
+    requested.add(cursor)
+    return {**query, "starting_after": cursor}
+
+
 def auto_paging_iter(fetch: PageFetcher, params: Optional[Mapping[str, Any]]) -> Iterator[Any]:
     """Validates ``params`` now (not on the first ``next()``) and returns the item iterator."""
     query = _first_page_params(params)
 
     def items() -> Iterator[Any]:
         page_query = query
+        requested: Set[Optional[str]] = {query.get("starting_after")}
         while True:
             page, cursor = _read_page(fetch(page_query))
             yield from page
             if cursor is None:
                 return
-            page_query = {**page_query, "starting_after": cursor}
+            page_query = _next_query(page_query, cursor, requested)
 
     return items()
 
@@ -74,12 +87,13 @@ def async_auto_paging_iter(fetch: AsyncPageFetcher, params: Optional[Mapping[str
 
     async def items() -> AsyncIterator[Any]:
         page_query = query
+        requested: Set[Optional[str]] = {query.get("starting_after")}
         while True:
             page, cursor = _read_page(await fetch(page_query))
             for item in page:
                 yield item
             if cursor is None:
                 return
-            page_query = {**page_query, "starting_after": cursor}
+            page_query = _next_query(page_query, cursor, requested)
 
     return items()
