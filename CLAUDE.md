@@ -875,7 +875,7 @@ python3 .api-sync/check_contract.py
 ```
 
 `src/blindpay/error_codes.py` is generated from the snapshot's `Errors` tag table (`| `CODE` | status | retry |
-description |`); never edit it by hand. The generator fails on an empty table, an unparseable row, a duplicate code or
+description |`); never edit it by hand. The generator fails on an empty table, any unparseable row (listing them all), a duplicate code or
 an unknown retry class. `ErrorResponse["code"]` stays a plain `str` (unknown codes still arrive); `retry_class` is
 informational and never feeds the transport retry table in `_internal/http.py`. `tests/fixtures/error-codes.json` is
 the cross-SDK oracle `tests/test_error_codes.py` compares against.

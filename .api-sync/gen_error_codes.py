@@ -11,8 +11,9 @@ Usage:
     python3 .api-sync/gen_error_codes.py --spec <openapi.json>           # write the module
     python3 .api-sync/gen_error_codes.py --spec <openapi.json> --check   # exit 1 if it would change
 
-It fails (exit 2) when the table has no rows, a row doesn't parse, a code repeats, a code isn't a valid Python
-identifier, or a retry class is unknown, so a reshaped table can't silently produce an empty enum.
+It fails (exit 2) when the table has no rows, any line starting with "| `" doesn't parse (it lists every one), a code
+repeats, a code isn't a valid Python identifier, or a retry class is unknown, so a reshaped table can't silently
+produce an empty or partial enum.
 """
 
 import argparse
@@ -105,15 +106,17 @@ def errors_table(spec: Dict[str, Any]) -> List[Row]:
     tags = [tag for tag in spec.get("tags", []) if tag.get("name") == TAG]
     if not tags:
         raise TableError(f"the spec has no `{TAG}` tag")
+    table = [line.strip() for line in str(tags[0].get("description", "")).splitlines()]
+    table = [line for line in table if line.startswith("| `")]
+    unparseable = [line for line in table if not ROW.match(line)]
+    if unparseable:
+        listed = "\n  ".join(unparseable)
+        raise TableError(f"{len(unparseable)} of {len(table)} error-code row(s) don't parse:\n  {listed}")
     rows: List[Row] = []
     seen: set[str] = set()
-    for line in str(tags[0].get("description", "")).splitlines():
-        line = line.strip()
-        if not line.startswith("| `"):
-            continue
+    for line in table:
         match = ROW.match(line)
-        if not match:
-            raise TableError(f"unparseable error-code row: {line}")
+        assert match is not None
         code, retry = match["code"], match["retry"]
         if not code.isidentifier() or keyword.iskeyword(code) or not code.isupper():
             raise TableError(f"error code {code!r} isn't an UPPER_SNAKE Python identifier")

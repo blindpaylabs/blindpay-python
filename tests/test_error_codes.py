@@ -143,6 +143,18 @@ def _bad_status(text: str) -> str:
     return text.replace("| `AUTH_FORBIDDEN` | 403 |", "| `AUTH_FORBIDDEN` | 4xx |")
 
 
+def test_generator_lists_every_unparseable_row(tmp_path: Path):
+    def two_bad_rows(text: str) -> str:
+        text = text.replace("| `AUTH_FORBIDDEN` | 403 |", "| `AUTH_FORBIDDEN` | 4xx |")
+        return text.replace("| `QUOTES_EXPIRED` | 400 |", "| `QUOTES_EXPIRED` | ? |")
+
+    result = _run(_with_errors_table(two_bad_rows), tmp_path)
+
+    assert result.returncode == 2
+    assert "2 of 175 error-code row(s) don't parse" in result.stderr
+    assert "`AUTH_FORBIDDEN` | 4xx" in result.stderr and "`QUOTES_EXPIRED` | ?" in result.stderr
+
+
 def _duplicate(text: str) -> str:
     return text.replace("`AUTH_FORBIDDEN`", "`AUTH_EMAIL_ALREADY_REGISTERED`")
 
@@ -155,7 +167,7 @@ def _bad_retry(text: str) -> str:
     "transform,message",
     [
         (_drop_rows, "no error-code"),
-        (_bad_status, "unparseable"),
+        (_bad_status, "don't parse"),
         (_duplicate, "appears twice"),
         (_bad_retry, "unknown retry class"),
     ],
