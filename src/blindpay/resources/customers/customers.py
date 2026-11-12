@@ -725,11 +725,11 @@ class IndividualWithEnhancedKYC(TypedDict):
     id_doc_type: Optional[IdentificationDocument]
     id_doc_front_file: Optional[str]
     id_doc_back_file: Optional[str]
-    aiprise_validation_key: str
+    aiprise_validation_key: NotRequired[str]
     instance_id: str
     source_of_funds_doc_type: Optional[str]
     source_of_funds_doc_file: Optional[str]
-    individual_holding_doc_front_file: str
+    individual_holding_doc_front_file: NotRequired[str]
     purpose_of_transactions: Optional[PurposeOfTransactions]
     purpose_of_transactions_explanation: Optional[str]
     tos_id: Optional[str]
@@ -790,7 +790,7 @@ class BusinessWithStandardKYB(TypedDict):
     external_id: Optional[str]
     instance_id: str
     tos_id: Optional[str]
-    aiprise_validation_key: str
+    aiprise_validation_key: NotRequired[str]
     created_at: Optional[str]
     updated_at: Optional[str]
     limit: TransactionLimit

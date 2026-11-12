@@ -32,8 +32,9 @@ class ListOfframpWalletsInput(TypedDict):
 class CreateOfframpWalletInput(TypedDict):
     customer_id: str
     bank_account_id: str
-    external_id: str
+    external_id: NotRequired[Optional[str]]
     network: Network
+    partner_fee_id: NotRequired[Optional[str]]
 
 
 class CreateOfframpWalletResponse(TypedDict):

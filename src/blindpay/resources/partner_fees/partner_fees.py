@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -23,14 +23,20 @@ ListPartnerFeesResponse = List[PartnerFee]
 
 
 class CreatePartnerFeeInput(TypedDict):
-    virtual_account_set: Optional[bool]
-    evm_wallet_address: str
+    virtual_account_set: NotRequired[Optional[bool]]
+    evm_wallet_address: NotRequired[Optional[str]]
+    """Not in the public spec; optional, and kept only so existing calls still type-check."""
     name: str
-    payin_flat_fee: float
-    payin_percentage_fee: float
-    payout_flat_fee: float
-    payout_percentage_fee: float
-    stellar_wallet_address: Optional[str]
+    payin_flat_fee: Union[int, float]
+    """Integer cents (1000 = 10.00)."""
+    payin_percentage_fee: Union[int, float]
+    """Integer basis points (100 = 1%)."""
+    payout_flat_fee: Union[int, float]
+    """Integer cents (1000 = 10.00)."""
+    payout_percentage_fee: Union[int, float]
+    """Integer basis points (100 = 1%)."""
+    stellar_wallet_address: NotRequired[Optional[str]]
+    """Not in the public spec; optional, and kept only so existing calls still type-check."""
 
 
 class CreatePartnerFeeResponse(TypedDict):

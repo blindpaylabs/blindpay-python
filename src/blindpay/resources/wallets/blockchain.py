@@ -60,7 +60,7 @@ class CreateAssetTrustlineResponse(TypedDict):
 class MintUsdbStellarInput(TypedDict):
     address: str
     amount: str
-    signedXdr: str
+    signedXdr: NotRequired[str]
 
 
 class MintUsdbSolanaInput(TypedDict):
@@ -74,9 +74,10 @@ class MintUsdbSolanaResponse(TypedDict):
 
 
 class PrepareSolanaDelegationTransactionInput(TypedDict):
-    amount: str
+    amount: NotRequired[str]
     owner_address: str
-    token_address: str
+    token_address: NotRequired[str]
+    quote_id: NotRequired[str]
 
 
 class PrepareSolanaDelegationTransactionResponse(TypedDict):
