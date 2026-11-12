@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v4.0.1...v4.1.0) (2026-11-12)
+
+
+### Features
+
+* review_reason, typed error codes, GET request options and release hygiene ([#83](https://github.com/blindpaylabs/blindpay-python/issues/83)) ([0fc51fc](https://github.com/blindpaylabs/blindpay-python/commit/0fc51fccdd355958a43a356a51b7d8ad7242cf6d))
+
 ## [4.0.1](https://github.com/blindpaylabs/blindpay-python/compare/v4.0.0...v4.0.1) (2026-11-11)
 
 
