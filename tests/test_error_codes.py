@@ -1,4 +1,4 @@
-"""W2: typed error codes generated from the spec's ``Errors`` tag, checked against the shared oracle."""
+"""Typed error codes generated from the spec's ``Errors`` tag, checked against the shared oracle."""
 
 import json
 import subprocess

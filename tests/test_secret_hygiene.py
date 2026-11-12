@@ -1,4 +1,4 @@
-"""C13 / W8: printing or dumping a client never shows the API key, and transport errors never echo a query string."""
+"""Printing or dumping a client never shows the API key, and transport errors never echo a query string."""
 
 import pprint
 from typing import Any
