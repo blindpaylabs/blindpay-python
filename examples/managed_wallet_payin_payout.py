@@ -13,7 +13,7 @@ Amounts are integer cents. On a development instance the payout quote's ``reques
 import os
 import time
 import uuid
-from typing import Callable, Union
+from typing import Callable, Optional
 
 from _helpers import unwrap
 
@@ -24,7 +24,7 @@ FAILS = 66600  # dev sentinel: the payout fails
 REFUNDS = 77700  # dev sentinel: the payout is refunded
 
 
-def wait_for(read_status: Callable[[], Union[str, None]], timeout: float = 120, every: float = 5) -> str:
+def wait_for(read_status: Callable[[], Optional[str]], timeout: float = 120, every: float = 5) -> str:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         status = read_status()
