@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.1](https://github.com/blindpaylabs/blindpay-python/compare/v4.1.0...v4.1.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* README snippets type-check in pyright, typed delete results, and a repeated-cursor guard for pagers ([#85](https://github.com/blindpaylabs/blindpay-python/issues/85)) ([6bca8a9](https://github.com/blindpaylabs/blindpay-python/commit/6bca8a9ffb11240a9a958d66a7f7837d87962e8b))
+
 ## [4.1.0](https://github.com/blindpaylabs/blindpay-python/compare/v4.0.1...v4.1.0) (2026-11-12)
 
 
