@@ -681,7 +681,9 @@ The project uses [release-please](https://github.com/googleapis/release-please) 
   The `python` type also rewrites `src/blindpay/__init__.py`, and in 4.0.0 it wrote back a stale copy that dropped
   every export.
 - Tags are `vX.Y.Z` (`include-component-in-tag: false`). `publish.yaml` checks out that tag.
-- Bumps `pyproject.toml` (toml updater, `$.project.version`) and `src/blindpay/_version.py` (Generic updater)
+- Bumps `pyproject.toml` (toml updater, `$.project.version`), `uv.lock` (toml updater,
+  `$.package[?(@.name.value=='blindpay')].version`: release-please's TOML parser wraps scalars, hence `.value`) and
+  `src/blindpay/_version.py` (Generic updater)
 
 **Auto-merge:** `publish.yaml` merges the release PR itself. It first waits for the PR's checks to pass, then
 refuses if the PR changes any line outside `CHANGELOG.md` other than a version line.
@@ -689,13 +691,15 @@ refuses if the PR changes any line outside `CHANGELOG.md` other than a version l
 **Manifest:** `.release-please-manifest.json`
 - Tracks the current version at the root path `.`
 
-**The release version lives in three files that release-please moves together.** Never edit them by hand:
+**The release version lives in four files that release-please moves together.** Never edit them by hand:
 - `.release-please-manifest.json` -> `"."`
 - `pyproject.toml` -> `[project].version`
 - `src/blindpay/_version.py` -> `__version__`. Keep the `# x-release-please-version` marker on that line:
   the Generic updater only rewrites marked lines. `client.py` imports it for the `User-Agent` header.
 
-`tests/test_packaging.py` fails if the three drift. Regenerate `uv.lock` with `uv lock --python 3.13` only when
+- `uv.lock` -> the `blindpay` package's `version`. The release PR's auto-merge guard accepts it (a `version = ` line).
+
+`tests/test_packaging.py` fails if they drift. Regenerate `uv.lock` with `uv lock --python 3.13` only when
 dependencies change.
 
 ### Commit message format

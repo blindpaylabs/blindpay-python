@@ -24,6 +24,12 @@ class TestPackaging:
         manifest = json.loads((REPO_ROOT / ".release-please-manifest.json").read_text())
         assert blindpay.__version__ == pyproject["project"]["version"] == manifest["."]
 
+    def test_lockfile_pins_the_released_version(self):
+        # release-please bumps uv.lock too (extra-files), so `uv sync --locked` keeps working after a release.
+        lock = tomllib.loads((REPO_ROOT / "uv.lock").read_text())
+        (own,) = [package for package in lock["package"] if package["name"] == "blindpay"]
+        assert own["version"] == blindpay.__version__
+
     def test_version_file_carries_the_release_please_marker(self):
         assert "# x-release-please-version" in (PACKAGE_DIR / "_version.py").read_text()
 
