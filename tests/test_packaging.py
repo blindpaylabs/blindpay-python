@@ -25,7 +25,8 @@ class TestPackaging:
         assert blindpay.__version__ == pyproject["project"]["version"] == manifest["."]
 
     def test_lockfile_pins_the_released_version(self):
-        # release-please bumps uv.lock too (extra-files), so `uv sync --locked` keeps working after a release.
+        # release-please bumps uv.lock too (extra-files). CI also runs `uv lock --check` and `uv sync --locked`, which
+        # fail on any lock drift before this test runs; this test pins the version line for local, frozen runs.
         lock = tomllib.loads((REPO_ROOT / "uv.lock").read_text())
         (own,) = [package for package in lock["package"] if package["name"] == "blindpay"]
         assert own["version"] == blindpay.__version__

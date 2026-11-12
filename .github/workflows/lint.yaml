@@ -18,8 +18,11 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
+      - name: Lockfile is current (release-please bumps uv.lock with the version)
+        run: uv lock --check
+
       - name: Sync dev deps
-        run: uv sync --group dev
+        run: uv sync --locked --group dev
 
       - name: Lint check
         run: |
