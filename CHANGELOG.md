@@ -7,7 +7,7 @@
 
 * restore the package exports the 4.0.0 release commit dropped ([#81](https://github.com/blindpaylabs/blindpay-python/issues/81)) ([3c5bbef](https://github.com/blindpaylabs/blindpay-python/commit/3c5bbeffc2565adfd34b875c555c9e81198211b5))
 
-## [4.0.0](https://github.com/blindpaylabs/blindpay-python/compare/blindpay-v3.4.1...blindpay-v4.0.0) (2026-11-11)
+## [4.0.0](https://github.com/blindpaylabs/blindpay-python/compare/v3.4.1...v4.0.0) (2026-11-11)
 
 
 ### ⚠ BREAKING CHANGES
