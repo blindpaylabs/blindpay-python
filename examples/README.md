@@ -8,6 +8,7 @@ nothing here runs against the API in CI.
 |---|---|
 | `webhook_endpoint.py` | Register a webhook endpoint, then verify deliveries against the raw body, dedupe on `svix-id`, and handle a failed payout on `payout.update` or `payout.complete` |
 | `managed_wallet_payout.py` | Quote with `bank_account_id`, then `payouts.create_evm` with `wallet_id` and an explicit idempotency key; what to do after a 5xx |
+| `managed_wallet_payin_payout.py` | Create a managed wallet, fund it with a payin quote (`wallet_id`) and `payins.create_evm`, then pay a bank account with `payouts.create_evm` and `wallet_id`; the dev sentinels `66600` (failed) and `77700` (refunded) |
 | `fiat_payin.py` | Payin quote, then payin (async client) |
 | `reconciliation.py` | Sum a customer's completed payouts with `list_auto_paging` and filters |
 | `get_available_rails.py` | Rails and their bank-detail fields, async and sync |
