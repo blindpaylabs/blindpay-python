@@ -11,7 +11,7 @@ from blindpay import (
     LimitIncreaseUpdateWebhookEvent,
     webhooks,
 )
-from tests.spec_fixtures import SPEC_DIR, response_variants, value_errors
+from tests.spec_fixtures import SPEC_DIR, assert_matches_spec, response_variants, value_errors
 from tests.test_webhook_events import NOW, SECRET, signed
 
 GET_OP = "GET /v1/instances/{instance_id}/customers/{customer_id}/limit-increase"
@@ -28,6 +28,11 @@ def test_get_limit_increase_requests_decodes_review_reason():
     nulls = cast(List[Dict[str, Any]], variants["nullables_null"])
 
     assert "review_reason" in LimitIncreaseRequest.__annotations__
+    # The GET returns a list: check the item type against each variant's first item.
+    assert_matches_spec(
+        LimitIncreaseRequest,
+        {name: cast(List[Dict[str, Any]], variants[name])[0] for name in ("full", "required_only", "nullables_null")},
+    )
     assert value_errors(List[LimitIncreaseRequest], full) == []
     assert value_errors(List[LimitIncreaseRequest], nulls) == []
     assert isinstance(full[0]["review_reason"], str) and full[0]["review_reason"]
@@ -41,6 +46,7 @@ def test_get_limit_increase_requests_decodes_review_reason():
 def test_limit_increase_webhooks_carry_review_reason(event: str, typed: Any):
     variants = _webhook_variants(event)
     assert "review_reason" in typed.__annotations__
+    assert_matches_spec(typed, variants)
 
     for name in ("full", "nullables_null"):
         body = json.dumps(variants[name]).encode()
