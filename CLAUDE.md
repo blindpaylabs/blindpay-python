@@ -841,7 +841,7 @@ fields/enums the SDK doesn't model) must stay true. When a fix makes an entry fa
 Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_*`, `aiprise_*`, `jpm_*`, ...) are never modelled:
 record them in `unmodeled.json` with reason "provider-named field; pending blindpay-v2 decision".
 
-`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@66144f3b2` (94 SDK operations). CI gates:
+`.api-sync/spec-snapshot.json` is the public spec at `blindpay-v2@7e49addd9` (94 SDK operations). CI gates:
 
 ```bash
 python3 .api-sync/sync.py --validate-map

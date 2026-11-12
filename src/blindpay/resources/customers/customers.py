@@ -1078,6 +1078,9 @@ class LimitIncreaseRequest(TypedDict):
     approved_daily: NotRequired[Optional[int]]
     approved_monthly: NotRequired[Optional[int]]
     approved_per_transaction: NotRequired[Optional[int]]
+    review_reason: NotRequired[Optional[str]]
+    """Why compliance rejected the request or approved lower limits than requested, and what to send to get the full
+    amount. Set when status is rejected or approved below the requested limits."""
 
 
 GetLimitIncreaseRequestsResponse = List[LimitIncreaseRequest]

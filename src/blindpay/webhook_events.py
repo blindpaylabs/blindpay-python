@@ -710,6 +710,7 @@ class LimitIncreaseNewWebhookEvent(TypedDict):
     supporting_document_type: NotRequired[Optional[str]]
     supporting_document_file: NotRequired[Optional[str]]
     supporting_documents: NotRequired[Optional[List[LimitIncreaseNewWebhookEventSupportingDocuments]]]
+    review_reason: NotRequired[Optional[str]]
     customer_id: str
     created_at: NotRequired[Optional[str]]
     updated_at: NotRequired[Optional[str]]
@@ -733,6 +734,7 @@ class LimitIncreaseUpdateWebhookEvent(TypedDict):
     supporting_document_type: NotRequired[Optional[str]]
     supporting_document_file: NotRequired[Optional[str]]
     supporting_documents: NotRequired[Optional[List[LimitIncreaseUpdateWebhookEventSupportingDocuments]]]
+    review_reason: NotRequired[Optional[str]]
     customer_id: str
     created_at: NotRequired[Optional[str]]
     updated_at: NotRequired[Optional[str]]
