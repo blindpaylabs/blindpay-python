@@ -9,7 +9,7 @@ import pytest
 from blindpay import BlindPay, BlindPaySync, WebhookVerificationError, webhooks
 from tests.http_mock import Recorder, async_client, sync_client
 
-KEY = "sk_live_0123456789abcdefSECRET"
+KEY = "test-api-key-0123456789abcdefSECRET"
 WEBHOOK_SECRET = "whsec_dGVzdC13ZWJob29rLXNlY3JldC0wMDAwMDAwMDAwMDAw"
 KINDS = ["async", "sync"]
 
